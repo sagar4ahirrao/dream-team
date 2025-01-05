@@ -1,6 +1,4 @@
-```bash  
-cd src 
-```
+
 Set up a virtual environment (Preferred)
 ```bash
 uv venv
