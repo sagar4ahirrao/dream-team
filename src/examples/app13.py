@@ -18,6 +18,8 @@ from autogen_ext.agents.file_surfer import FileSurfer
 from autogen_ext.agents.magentic_one import MagenticOneCoderAgent
 from autogen_ext.agents.web_surfer import MultimodalWebSurfer
 from autogen_ext.code_executors.local import LocalCommandLineCodeExecutor
+from autogen_ext.code_executors.azure import ACADynamicSessionsCodeExecutor
+from autogen_ext.code_executors.docker import DockerCommandLineCodeExecutor
 from autogen_ext.models.openai import AzureOpenAIChatCompletionClient
 from autogen_core import AgentId, AgentProxy, DefaultTopicId
 from autogen_core import SingleThreadedAgentRuntime
@@ -26,6 +28,7 @@ from autogen_agentchat.base import TaskResult
 from azure.identity import DefaultAzureCredential, get_bearer_token_provider
 from dotenv import load_dotenv
 # from rag_helper import do_search
+import tempfile
 
 load_dotenv()
 azure_credential = DefaultAzureCredential()
@@ -368,6 +371,54 @@ async def init(logs_dir="./logs"):
     pass
     # magnetic_one = init()
 
+def setup_agents(agents, client):
+    agent_list = []
+    for agent in agents:
+        if (agent["type"] == "MagenticOne" and agent["name"] == "Coder"):
+            coder = MagenticOneCoderAgent("Coder", model_client=client)
+            agent_list.append(coder)
+            print("Coder added!")
+        elif (agent["type"] == "MagenticOne" and agent["name"] == "Executor"):
+            if st.session_state["run_mode_locally"]:
+                # executor = CodeExecutorAgent("Executor", code_executor=LocalCommandLineCodeExecutor())
+                executor = CodeExecutorAgent("Executor", code_executor=DockerCommandLineCodeExecutor(work_dir=logs_dir))
+            else:
+                pool_endpoint=os.getenv("POOL_MANAGEMENT_ENDPOINT")
+                assert pool_endpoint, "POOL_MANAGEMENT_ENDPOINT environment variable is not set"
+                with tempfile.TemporaryDirectory() as temp_dir:
+                    executor = CodeExecutorAgent("Executor", code_executor=ACADynamicSessionsCodeExecutor(pool_management_endpoint=pool_endpoint, credential=azure_credential, work_dir=temp_dir))
+            
+            
+            agent_list.append(executor)
+            print("Executor added!")
+        elif (agent["type"] == "MagenticOne" and agent["name"] == "WebSurfer"):
+            web_surfer = MultimodalWebSurfer("WebSurfer", model_client=client)
+            agent_list.append(web_surfer)
+            print("WebSurfer added!")
+        elif (agent["type"] == "MagenticOne" and agent["name"] == "FileSurfer"):
+            file_surfer = FileSurfer("FileSurfer", model_client=client)
+            agent_list.append(file_surfer)
+            print("FileSurfer added!")
+        # elif (agent["type"] == "Custom"):
+        #     _sys_messages = [
+        #         SystemMessage(
+        #             content=agent["system_message"],
+        #         )
+        #     ]
+        #     await Coder.register(self.runtime, 
+        #                         agent["name"], 
+        #                         lambda: Coder(model_client=self.client,
+        #                         description=agent["description"],
+        #                         system_messages=_sys_messages)
+        #                         )
+        #     custom_agent = AgentProxy(AgentId(agent["name"], "default"), self.runtime)
+        #     agent_list.append(custom_agent)
+        #     print(f'{agent["name"]} (custom) added!')
+        #     pass
+        else:
+            raise ValueError('Unknown Agent!')
+    return agent_list
+
 async def main(task, logs_dir="./logs"):
     
     # create folder for logs if not exists
@@ -386,12 +437,20 @@ async def main(task, logs_dir="./logs"):
                 "json_output": True,
             }
         )
-    fs = FileSurfer("FileSurfer", model_client=client)
-    ws = MultimodalWebSurfer("WebSurfer", model_client=client)
-    coder = MagenticOneCoderAgent("Coder", model_client=client,)
+    # fs = FileSurfer("FileSurfer", model_client=client)
+    # ws = MultimodalWebSurfer("WebSurfer", model_client=client)
+    # coder = MagenticOneCoderAgent("Coder", model_client=client,)
     #coder = AgentProxy(AgentId("Coder", "default"), runtime)
 
-    executor = CodeExecutorAgent("Executor", code_executor=LocalCommandLineCodeExecutor())
+
+    # if st.session_state["run_mode_locally"]:
+    #     # executor = CodeExecutorAgent("Executor", code_executor=LocalCommandLineCodeExecutor())
+    #     executor = CodeExecutorAgent("Executor", code_executor=DockerCommandLineCodeExecutor(work_dir=logs_dir))
+    # else:
+    #     pool_endpoint=os.getenv("POOL_MANAGEMENT_ENDPOINT")
+    #     assert pool_endpoint, "POOL_MANAGEMENT_ENDPOINT environment variable is not set"
+    #     with tempfile.TemporaryDirectory() as temp_dir:
+    #         executor = CodeExecutorAgent("Executor", code_executor=ACADynamicSessionsCodeExecutor(pool_management_endpoint=pool_endpoint, credential=azure_credential, work_dir=temp_dir))
     # rager = AssistantAgent(
     #     "Rager",
     #     model_client=client,
@@ -403,9 +462,12 @@ async def main(task, logs_dir="./logs"):
     #     reflect_on_tool_use=True,
     # )
     
+    agents_list = setup_agents(st.session_state.saved_agents, client)
+    
     # team = MagenticOneGroupChat([rager, coder], model_client=client)#fs,ws,executor
     team = MagenticOneGroupChat(
-        participants = [fs,ws,executor, coder], 
+        # participants = [fs,ws,executor, coder], 
+        participants=agents_list,
         model_client=client,
         max_turns=st.session_state.max_rounds,
         max_stalls=st.session_state.max_stalls_before_replan,
