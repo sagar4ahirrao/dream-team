@@ -383,10 +383,6 @@ async def setup_agents(agents, client, logs_dir):
             print("Coder added!")
         elif (agent["type"] == "MagenticOne" and agent["name"] == "Executor"):
             if st.session_state["run_mode_locally"]:
-                # executor = CodeExecutorAgent("Executor", code_executor=LocalCommandLineCodeExecutor())
-                # executor = CodeExecutorAgent("Executor", code_executor=DockerCommandLineCodeExecutor(work_dir=logs_dir))
-                # executor = CodeExecutorAgent("Executor", code_executor=DockerCommandLineCodeExecutor(container_name="ssss"))
-
                 #docker
                 code_executor = DockerCommandLineCodeExecutor(work_dir=logs_dir)
                 await code_executor.start()
@@ -442,36 +438,10 @@ async def main(task, logs_dir="./logs"):
                 "json_output": True,
             }
         )
-    # fs = FileSurfer("FileSurfer", model_client=client)
-    # ws = MultimodalWebSurfer("WebSurfer", model_client=client)
-    # coder = MagenticOneCoderAgent("Coder", model_client=client,)
-    #coder = AgentProxy(AgentId("Coder", "default"), runtime)
-
-
-    # if st.session_state["run_mode_locally"]:
-    #     # executor = CodeExecutorAgent("Executor", code_executor=LocalCommandLineCodeExecutor())
-    #     executor = CodeExecutorAgent("Executor", code_executor=DockerCommandLineCodeExecutor(work_dir=logs_dir))
-    # else:
-    #     pool_endpoint=os.getenv("POOL_MANAGEMENT_ENDPOINT")
-    #     assert pool_endpoint, "POOL_MANAGEMENT_ENDPOINT environment variable is not set"
-    #     with tempfile.TemporaryDirectory() as temp_dir:
-    #         executor = CodeExecutorAgent("Executor", code_executor=ACADynamicSessionsCodeExecutor(pool_management_endpoint=pool_endpoint, credential=azure_credential, work_dir=temp_dir))
-    # rager = AssistantAgent(
-    #     "Rager",
-    #     model_client=client,
-    #     tools=[do_search],
-    #     description="An agent that has access to a knowledge base and can handle RAG tasks, call this agent if you are getting questions on your knowledge base",
-    #     system_message="""
-    #     You are a helpful AI Assistant.
-    #     When given a user query, use available tools to help the user with their request.""",
-    #     reflect_on_tool_use=True,
-    # )
-    
+   
     agents_list = await setup_agents(st.session_state.saved_agents, client, logs_dir)
     
-    # team = MagenticOneGroupChat([rager, coder], model_client=client)#fs,ws,executor
     team = MagenticOneGroupChat(
-        # participants = [fs,ws,executor, coder], 
         participants=agents_list,
         model_client=client,
         max_turns=st.session_state.max_rounds,
@@ -490,8 +460,6 @@ if st.session_state['running']:
     assert st.session_state['instructions'] != "", "Instructions can't be empty."
 
     with st.spinner("Dream Team is running..."):
-        # asyncio.run(main("generate code and calculate with python 132*82"))
-        # asyncio.run(main("generate code for 'Hello World' in Python"))
         asyncio.run(main(st.session_state['instructions']))
 
     final_answer = st.session_state["final_answer"]
