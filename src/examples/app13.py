@@ -373,7 +373,7 @@ async def init(logs_dir="./logs"):
     pass
     # magnetic_one = init()
 
-def setup_agents(agents, client):
+def setup_agents(agents, client, logs_dir):
     agent_list = []
     for agent in agents:
         if (agent["type"] == "MagenticOne" and agent["name"] == "Coder"):
@@ -459,7 +459,7 @@ async def main(task, logs_dir="./logs"):
     #     reflect_on_tool_use=True,
     # )
     
-    agents_list = setup_agents(st.session_state.saved_agents, client)
+    agents_list = setup_agents(st.session_state.saved_agents, client, logs_dir)
     
     # team = MagenticOneGroupChat([rager, coder], model_client=client)#fs,ws,executor
     team = MagenticOneGroupChat(
