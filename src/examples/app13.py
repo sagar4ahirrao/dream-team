@@ -244,6 +244,7 @@ if not st.session_state['running']:
 
     # Define predefined values
     predefined_values = [
+        "Generate a python script to print and execute Fibonacci series below 1000",
         "Find me a French restaurant in Dubai with 2 Michelin stars?",
         "When and where is the next game of Arsenal, print a link for purchase",
         "Generate a python script to print Fibonacci series below 1000",
@@ -373,7 +374,7 @@ async def init(logs_dir="./logs"):
     pass
     # magnetic_one = init()
 
-def setup_agents(agents, client, logs_dir):
+async def setup_agents(agents, client, logs_dir):
     agent_list = []
     for agent in agents:
         if (agent["type"] == "MagenticOne" and agent["name"] == "Coder"):
@@ -383,7 +384,14 @@ def setup_agents(agents, client, logs_dir):
         elif (agent["type"] == "MagenticOne" and agent["name"] == "Executor"):
             if st.session_state["run_mode_locally"]:
                 # executor = CodeExecutorAgent("Executor", code_executor=LocalCommandLineCodeExecutor())
-                executor = CodeExecutorAgent("Executor", code_executor=DockerCommandLineCodeExecutor(work_dir=logs_dir))
+                # executor = CodeExecutorAgent("Executor", code_executor=DockerCommandLineCodeExecutor(work_dir=logs_dir))
+                # executor = CodeExecutorAgent("Executor", code_executor=DockerCommandLineCodeExecutor(container_name="ssss"))
+
+                #docker
+                code_executor = DockerCommandLineCodeExecutor(work_dir=logs_dir)
+                await code_executor.start()
+
+                executor = CodeExecutorAgent("Executor", code_executor=code_executor)
             else:
                 pool_endpoint=os.getenv("POOL_MANAGEMENT_ENDPOINT")
                 assert pool_endpoint, "POOL_MANAGEMENT_ENDPOINT environment variable is not set"
@@ -459,7 +467,7 @@ async def main(task, logs_dir="./logs"):
     #     reflect_on_tool_use=True,
     # )
     
-    agents_list = setup_agents(st.session_state.saved_agents, client, logs_dir)
+    agents_list = await setup_agents(st.session_state.saved_agents, client, logs_dir)
     
     # team = MagenticOneGroupChat([rager, coder], model_client=client)#fs,ws,executor
     team = MagenticOneGroupChat(
