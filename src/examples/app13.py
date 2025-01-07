@@ -29,6 +29,7 @@ from azure.identity import DefaultAzureCredential, get_bearer_token_provider
 from dotenv import load_dotenv
 # from rag_helper import do_search
 import tempfile
+from magentic_on_custom_agent import MagenticOneCustomAgent
 
 load_dotenv()
 azure_credential = DefaultAzureCredential()
@@ -120,6 +121,7 @@ st.write("### Dream Team powered by Magentic 1")
 def add_agent(item = None):
     # st.write(f"Setuup your agent:")
     st.caption("Note: Always use unique name with no spaces. Always fill System message and Description.")
+    st.caption('In the system message use as last sentence: Reply "TERMINATE" in the end when everything is done.')
     # agent_type = st.selectbox("Type", ["MagenticOne","Custom"], key=f"type{input_key}", index=0 if agent and agent["type"] == "MagenticOne" else 1, disabled=is_disabled(agent["type"]) if agent else False)
     agent_type = "Custom"
     agent_name = st.text_input("Name", value=None)
@@ -399,22 +401,17 @@ def setup_agents(agents, client):
             file_surfer = FileSurfer("FileSurfer", model_client=client)
             agent_list.append(file_surfer)
             print("FileSurfer added!")
-        # elif (agent["type"] == "Custom"):
-        #     _sys_messages = [
-        #         SystemMessage(
-        #             content=agent["system_message"],
-        #         )
-        #     ]
-        #     await Coder.register(self.runtime, 
-        #                         agent["name"], 
-        #                         lambda: Coder(model_client=self.client,
-        #                         description=agent["description"],
-        #                         system_messages=_sys_messages)
-        #                         )
-        #     custom_agent = AgentProxy(AgentId(agent["name"], "default"), self.runtime)
-        #     agent_list.append(custom_agent)
-        #     print(f'{agent["name"]} (custom) added!')
-        #     pass
+        elif (agent["type"] == "Custom"):
+            custom_agent = MagenticOneCustomAgent(
+                agent["name"], 
+                model_client=client, 
+                system_message=agent["system_message"], 
+                description=agent["description"]
+                )
+
+            agent_list.append(custom_agent)
+            print(f'{agent["name"]} (custom) added!')
+            pass
         else:
             raise ValueError('Unknown Agent!')
     return agent_list
