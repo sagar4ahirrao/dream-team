@@ -23,13 +23,14 @@ from autogen_ext.code_executors.docker import DockerCommandLineCodeExecutor
 from autogen_ext.models.openai import AzureOpenAIChatCompletionClient
 from autogen_core import AgentId, AgentProxy, DefaultTopicId
 from autogen_core import SingleThreadedAgentRuntime
-from autogen_agentchat.messages import MultiModalMessage, TextMessage
+from autogen_agentchat.messages import MultiModalMessage, TextMessage, ToolCallExecutionEvent, ToolCallRequestEvent
 from autogen_agentchat.base import TaskResult
 from azure.identity import DefaultAzureCredential, get_bearer_token_provider
 from dotenv import load_dotenv
 # from rag_helper import do_search
 import tempfile
 from magentic_on_custom_agent import MagenticOneCustomAgent
+from magentic_on_custom_rag_agent import MagenticOneRAGAgent
 
 load_dotenv()
 azure_credential = DefaultAzureCredential()
@@ -139,6 +140,38 @@ def add_agent(item = None):
             "icon": generate_random_agent_emoji()
         })
         st.rerun()
+
+@st.dialog("Add RAG agent")
+def add_rag_agent(item = None):
+    # st.write(f"Setuup your agent:")
+    st.caption("Note: Always use unique name with no spaces.")
+    st.caption('Index Name must be your existing index in AI Search service which is filled with data. We expect a structure of index:')
+    st.caption('"parent_id", "chunk_id", "chunk","text_vector"')
+    st.caption("This structure is default when you ingest and vectorize document directly from Azure AI Search.")
+    
+    # agent_type = st.selectbox("Type", ["MagenticOne","Custom"], key=f"type{input_key}", index=0 if agent and agent["type"] == "MagenticOne" else 1, disabled=is_disabled(agent["type"]) if agent else False)
+    agent_type = "RAG"
+    agent_name = st.text_input("Name", value=None)
+    # system_message = st.text_area("System Message", value=None)
+    # description = st.text_area("Description", value=None)
+
+    index_name = st.text_input("Index Name", value=None)
+        
+    if st.button("Submit"):
+        # st.session_state.vote = {"item": item, "reason": reason}
+        st.session_state.saved_agents.append({
+            "input_key": random.choice(string.ascii_uppercase)+str(random.randint(0,999999)),
+            "type": agent_type,
+            "name": agent_name,
+            # "system_message": system_message,
+            # "description": description,
+            
+            "icon": "🔍",
+            "index_name": index_name
+        })
+        st.rerun()
+
+
 @st.dialog("Edit agent")
 def edit_agent(input_key = None):
     agent = next((i for i in st.session_state.saved_agents if i["input_key"] == input_key), None)
@@ -240,11 +273,14 @@ if not st.session_state['running']:
         with col3:
             if st.button("Add Agent", type="primary", icon="➕"):
                 add_agent("A")
+            if st.button("Add RAG Agent", type="primary", icon="➕"):
+                add_rag_agent("A")
                 
 
     # Define predefined values
     predefined_values = [
-        "Generate a python script to print and execute Fibonacci series below 1000",
+        # "how do I setup my Surface?",
+        # "Generate a python script to print and execute Fibonacci series below 1000",
         "Find me a French restaurant in Dubai with 2 Michelin stars?",
         "When and where is the next game of Arsenal, print a link for purchase",
         "Generate a python script to print Fibonacci series below 1000",
@@ -364,7 +400,34 @@ def display_log_message(log_entry, logs_dir):
         with st.expander(f"{agent_icon} {_source} @ {_timestamp}", expanded=True):
             st.write("Message:")
             st.write(_content)
+    elif isinstance(_log_entry_json, ToolCallExecutionEvent):
+        # message type, ToolCallRequestEvent, ToolCallExecutionEvent
+        _type = _log_entry_json.type
+        # source of the message, e.g.: user, MagenticOneOrchestrator,'WebSurfer','Coder'
+        _source = _log_entry_json.source
+        # actual message content - if multimodal it will be list of contents, one of them is autogen_core._image.Image object where data_uri is base64 encoded image, image is PIL image
+        _content = _log_entry_json.content
+        _timestamp = get_current_time()
+
+        agent_icon = get_agent_icon(_source)
+        with st.expander(f"{agent_icon} {_source} @ {_timestamp}", expanded=True):
+            st.write("Message:")
+            st.write(_content)
     
+    elif isinstance(_log_entry_json, ToolCallRequestEvent):
+        # message type, ToolCallRequestEvent, ToolCallExecutionEvent
+        _type = _log_entry_json.type
+        # source of the message, e.g.: user, MagenticOneOrchestrator,'WebSurfer','Coder'
+        _source = _log_entry_json.source
+        # actual message content - if multimodal it will be list of contents, one of them is autogen_core._image.Image object where data_uri is base64 encoded image, image is PIL image
+        _content = _log_entry_json.content
+        _timestamp = get_current_time()
+        _models_usage = _log_entry_json.models_usage
+
+        agent_icon = get_agent_icon(_source)
+        with st.expander(f"{agent_icon} {_source} @ {_timestamp}", expanded=True):
+            st.write("Message:")
+            st.write(_content)
     else:
         st.caption("🤔 Agents mumbling...")
 
@@ -377,17 +440,23 @@ async def init(logs_dir="./logs"):
 async def setup_agents(agents, client, logs_dir):
     agent_list = []
     for agent in agents:
+        # This is default MagenticOne agent - Coder
         if (agent["type"] == "MagenticOne" and agent["name"] == "Coder"):
             coder = MagenticOneCoderAgent("Coder", model_client=client)
             agent_list.append(coder)
             print("Coder added!")
+
+        # This is default MagenticOne agent - Executor
         elif (agent["type"] == "MagenticOne" and agent["name"] == "Executor"):
+            # hangle local = local docker execution
             if st.session_state["run_mode_locally"]:
                 #docker
                 code_executor = DockerCommandLineCodeExecutor(work_dir=logs_dir)
                 await code_executor.start()
 
                 executor = CodeExecutorAgent("Executor", code_executor=code_executor)
+            
+            # or remote = Azure ACA Dynamic Sessions execution
             else:
                 pool_endpoint=os.getenv("POOL_MANAGEMENT_ENDPOINT")
                 assert pool_endpoint, "POOL_MANAGEMENT_ENDPOINT environment variable is not set"
@@ -397,14 +466,20 @@ async def setup_agents(agents, client, logs_dir):
             
             agent_list.append(executor)
             print("Executor added!")
+
+        # This is default MagenticOne agent - WebSurfer
         elif (agent["type"] == "MagenticOne" and agent["name"] == "WebSurfer"):
             web_surfer = MultimodalWebSurfer("WebSurfer", model_client=client)
             agent_list.append(web_surfer)
             print("WebSurfer added!")
+        
+        # This is default MagenticOne agent - FileSurfer
         elif (agent["type"] == "MagenticOne" and agent["name"] == "FileSurfer"):
             file_surfer = FileSurfer("FileSurfer", model_client=client)
             agent_list.append(file_surfer)
             print("FileSurfer added!")
+        
+        # This is custom agent - simple SYSTEM message and DESCRIPTION is used inherited from AssistantAgent
         elif (agent["type"] == "Custom"):
             custom_agent = MagenticOneCustomAgent(
                 agent["name"], 
@@ -415,7 +490,20 @@ async def setup_agents(agents, client, logs_dir):
 
             agent_list.append(custom_agent)
             print(f'{agent["name"]} (custom) added!')
-            pass
+        
+        # This is custom agent - RAG agent - you need to specify index_name and Azure Cognitive Search service endpoint and admin key in .env file
+        elif (agent["type"] == "RAG"):
+            # RAG agent
+            rag_agent = MagenticOneRAGAgent(
+                agent["name"], 
+                model_client=client, 
+                index_name=agent["index_name"],
+                AZURE_OPENAI_ENDPOINT=os.getenv("AZURE_OPENAI_ENDPOINT"),
+                AZURE_SEARCH_SERVICE_ENDPOINT=os.getenv("AZURE_SEARCH_SERVICE_ENDPOINT"),
+                AZURE_SEARCH_ADMIN_KEY=os.getenv("AZURE_SEARCH_ADMIN_KEY")
+                )
+            agent_list.append(rag_agent)
+            print(f'{agent["name"]} (RAG) added!')
         else:
             raise ValueError('Unknown Agent!')
     return agent_list
