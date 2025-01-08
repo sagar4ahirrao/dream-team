@@ -3,41 +3,18 @@ import sys
 import asyncio
 import random
 import string
-import logging
 import os
-import json
 from datetime import datetime 
-# from dotenv import load_dotenv
-# load_dotenv()
-# from magentic_one_helper import MagenticOneHelper
 
-from autogen_agentchat.ui import Console
-from autogen_agentchat.agents import CodeExecutorAgent, AssistantAgent
-from autogen_agentchat.teams import MagenticOneGroupChat
-from autogen_ext.agents.file_surfer import FileSurfer
-from autogen_ext.agents.magentic_one import MagenticOneCoderAgent
-from autogen_ext.agents.web_surfer import MultimodalWebSurfer
-from autogen_ext.code_executors.local import LocalCommandLineCodeExecutor
-from autogen_ext.code_executors.azure import ACADynamicSessionsCodeExecutor
-from autogen_ext.code_executors.docker import DockerCommandLineCodeExecutor
-from autogen_ext.models.openai import AzureOpenAIChatCompletionClient
-from autogen_core import AgentId, AgentProxy, DefaultTopicId
-from autogen_core import SingleThreadedAgentRuntime
+# used for displaying messages from the agents
 from autogen_agentchat.messages import MultiModalMessage, TextMessage, ToolCallExecutionEvent, ToolCallRequestEvent
 from autogen_agentchat.base import TaskResult
-from azure.identity import DefaultAzureCredential, get_bearer_token_provider
-from dotenv import load_dotenv
-# from rag_helper import do_search
-import tempfile
-from magentic_on_custom_agent import MagenticOneCustomAgent
-from magentic_on_custom_rag_agent import MagenticOneRAGAgent
 
+from dotenv import load_dotenv
 load_dotenv()
-azure_credential = DefaultAzureCredential()
-token_provider = get_bearer_token_provider(
-    azure_credential, "https://cognitiveservices.azure.com/.default"
-)
-runtime = SingleThreadedAgentRuntime()
+
+from magentic_one_helper import MagenticOneHelper
+
 
 #Enable asyncio for Windows
 if sys.platform.startswith("win"):
@@ -84,13 +61,10 @@ MAGENTIC_ONE_DEFAULT_AGENTS = [
 # Initialize session state for instructions
 if 'instructions' not in st.session_state:
     st.session_state['instructions'] = ""
-
 if 'running' not in st.session_state:
     st.session_state['running'] = False
-
 if "final_answer" not in st.session_state:
     st.session_state["final_answer"] = None
-
 if "stop_reason" not in st.session_state:
     st.session_state["stop_reason"] = None
 if "run_mode_locally" not in st.session_state:
@@ -431,117 +405,26 @@ def display_log_message(log_entry, logs_dir):
     else:
         st.caption("🤔 Agents mumbling...")
 
-
-
-async def init(logs_dir="./logs"):
-    pass
-    # magnetic_one = init()
-
-async def setup_agents(agents, client, logs_dir):
-    agent_list = []
-    for agent in agents:
-        # This is default MagenticOne agent - Coder
-        if (agent["type"] == "MagenticOne" and agent["name"] == "Coder"):
-            coder = MagenticOneCoderAgent("Coder", model_client=client)
-            agent_list.append(coder)
-            print("Coder added!")
-
-        # This is default MagenticOne agent - Executor
-        elif (agent["type"] == "MagenticOne" and agent["name"] == "Executor"):
-            # hangle local = local docker execution
-            if st.session_state["run_mode_locally"]:
-                #docker
-                code_executor = DockerCommandLineCodeExecutor(work_dir=logs_dir)
-                await code_executor.start()
-
-                executor = CodeExecutorAgent("Executor", code_executor=code_executor)
-            
-            # or remote = Azure ACA Dynamic Sessions execution
-            else:
-                pool_endpoint=os.getenv("POOL_MANAGEMENT_ENDPOINT")
-                assert pool_endpoint, "POOL_MANAGEMENT_ENDPOINT environment variable is not set"
-                with tempfile.TemporaryDirectory() as temp_dir:
-                    executor = CodeExecutorAgent("Executor", code_executor=ACADynamicSessionsCodeExecutor(pool_management_endpoint=pool_endpoint, credential=azure_credential, work_dir=temp_dir))
-            
-            
-            agent_list.append(executor)
-            print("Executor added!")
-
-        # This is default MagenticOne agent - WebSurfer
-        elif (agent["type"] == "MagenticOne" and agent["name"] == "WebSurfer"):
-            web_surfer = MultimodalWebSurfer("WebSurfer", model_client=client)
-            agent_list.append(web_surfer)
-            print("WebSurfer added!")
-        
-        # This is default MagenticOne agent - FileSurfer
-        elif (agent["type"] == "MagenticOne" and agent["name"] == "FileSurfer"):
-            file_surfer = FileSurfer("FileSurfer", model_client=client)
-            agent_list.append(file_surfer)
-            print("FileSurfer added!")
-        
-        # This is custom agent - simple SYSTEM message and DESCRIPTION is used inherited from AssistantAgent
-        elif (agent["type"] == "Custom"):
-            custom_agent = MagenticOneCustomAgent(
-                agent["name"], 
-                model_client=client, 
-                system_message=agent["system_message"], 
-                description=agent["description"]
-                )
-
-            agent_list.append(custom_agent)
-            print(f'{agent["name"]} (custom) added!')
-        
-        # This is custom agent - RAG agent - you need to specify index_name and Azure Cognitive Search service endpoint and admin key in .env file
-        elif (agent["type"] == "RAG"):
-            # RAG agent
-            rag_agent = MagenticOneRAGAgent(
-                agent["name"], 
-                model_client=client, 
-                index_name=agent["index_name"],
-                AZURE_OPENAI_ENDPOINT=os.getenv("AZURE_OPENAI_ENDPOINT"),
-                AZURE_SEARCH_SERVICE_ENDPOINT=os.getenv("AZURE_SEARCH_SERVICE_ENDPOINT"),
-                AZURE_SEARCH_ADMIN_KEY=os.getenv("AZURE_SEARCH_ADMIN_KEY")
-                )
-            agent_list.append(rag_agent)
-            print(f'{agent["name"]} (RAG) added!')
-        else:
-            raise ValueError('Unknown Agent!')
-    return agent_list
-
 async def main(task, logs_dir="./logs"):
     
     # create folder for logs if not exists
     if not os.path.exists(logs_dir):    
         os.makedirs(logs_dir)
 
-    client = AzureOpenAIChatCompletionClient(
-            model="gpt-4o-2024-11-20",
-            azure_deployment="gpt-4o",
-            api_version="2024-06-01",
-            azure_endpoint=os.getenv("AZURE_OPENAI_ENDPOINT"),
-            azure_ad_token_provider=token_provider,
-            model_info={
-                "vision": True,
-                "function_calling": True,
-                "json_output": True,
-            }
-        )
-   
-    agents_list = await setup_agents(st.session_state.saved_agents, client, logs_dir)
-    
-    team = MagenticOneGroupChat(
-        participants=agents_list,
-        model_client=client,
-        max_turns=st.session_state.max_rounds,
-        max_stalls=st.session_state.max_stalls_before_replan,
-        
-    )
-    stream = team.run_stream(task=task)
+
+    # Initialize the MagenticOne system
+    magentic_one = MagenticOneHelper(logs_dir=logs_dir, save_screenshots=st.session_state.save_screenshots, run_locally=st.session_state["run_mode_locally"])
+    await magentic_one.initialize(agents=st.session_state.saved_agents)
+
+    # Start the MagenticOne system
+
+    stream = magentic_one.main(task = task)
    
     with st.container(border=True):    
         # Stream and process logs
         async for log_entry in stream:
             display_log_message(log_entry=log_entry, logs_dir=logs_dir)
+
 
 
 if st.session_state['running']:

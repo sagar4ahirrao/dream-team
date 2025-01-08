@@ -3,13 +3,18 @@ import sys
 import asyncio
 import random
 import string
-import logging
 import os
-import json
 from datetime import datetime 
+
+# used for displaying messages from the agents
+from autogen_agentchat.messages import MultiModalMessage, TextMessage, ToolCallExecutionEvent, ToolCallRequestEvent
+from autogen_agentchat.base import TaskResult
+
 from dotenv import load_dotenv
 load_dotenv()
+
 from magentic_one_helper import MagenticOneHelper
+
 
 #Enable asyncio for Windows
 if sys.platform.startswith("win"):
@@ -56,13 +61,12 @@ MAGENTIC_ONE_DEFAULT_AGENTS = [
 # Initialize session state for instructions
 if 'instructions' not in st.session_state:
     st.session_state['instructions'] = ""
-
 if 'running' not in st.session_state:
     st.session_state['running'] = False
-
 if "final_answer" not in st.session_state:
     st.session_state["final_answer"] = None
-
+if "stop_reason" not in st.session_state:
+    st.session_state["stop_reason"] = None
 if "run_mode_locally" not in st.session_state:
     st.session_state["run_mode_locally"] = True
 
@@ -92,6 +96,7 @@ st.write("### Dream Team powered by Magentic 1")
 def add_agent(item = None):
     # st.write(f"Setuup your agent:")
     st.caption("Note: Always use unique name with no spaces. Always fill System message and Description.")
+    st.caption('In the system message use as last sentence: Reply "TERMINATE" in the end when everything is done.')
     # agent_type = st.selectbox("Type", ["MagenticOne","Custom"], key=f"type{input_key}", index=0 if agent and agent["type"] == "MagenticOne" else 1, disabled=is_disabled(agent["type"]) if agent else False)
     agent_type = "Custom"
     agent_name = st.text_input("Name", value=None)
@@ -109,6 +114,38 @@ def add_agent(item = None):
             "icon": generate_random_agent_emoji()
         })
         st.rerun()
+
+@st.dialog("Add RAG agent")
+def add_rag_agent(item = None):
+    # st.write(f"Setuup your agent:")
+    st.caption("Note: Always use unique name with no spaces.")
+    st.caption('Index Name must be your existing index in AI Search service which is filled with data. We expect a structure of index:')
+    st.caption('"parent_id", "chunk_id", "chunk","text_vector"')
+    st.caption("This structure is default when you ingest and vectorize document directly from Azure AI Search.")
+    
+    # agent_type = st.selectbox("Type", ["MagenticOne","Custom"], key=f"type{input_key}", index=0 if agent and agent["type"] == "MagenticOne" else 1, disabled=is_disabled(agent["type"]) if agent else False)
+    agent_type = "RAG"
+    agent_name = st.text_input("Name", value=None)
+    # system_message = st.text_area("System Message", value=None)
+    # description = st.text_area("Description", value=None)
+
+    index_name = st.text_input("Index Name", value=None)
+        
+    if st.button("Submit"):
+        # st.session_state.vote = {"item": item, "reason": reason}
+        st.session_state.saved_agents.append({
+            "input_key": random.choice(string.ascii_uppercase)+str(random.randint(0,999999)),
+            "type": agent_type,
+            "name": agent_name,
+            # "system_message": system_message,
+            # "description": description,
+            
+            "icon": "🔍",
+            "index_name": index_name
+        })
+        st.rerun()
+
+
 @st.dialog("Edit agent")
 def edit_agent(input_key = None):
     agent = next((i for i in st.session_state.saved_agents if i["input_key"] == input_key), None)
@@ -161,7 +198,7 @@ image_path = "contoso.png"
   
 # Display the image in the sidebar  
 with st.sidebar:
-    st.image(image_path, use_container_width=True) 
+    # st.image(image_path, use_container_width=True) 
 
     with st.container(border=True):
         st.caption("Settings:")
@@ -210,10 +247,14 @@ if not st.session_state['running']:
         with col3:
             if st.button("Add Agent", type="primary", icon="➕"):
                 add_agent("A")
+            if st.button("Add RAG Agent", type="primary", icon="➕"):
+                add_rag_agent("A")
                 
 
     # Define predefined values
     predefined_values = [
+        # "how do I setup my Surface?",
+        # "Generate a python script to print and execute Fibonacci series below 1000",
         "Find me a French restaurant in Dubai with 2 Michelin stars?",
         "When and where is the next game of Arsenal, print a link for purchase",
         "Generate a python script to print Fibonacci series below 1000",
@@ -267,47 +308,102 @@ if st.button(run_button_text, type="primary"):
         cancel_event.set()  # Set the cancellation event
         st.rerun()
 
+
+def get_current_time():
+    return datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+def get_agent_icon(agent_name) -> str:
+    if agent_name == "MagenticOneOrchestrator":
+        agent_icon = "🎻"
+    elif agent_name == "WebSurfer":
+        agent_icon = "🏄‍♂️"
+    elif agent_name == "Coder":
+        agent_icon = "👨‍💻"
+    elif agent_name == "FileSurfer":
+        agent_icon = "📂"
+    elif agent_name == "Executor":
+        agent_icon = "💻"
+    elif agent_name == "user":
+        agent_icon = "👤"
+    else:
+        agent_icon = "🤖"
+    return agent_icon
 def display_log_message(log_entry, logs_dir):     
     # _log_entry_json  = json.loads(log_entry)
     _log_entry_json  = log_entry
 
-    _type = _log_entry_json.get("type", None)
-    _timestamp = _log_entry_json.get("timestamp", None)
-    _timestamp = datetime.fromisoformat(_timestamp).strftime('%Y-%m-%d %H:%M:%S')
-    # _src = _log_entry_json["source"]
-    agent_icon = "🚫"
+    # check if the message is a TaskResult class
+    if isinstance(_log_entry_json, TaskResult):
+        # st.write("TaskResult")
+        # it is TaskResult class wth messages (list of all messages) and stop_reason
+        # display last message
+        _type = "TaskResult"
+        _source = "TaskResult"
+        _content = _log_entry_json.messages[-1]
+        _stop_reason = _log_entry_json.stop_reason
+        _timestamp = get_current_time()
+        icon_result = "🎯"
+        # do not display the final answer just yet, only set it in the session state
+        st.session_state["final_answer"] = _content.content
+        st.session_state["stop_reason"] = _stop_reason
 
-    if _type == "OrchestrationEvent" or _type == "WebSurferEvent":
-        if str(_log_entry_json["source"]).startswith("Orchestrator"):
-            agent_icon = "🎻"
-        elif _log_entry_json["source"] == "WebSurfer":
-            agent_icon = "🏄‍♂️"
-        elif _log_entry_json["source"] == "Coder":
-            agent_icon = "👨‍💻"
-        elif _log_entry_json["source"] == "FileSurfer":
-            agent_icon = "📂"
-        elif _log_entry_json["source"] == "Executor":
-            agent_icon = "💻"
-        elif _log_entry_json["source"] == "UserProxy":
-            agent_icon = "👤"
-        else:
-            agent_icon = "🤖"
-        with st.expander(f"{agent_icon} {_log_entry_json['source']} @ {_timestamp}", expanded=True):
-            if (_log_entry_json["message"]).strip().startswith("Updated Ledger"):
-                st.write("Updated Ledger:")
-                st.json((_log_entry_json["message"]).replace("Updated Ledger:", ""))
-            if _log_entry_json["message"].startswith("Screenshot:"):
-                st.image(f'./{logs_dir}/{_log_entry_json["message"].replace("Screenshot:", "").strip()}')
-            else:
-                st.write(_log_entry_json["message"])
-    elif _type == "LLMCallEvent":
-        st.caption(f'{_timestamp} LLM Call [prompt_tokens: {_log_entry_json["prompt_tokens"]}, completion_tokens: {_log_entry_json["completion_tokens"]}]')
+    elif isinstance(_log_entry_json, MultiModalMessage):
+        # message type, e.g.: TextMessage,'MultiModalMessage'
+        _type = _log_entry_json.type
+        # source of the message, e.g.: user, MagenticOneOrchestrator,'WebSurfer','Coder'
+        _source = _log_entry_json.source
+        # actual message content - if multimodal it will be list of contents, one of them is autogen_core._image.Image object where data_uri is base64 encoded image, image is PIL image
+        _content = _log_entry_json.content
+        _timestamp = get_current_time()
+
+        agent_icon = get_agent_icon(_source)
+        with st.expander(f"{agent_icon} {_source} @ {_timestamp}", expanded=True):
+            st.write("Message:")
+            st.write(_content[0])
+            st.image(_content[1].image)
+
+    elif isinstance(_log_entry_json, TextMessage):
+        # message type, e.g.: TextMessage,'MultiModalMessage'
+        _type = _log_entry_json.type
+        # source of the message, e.g.: user, MagenticOneOrchestrator,'WebSurfer','Coder'
+        _source = _log_entry_json.source
+        # actual message content - if multimodal it will be list of contents, one of them is autogen_core._image.Image object where data_uri is base64 encoded image, image is PIL image
+        _content = _log_entry_json.content
+        _timestamp = get_current_time()
+
+        agent_icon = get_agent_icon(_source)
+        with st.expander(f"{agent_icon} {_source} @ {_timestamp}", expanded=True):
+            st.write("Message:")
+            st.write(_content)
+    elif isinstance(_log_entry_json, ToolCallExecutionEvent):
+        # message type, ToolCallRequestEvent, ToolCallExecutionEvent
+        _type = _log_entry_json.type
+        # source of the message, e.g.: user, MagenticOneOrchestrator,'WebSurfer','Coder'
+        _source = _log_entry_json.source
+        # actual message content - if multimodal it will be list of contents, one of them is autogen_core._image.Image object where data_uri is base64 encoded image, image is PIL image
+        _content = _log_entry_json.content
+        _timestamp = get_current_time()
+
+        agent_icon = get_agent_icon(_source)
+        with st.expander(f"{agent_icon} {_source} @ {_timestamp}", expanded=True):
+            st.write("Message:")
+            st.write(_content)
+    
+    elif isinstance(_log_entry_json, ToolCallRequestEvent):
+        # message type, ToolCallRequestEvent, ToolCallExecutionEvent
+        _type = _log_entry_json.type
+        # source of the message, e.g.: user, MagenticOneOrchestrator,'WebSurfer','Coder'
+        _source = _log_entry_json.source
+        # actual message content - if multimodal it will be list of contents, one of them is autogen_core._image.Image object where data_uri is base64 encoded image, image is PIL image
+        _content = _log_entry_json.content
+        _timestamp = get_current_time()
+        _models_usage = _log_entry_json.models_usage
+
+        agent_icon = get_agent_icon(_source)
+        with st.expander(f"{agent_icon} {_source} @ {_timestamp}", expanded=True):
+            st.write("Message:")
+            st.write(_content)
     else:
         st.caption("🤔 Agents mumbling...")
-
-async def init(logs_dir="./logs"):
-    pass
-    # magnetic_one = init()
 
 async def main(task, logs_dir="./logs"):
     
@@ -315,50 +411,26 @@ async def main(task, logs_dir="./logs"):
     if not os.path.exists(logs_dir):    
         os.makedirs(logs_dir)
 
-    # Initialize MagenticOne
-    magnetic_one = MagenticOneHelper(logs_dir=logs_dir, run_locally=st.session_state["run_mode_locally"])
-    magnetic_one.max_rounds = st.session_state.max_rounds
-    magnetic_one.max_time = st.session_state.max_time * 60
-    magnetic_one.max_stalls_before_replan = st.session_state.max_stalls_before_replan
-    magnetic_one.return_final_answer = st.session_state.return_final_answer
-    magnetic_one.start_page = st.session_state.start_page
-    magnetic_one.save_screenshots = st.session_state.save_screenshots
 
-    await magnetic_one.initialize(st.session_state.saved_agents)
-    print("MagenticOne initialized.")
-    # return magnetic_one
+    # Initialize the MagenticOne system
+    magentic_one = MagenticOneHelper(logs_dir=logs_dir, save_screenshots=st.session_state.save_screenshots, run_locally=st.session_state["run_mode_locally"])
+    await magentic_one.initialize(agents=st.session_state.saved_agents)
 
-    # Create task and log streaming tasks
-    task_future = asyncio.create_task(magnetic_one.run_task(task))
-    final_answer = None
+    # Start the MagenticOne system
 
+    stream = magentic_one.main(task = task)
+   
     with st.container(border=True):    
         # Stream and process logs
-        async for log_entry in magnetic_one.stream_logs():
-            # print(json.dumps(log_entry, indent=2))
-            # st.write(json.dumps(log_entry, indent=2))
+        async for log_entry in stream:
             display_log_message(log_entry=log_entry, logs_dir=logs_dir)
 
-    # Wait for task to complete
-    await task_future
 
-    # Get the final answer
-    final_answer = magnetic_one.get_final_answer()
-
-    if final_answer is not None:
-        print(f"Final answer: {final_answer}")
-        st.session_state["final_answer"] = final_answer
-    else:
-        print("No final answer found in logs.")
-        st.session_state["final_answer"] = None
-        st.warning("No final answer found in logs.")
 
 if st.session_state['running']:
     assert st.session_state['instructions'] != "", "Instructions can't be empty."
 
     with st.spinner("Dream Team is running..."):
-        # asyncio.run(main("generate code and calculate with python 132*82"))
-        # asyncio.run(main("generate code for 'Hello World' in Python"))
         asyncio.run(main(st.session_state['instructions']))
 
     final_answer = st.session_state["final_answer"]
@@ -366,6 +438,9 @@ if st.session_state['running']:
         st.success("Task completed successfully.")
         st.write("## Final answer:")
         st.write(final_answer)
+        st.write("## Stop reason:")
+        st.write(st.session_state["stop_reason"])
+        cancel_event.set()  # Set the cancellation event
     else:
         st.error("Task failed.")
         st.write("Final answer not found.")
