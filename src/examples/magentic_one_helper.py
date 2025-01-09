@@ -67,7 +67,7 @@ class MagenticOneHelper:
         self.runtime = SingleThreadedAgentRuntime()
 
         self.client = AzureOpenAIChatCompletionClient(
-            model="gpt-4o",
+            model="gpt-4o-2024-11-20",
             azure_deployment="gpt-4o",
             api_version="2024-06-01",
             azure_endpoint=os.getenv("AZURE_OPENAI_ENDPOINT"),
@@ -78,6 +78,12 @@ class MagenticOneHelper:
                 "json_output": True,
             }
         )
+
+        # # Set up logging
+        # logger = logging.getLogger(EVENT_LOGGER_NAME)
+        # logger.setLevel(logging.INFO)
+        # self.log_handler = LogHandler(filename=os.path.join(self.logs_dir, "log.jsonl"))
+        # logger.handlers = [self.log_handler]
 
         # Set up agents
         self.agents = await self.setup_agents(agents, self.client, self.logs_dir) 
