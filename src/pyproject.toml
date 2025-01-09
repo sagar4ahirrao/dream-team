@@ -12,7 +12,7 @@ dependencies = [
     "autogen-ext[docker]==0.4.0.dev13",
     "autogen-core==0.4.0.dev13",
     "streamlit>=1.41.1",
-    "promptflow-tracing==1.16.2",
+    "promptflow-tracing==1.17.0",
     "azure-search-documents==11.6.0b4",
     "markitdown>=0.0.1a3",
     "aiofiles>=24.1.0",

@@ -15,7 +15,8 @@ from typing import List
 import requests
 
 
-MAGENTIC_ONE_RAG_DESCRIPTION = "An agent that has access to a knowledge base and can handle RAG tasks, call this agent if you are getting questions on your knowledge base"
+# MAGENTIC_ONE_RAG_DESCRIPTION = "An agent that has access to a knowledge base and can handle RAG tasks, call this agent if you are getting questions on your knowledge base"
+MAGENTIC_ONE_RAG_DESCRIPTION = "An agent that has access to a knowledge base of International Energy Agency (IEA) Analysis and forecast to 2030 and can handle RAG tasks, call this agent if you are getting questions on your knowledge base"
 
 MAGENTIC_ONE_RAG_SYSTEM_MESSAGE = """
         You are a helpful AI Assistant.

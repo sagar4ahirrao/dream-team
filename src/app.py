@@ -198,7 +198,7 @@ image_path = "contoso.png"
   
 # Display the image in the sidebar  
 with st.sidebar:
-    # st.image(image_path, use_container_width=True) 
+    st.image(image_path, use_container_width=True) 
 
     with st.container(border=True):
         st.caption("Settings:")
@@ -208,7 +208,6 @@ with st.sidebar:
         st.session_state.return_final_answer = st.checkbox("Return Final Answer", value=True)
 
         st.session_state.start_page = st.text_input("Start Page URL", value="https://www.bing.com")
-        st.session_state.save_screenshots = st.checkbox("Save Screenshots", value=True)
         
 def generate_random_agent_emoji() -> str:
     emoji_list = ["🤖", "🔄", "😊", "🚀", "🌟", "🔥", "💡", "🎉", "👍"]
