@@ -12,6 +12,5 @@ dependencies = [
     "autogen-ext[docker]==0.4.0.dev11",
     "autogen-core==0.4.0.dev11",
     "streamlit>=1.41.1",
-    "promptflow-devkit==1.16.2",
-    "promptflow-tracing==1.16.2",
+    "promptflow-tracing==1.17.0",
 ]
