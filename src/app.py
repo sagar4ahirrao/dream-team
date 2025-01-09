@@ -256,7 +256,8 @@ if not st.session_state['running']:
         # "Generate a python script to print and execute Fibonacci series below 1000",
         "Find me a French restaurant in Dubai with 2 Michelin stars?",
         "When and where is the next game of Arsenal, print a link for purchase",
-        "Generate a python script to print Fibonacci series below 1000",
+        "Based on your knowledge base how many taxes Elon Musk paid?",
+        "Generate a python script and execute Fibonacci series below 1000",
     ]
 
     # Add an option for custom input

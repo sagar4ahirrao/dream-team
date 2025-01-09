@@ -77,15 +77,6 @@ deactivate
 ```bash
 uv sync
 ```
-```bash
-git clone --depth 1 --branch v0.4.0.dev11 https://github.com/microsoft/autogen.git
-cd autogen/python/packages/autogen-magentic-one
-uv pip install -e .
-```
-   - Navigate to src folder
-```bash
-cd ../../../..
-```
 
 ```bash
 playwright install --with-deps chromium
