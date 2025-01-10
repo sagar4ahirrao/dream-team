@@ -29,7 +29,7 @@ Dream Team offers the following key features:
 1. Install [Azure Developer CLI](https://learn.microsoft.com/en-us/azure/developer/azure-developer-cli/install-azd?tabs=winget-windows%2Cbrew-mac%2Cscript-linux&pivots=os-windows).
 2. Ensure you have access to an Azure subscription
 3. Docker - Follow the [official Docker installation instructions](https://docs.docker.com/get-started/get-docker/)
-4. Python version >= 3.8, < 3.13
+4. Python version >= 3.10, < 3.13
 5. Install [UV](https://github.com/astral-sh/uv?tab=readme-ov-file#installation) - optional for running locally
 
 

@@ -31,8 +31,7 @@ token_provider = get_bearer_token_provider(
 )
 
 #You can view the traces in http://127.0.0.1:23333/v1.0/ui/traces/
-start_trace()
-
+#start_trace()
 
 class MagenticOneHelper:
     def __init__(self, logs_dir: str = None, save_screenshots: bool = False, run_locally: bool = False) -> None:
