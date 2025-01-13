@@ -12,7 +12,6 @@ AZURE_SEARCH_SERVICE_ENDPOINT=""
 AZURE_SEARCH_ADMIN_KEY=""
 '''
 MAGENTIC_ONE_RAG_DESCRIPTION = "An agent that has access to internal index and can handle RAG tasks, call this agent if you are getting questions on your internal index"
-#MAGENTIC_ONE_RAG_DESCRIPTION = "An agent that has access to a knowledge base of International Energy Agency (IEA) Analysis and forecast to 2030 and can handle RAG tasks, call this agent if you are getting questions on your knowledge base"
 
 MAGENTIC_ONE_RAG_SYSTEM_MESSAGE = """
         You are a helpful AI Assistant.
@@ -32,12 +31,13 @@ class MagenticOneRAGAgent(AssistantAgent):
         index_name: str,
         AZURE_SEARCH_SERVICE_ENDPOINT: str,
         AZURE_SEARCH_ADMIN_KEY: str,
+        description: str = MAGENTIC_ONE_RAG_DESCRIPTION,
 
     ):
         super().__init__(
             name,
             model_client,
-            description=MAGENTIC_ONE_RAG_DESCRIPTION,
+            description=description,
             system_message=MAGENTIC_ONE_RAG_SYSTEM_MESSAGE,
             tools=[self.do_search],
             reflect_on_tool_use=True,
