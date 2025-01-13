@@ -2,21 +2,17 @@ from autogen_agentchat.agents import AssistantAgent
 from autogen_core.models import (
     ChatCompletionClient,
 )
-
 from azure.search.documents import SearchClient
 from azure.core.credentials import AzureKeyCredential
-from azure.search.documents.models import VectorizedQuery
 from azure.search.documents.models import VectorizableTextQuery
-from azure.identity import DefaultAzureCredential,get_bearer_token_provider
-from openai import AzureOpenAI
-from tenacity import retry, wait_random_exponential, stop_after_attempt
-from typing import List
 
-import requests
-
-
-# MAGENTIC_ONE_RAG_DESCRIPTION = "An agent that has access to a knowledge base and can handle RAG tasks, call this agent if you are getting questions on your knowledge base"
-MAGENTIC_ONE_RAG_DESCRIPTION = "An agent that has access to a knowledge base of International Energy Agency (IEA) Analysis and forecast to 2030 and can handle RAG tasks, call this agent if you are getting questions on your knowledge base"
+'''
+Please provide the following environment variables in your .env file:
+AZURE_SEARCH_SERVICE_ENDPOINT=""
+AZURE_SEARCH_ADMIN_KEY=""
+'''
+MAGENTIC_ONE_RAG_DESCRIPTION = "An agent that has access to internal index and can handle RAG tasks, call this agent if you are getting questions on your internal index"
+#MAGENTIC_ONE_RAG_DESCRIPTION = "An agent that has access to a knowledge base of International Energy Agency (IEA) Analysis and forecast to 2030 and can handle RAG tasks, call this agent if you are getting questions on your knowledge base"
 
 MAGENTIC_ONE_RAG_SYSTEM_MESSAGE = """
         You are a helpful AI Assistant.
@@ -34,7 +30,6 @@ class MagenticOneRAGAgent(AssistantAgent):
         name: str,
         model_client: ChatCompletionClient,
         index_name: str,
-        AZURE_OPENAI_ENDPOINT: str,
         AZURE_SEARCH_SERVICE_ENDPOINT: str,
         AZURE_SEARCH_ADMIN_KEY: str,
 
@@ -49,7 +44,6 @@ class MagenticOneRAGAgent(AssistantAgent):
         )
 
         self.index_name = index_name    
-        self.AZURE_OPENAI_ENDPOINT = AZURE_OPENAI_ENDPOINT  
         self.AZURE_SEARCH_SERVICE_ENDPOINT = AZURE_SEARCH_SERVICE_ENDPOINT
         self.AZURE_SEARCH_ADMIN_KEY = AZURE_SEARCH_ADMIN_KEY
 

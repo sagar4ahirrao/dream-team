@@ -4,7 +4,7 @@ import os
 
 from typing import Optional, AsyncGenerator, Dict, Any, List
 from autogen_agentchat.ui import Console
-from autogen_agentchat.agents import CodeExecutorAgent, AssistantAgent
+from autogen_agentchat.agents import CodeExecutorAgent
 from autogen_agentchat.teams import MagenticOneGroupChat
 from autogen_ext.agents.file_surfer import FileSurfer
 from autogen_ext.agents.magentic_one import MagenticOneCoderAgent
@@ -145,7 +145,6 @@ class MagenticOneHelper:
                     agent["name"], 
                     model_client=client, 
                     index_name=agent["index_name"],
-                    AZURE_OPENAI_ENDPOINT=os.getenv("AZURE_OPENAI_ENDPOINT"),
                     AZURE_SEARCH_SERVICE_ENDPOINT=os.getenv("AZURE_SEARCH_SERVICE_ENDPOINT"),
                     AZURE_SEARCH_ADMIN_KEY=os.getenv("AZURE_SEARCH_ADMIN_KEY")
                     )
