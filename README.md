@@ -78,9 +78,6 @@ deactivate
 ## Install dependencies
 ```bash
 uv sync
-```
-
-```bash
 playwright install --with-deps chromium
 ```
 

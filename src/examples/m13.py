@@ -46,18 +46,8 @@ async def main() -> None:
     #coder = AgentProxy(AgentId("Coder", "default"), runtime)
 
     executor = CodeExecutorAgent("Executor", code_executor=LocalCommandLineCodeExecutor())
-    rager = AssistantAgent(
-        "Rager",
-        model_client=client,
-        tools=[do_search],
-        description="An agent that has access to a knowledge base and can handle RAG tasks, call this agent if you are getting questions on your knowledge base",
-        system_message="""
-        You are a helpful AI Assistant.
-        When given a user query, use available tools to help the user with their request.""",
-        reflect_on_tool_use=True,
-    )
-    
-    team = MagenticOneGroupChat([rager, coder], model_client=client)#fs,ws,executor
+   
+    team = MagenticOneGroupChat([fs,ws,executor, coder], model_client=client)
     await Console(team.run_stream(task="How much taxes elon musk paid?"))
 
 if __name__ == "__main__":
