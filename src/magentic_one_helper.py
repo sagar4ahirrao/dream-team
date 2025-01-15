@@ -165,3 +165,66 @@ class MagenticOneHelper:
         )
         stream = team.run_stream(task=task)
         return stream
+    
+async def main(agents, task, run_locally) -> None:
+
+    magentic_one = MagenticOneHelper(logs_dir=".", run_locally=run_locally)
+    await magentic_one.initialize(agents)
+
+    team = MagenticOneGroupChat(
+            participants=magentic_one.agents,
+            model_client=magentic_one.client,
+            max_turns=magentic_one.max_rounds,
+            max_stalls=magentic_one.max_stalls_before_replan,
+            
+        )
+
+    await Console(team.run_stream(task=task))
+
+if __name__ == "__main__":   
+    MAGENTIC_ONE_DEFAULT_AGENTS = [
+            {
+            "input_key":"0001",
+            "type":"MagenticOne",
+            "name":"Coder",
+            "system_message":"",
+            "description":"",
+            "icon":"👨‍💻"
+            },
+            {
+            "input_key":"0002",
+            "type":"MagenticOne",
+            "name":"Executor",
+            "system_message":"",
+            "description":"",
+            "icon":"💻"
+            },
+            {
+            "input_key":"0003",
+            "type":"MagenticOne",
+            "name":"FileSurfer",
+            "system_message":"",
+            "description":"",
+            "icon":"📂"
+            },
+            {
+            "input_key":"0004",
+            "type":"MagenticOne",
+            "name":"WebSurfer",
+            "system_message":"",
+            "description":"",
+            "icon":"🏄‍♂️"
+            },
+            ]
+    
+    import argparse
+    parser = argparse.ArgumentParser(description="Run MagenticOneHelper with specified task and run_locally option.")
+    parser.add_argument("--task", "-t", type=str, required=True, help="The task to run, e.g. 'How much taxes elon musk paid?'")
+    parser.add_argument("--run_locally", action="store_true", help="Run locally if set")
+
+    args = parser.parse_args()
+
+    asyncio.run(main(MAGENTIC_ONE_DEFAULT_AGENTS,args.task, args.run_locally))
+
+    
+    
