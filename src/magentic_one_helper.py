@@ -67,7 +67,7 @@ class MagenticOneHelper:
         self.runtime = SingleThreadedAgentRuntime()
 
         self.client = AzureOpenAIChatCompletionClient(
-            model="gpt-4o",
+            model="gpt-4o-2024-11-20",
             azure_deployment="gpt-4o",
             api_version="2024-06-01",
             azure_endpoint=os.getenv("AZURE_OPENAI_ENDPOINT"),
@@ -221,7 +221,10 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Run MagenticOneHelper with specified task and run_locally option.")
     parser.add_argument("--task", "-t", type=str, required=True, help="The task to run, e.g. 'How much taxes elon musk paid?'")
     parser.add_argument("--run_locally", action="store_true", help="Run locally if set")
-
+    
+    # You can run this command from terminal
+    # python magentic_one_helper.py --task "Find me a French restaurant in Dubai with 2 Michelin stars?"
+    
     args = parser.parse_args()
 
     asyncio.run(main(MAGENTIC_ONE_DEFAULT_AGENTS,args.task, args.run_locally))
