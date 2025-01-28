@@ -4,6 +4,7 @@ import asyncio
 import random
 import string
 import os
+import json
 from datetime import datetime 
 
 # used for displaying messages from the agents
@@ -88,6 +89,11 @@ if 'start_page' not in st.session_state:
 if 'save_screenshots' not in st.session_state:
     st.session_state.save_screenshots = True
 
+if 'session_id' not in st.session_state:
+    st.session_state.session_id = None
+
+if 'planned' not in st.session_state:
+    st.session_state.planned = False
 st.set_page_config(layout="wide")
 st.write("### Dream Team powered by Magentic 1")
 
@@ -125,7 +131,7 @@ def add_rag_agent(item = None):
     
     # agent_type = st.selectbox("Type", ["MagenticOne","Custom"], key=f"type{input_key}", index=0 if agent and agent["type"] == "MagenticOne" else 1, disabled=is_disabled(agent["type"]) if agent else False)
     agent_type = "RAG"
-    agent_name = st.text_input("Name", value=None)
+    agent_name = st.text_input("Name", value="RAGAgent")
     # system_message = st.text_area("System Message", value=None)
     description = st.text_area("Description", value=MAGENTIC_ONE_RAG_DESCRIPTION)
 
@@ -199,15 +205,23 @@ image_path = "contoso.png"
 # Display the image in the sidebar  
 with st.sidebar:
     st.image(image_path, use_container_width=True) 
+    st.caption("v0.4.0.b4")
 
-    with st.container(border=True):
-        st.caption("Settings:")
+    with st.expander("Settings", expanded=False):
+        # st.caption("Settings:")
         st.session_state.max_rounds = st.number_input("Max Rounds", min_value=1, value=50)
         st.session_state.max_time = st.number_input("Max Time (Minutes)", min_value=1, value=10)
         st.session_state.max_stalls_before_replan = st.number_input("Max Stalls Before Replan", min_value=1, max_value=10, value=5)
         st.session_state.return_final_answer = st.checkbox("Return Final Answer", value=True)
 
         st.session_state.start_page = st.text_input("Start Page URL", value="https://www.bing.com")
+    
+    # if st.session_state.session_id:
+    with st.container(border=True):
+    #     st.caption("Plan:")
+        SESSION_INFO = st.empty()
+        PLAN_PLACE = st.empty()
+            
         
 def generate_random_agent_emoji() -> str:
     emoji_list = ["🤖", "🔄", "😊", "🚀", "🌟", "🔥", "💡", "🎉", "👍"]
@@ -249,7 +263,6 @@ if not st.session_state['running']:
             if st.button("Add RAG Agent", type="primary", icon="➕"):
                 add_rag_agent("A")
                 
-
     # Define predefined values
     predefined_values = [
         # "how do I setup my Surface?",
@@ -305,6 +318,8 @@ if st.button(run_button_text, type="primary"):
         st.session_state['instructions'] = ""
         st.session_state['final_answer'] = None
         st.session_state["run_mode_locally"] = True
+        st.session_state["session_id"] = None
+        st.session_state["planned"] = False
         cancel_event.set()  # Set the cancellation event
         st.rerun()
 
@@ -327,9 +342,49 @@ def get_agent_icon(agent_name) -> str:
     else:
         agent_icon = "🤖"
     return agent_icon
-def display_log_message(log_entry, logs_dir):     
+
+def write_log(path, log_entry):
+    # check if the file exists if not create it
+    if not os.path.exists(path):
+        with open(path, "w") as f:
+            f.write("")
+    # append the log entry to a file
+    with open(path, "a") as f:
+        f.write(f"{json.dumps(log_entry)}\n")
+
+async def summarize_plan(plan, client):
+    prompt = "You are a project manager."
+    text = f"""Summarize the plan for each agent into single-level only bullet points.
+
+    Plan:
+    {plan}
+    """
+    
+    from autogen_core.models import UserMessage, SystemMessage
+    messages = [
+        UserMessage(content=text, source="user"),
+        SystemMessage(content=prompt)
+    ]
+    result = await client.create(messages)
+    # print(result.content)
+    
+    plan_summary = result.content
+    return plan_summary
+async def display_log_message(log_entry, logs_dir, session_id, client = None):     
     # _log_entry_json  = json.loads(log_entry)
     _log_entry_json  = log_entry
+
+    log_file_name = f"{session_id}.log"
+    log_path = os.path.join(logs_dir,log_file_name)
+    log_message_json = {
+        "time": get_current_time(),
+        "type": None,
+        "source": None,
+        "content": None,
+        "stop_reason": None,
+        "models_usage": None,
+    }
+
 
     # check if the message is a TaskResult class
     if isinstance(_log_entry_json, TaskResult):
@@ -346,6 +401,12 @@ def display_log_message(log_entry, logs_dir):
         st.session_state["final_answer"] = _content.content
         st.session_state["stop_reason"] = _stop_reason
 
+        log_message_json["type"] = _type
+        log_message_json["source"] = _source
+        log_message_json["content"] = _content.content
+        log_message_json["stop_reason"] = _stop_reason
+
+
     elif isinstance(_log_entry_json, MultiModalMessage):
         # message type, e.g.: TextMessage,'MultiModalMessage'
         _type = _log_entry_json.type
@@ -360,6 +421,11 @@ def display_log_message(log_entry, logs_dir):
             st.write("Message:")
             st.write(_content[0])
             st.image(_content[1].image)
+        
+        log_message_json["type"] = _type
+        log_message_json["source"] = _source
+        log_message_json["content"] = _content[0]
+
 
     elif isinstance(_log_entry_json, TextMessage):
         # message type, e.g.: TextMessage,'MultiModalMessage'
@@ -371,9 +437,19 @@ def display_log_message(log_entry, logs_dir):
         _timestamp = get_current_time()
 
         agent_icon = get_agent_icon(_source)
+        if (_source == "MagenticOneOrchestrator" and not st.session_state["planned"]):
+            plan_summary = await summarize_plan(_content, client)
+            SESSION_INFO.write(f"Session ID: `{st.session_state.session_id}`")
+            PLAN_PLACE.write(plan_summary)
+            st.session_state["planned"] = True
         with st.expander(f"{agent_icon} {_source} @ {_timestamp}", expanded=True):
             st.write("Message:")
             st.write(_content)
+
+        log_message_json["type"] = _type
+        log_message_json["source"] = _source
+        log_message_json["content"] = _content
+
     elif isinstance(_log_entry_json, ToolCallExecutionEvent):
         # message type, ToolCallRequestEvent, ToolCallExecutionEvent
         _type = _log_entry_json.type
@@ -387,6 +463,11 @@ def display_log_message(log_entry, logs_dir):
         with st.expander(f"{agent_icon} {_source} @ {_timestamp}", expanded=True):
             st.write("Message:")
             st.write(_content)
+        
+        log_message_json["type"] = _type
+        log_message_json["source"] = _source
+        log_message_json["content"] = _content[0].content
+
     
     elif isinstance(_log_entry_json, ToolCallRequestEvent):
         # message type, ToolCallRequestEvent, ToolCallExecutionEvent
@@ -402,8 +483,19 @@ def display_log_message(log_entry, logs_dir):
         with st.expander(f"{agent_icon} {_source} @ {_timestamp}", expanded=True):
             st.write("Message:")
             st.write(_content)
+
+        log_message_json["type"] = _type
+        log_message_json["source"] = _source
+        log_message_json["content"] = _content[0].arguments
+        # log_message_json["models_usage"] = _models_usage
+
     else:
         st.caption("🤔 Agents mumbling...")
+
+        log_message_json["type"] = "N/A"
+        log_message_json["content"] = "Agents mumbling."
+    
+    write_log(log_path, log_message_json)
 
 async def main(task, logs_dir="./logs"):
     
@@ -415,7 +507,7 @@ async def main(task, logs_dir="./logs"):
     # Initialize the MagenticOne system
     magentic_one = MagenticOneHelper(logs_dir=logs_dir, save_screenshots=st.session_state.save_screenshots, run_locally=st.session_state["run_mode_locally"])
     await magentic_one.initialize(agents=st.session_state.saved_agents)
-
+    st.session_state.session_id = magentic_one.session_id
     # Start the MagenticOne system
 
     stream = magentic_one.main(task = task)
@@ -423,15 +515,16 @@ async def main(task, logs_dir="./logs"):
     with st.container(border=True):    
         # Stream and process logs
         async for log_entry in stream:
-            display_log_message(log_entry=log_entry, logs_dir=logs_dir)
+            await display_log_message(log_entry=log_entry, logs_dir=logs_dir, session_id=magentic_one.session_id, client=magentic_one.client)
 
 
 
 if st.session_state['running']:
     assert st.session_state['instructions'] != "", "Instructions can't be empty."
 
-    with st.spinner("Dream Team is running..."):
-        asyncio.run(main(st.session_state['instructions']))
+    if not st.session_state["final_answer"]:
+        with st.spinner("Dream Team is running..."):
+            asyncio.run(main(st.session_state['instructions']))
 
     final_answer = st.session_state["final_answer"]
     if final_answer:
@@ -440,6 +533,17 @@ if st.session_state['running']:
         st.write(final_answer)
         st.write("## Stop reason:")
         st.write(st.session_state["stop_reason"])
+        session_id = st.session_state.session_id
+        final_report_path = f"./logs/{session_id}.log"
+        st.write(f"Final report is saved at: {final_report_path}")
+        # download button to download the final report
+        with open(final_report_path, "r") as file:
+            st.download_button(
+                label="Download Final Report",
+                data=file,
+                file_name=f"{session_id}.log",
+                mime="text/plain",
+            )
         cancel_event.set()  # Set the cancellation event
     else:
         st.error("Task failed.")

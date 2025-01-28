@@ -1,6 +1,7 @@
 import asyncio
 import logging
 import os
+import time
 
 from typing import Optional, AsyncGenerator, Dict, Any, List
 from autogen_agentchat.ui import Console
@@ -33,6 +34,32 @@ token_provider = get_bearer_token_provider(
 #You can view the traces in http://127.0.0.1:23333/v1.0/ui/traces/
 start_trace()
 
+def generate_session_name():
+    '''Generate a unique session name based on random sci-fi words, e.g. quantum-cyborg-1234'''
+    import random
+
+    adjectives = [
+        "quantum", "neon", "stellar", "galactic", "cyber", "holographic", "plasma", "nano", "hyper", "virtual",
+        "cosmic", "interstellar", "lunar", "solar", "astro", "exo", "alien", "robotic", "synthetic", "digital",
+        "futuristic", "parallel", "extraterrestrial", "transdimensional", "biomechanical", "cybernetic", "hologram",
+        "metaphysical", "subatomic", "tachyon", "warp", "xeno", "zenith", "zerogravity", "antimatter", "darkmatter",
+        "neural", "photon", "quantum", "singularity", "space-time", "stellar", "telepathic", "timetravel", "ultra",
+        "virtualreality", "wormhole"
+    ]
+    nouns = [
+        "cyborg", "android", "drone", "mech", "robot", "alien", "spaceship", "starship", "satellite", "probe",
+        "astronaut", "cosmonaut", "galaxy", "nebula", "comet", "asteroid", "planet", "moon", "star", "quasar",
+        "black-hole", "wormhole", "singularity", "dimension", "universe", "multiverse", "matrix", "simulation",
+        "hologram", "avatar", "clone", "replicant", "cyberspace", "nanobot", "biobot", "exosuit", "spacesuit",
+        "terraformer", "teleporter", "warpdrive", "hyperdrive", "stasis", "cryosleep", "fusion", "fission", "antigravity",
+        "darkenergy", "neutrino", "tachyon", "photon"
+    ]
+
+    adjective = random.choice(adjectives)
+    noun = random.choice(nouns)
+    number = random.randint(1000, 9999)
+    
+    return f"{adjective}-{noun}-{number}"
 
 class MagenticOneHelper:
     def __init__(self, logs_dir: str = None, save_screenshots: bool = False, run_locally: bool = False) -> None:
@@ -65,9 +92,12 @@ class MagenticOneHelper:
         """
         # Create the runtime
         self.runtime = SingleThreadedAgentRuntime()
+        
+        # generate session id from current datetime
+        self.session_id = generate_session_name()
 
         self.client = AzureOpenAIChatCompletionClient(
-            model="gpt-4o-2024-11-20",
+            model="gpt-4o-2024-08-06",
             azure_deployment="gpt-4o",
             api_version="2024-06-01",
             azure_endpoint=os.getenv("AZURE_OPENAI_ENDPOINT"),
