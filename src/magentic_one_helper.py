@@ -18,7 +18,6 @@ from autogen_core import AgentId, AgentProxy, DefaultTopicId
 from autogen_core import SingleThreadedAgentRuntime
 from azure.identity import DefaultAzureCredential, get_bearer_token_provider
 import tempfile
-from promptflow.tracing import start_trace
 from autogen_ext.models.openai import AzureOpenAIChatCompletionClient
 from dotenv import load_dotenv
 load_dotenv()
@@ -30,9 +29,6 @@ azure_credential = DefaultAzureCredential()
 token_provider = get_bearer_token_provider(
     azure_credential, "https://cognitiveservices.azure.com/.default"
 )
-
-#You can view the traces in http://127.0.0.1:23333/v1.0/ui/traces/
-start_trace()
 
 def generate_session_name():
     '''Generate a unique session name based on random sci-fi words, e.g. quantum-cyborg-1234'''
@@ -97,7 +93,7 @@ class MagenticOneHelper:
         self.session_id = generate_session_name()
 
         self.client = AzureOpenAIChatCompletionClient(
-            model="gpt-4o-2024-08-06",
+            model="gpt-4o-2024-11-20",
             azure_deployment="gpt-4o",
             api_version="2024-06-01",
             azure_endpoint=os.getenv("AZURE_OPENAI_ENDPOINT"),
