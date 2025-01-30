@@ -205,7 +205,7 @@ image_path = "contoso.png"
 # Display the image in the sidebar  
 with st.sidebar:
     st.image(image_path, use_container_width=True) 
-    st.caption("v0.4.3.a1")
+    st.caption("v0.4.4.a1")
 
     with st.expander("Settings", expanded=False):
         # st.caption("Settings:")

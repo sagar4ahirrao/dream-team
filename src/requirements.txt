@@ -1,9 +1,9 @@
 azure-identity>=1.19.0
 python-dotenv>=1.0.1
-autogen-agentchat==0.4.3
-autogen-ext[azure]==0.4.3
-autogen-ext[docker]==0.4.3
-autogen-core==0.4.3
+autogen-agentchat==0.4.4
+autogen-ext[azure]==0.4.4
+autogen-ext[docker]==0.4.4
+autogen-core==0.4.4
 streamlit>=1.41.1
 azure-search-documents==11.6.0b4
 markitdown>=0.0.1a3
