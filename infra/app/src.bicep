@@ -8,7 +8,7 @@ param containerAppsEnvironmentName string
 param applicationInsightsName string
 param exists bool
 
-param azureOpenaiResourceName string 
+param azureOpenaiResourceName string = 'emea-aigbb-demos-oai'
 param azureOpenaiDeploymentName string = 'gpt-4o'
 param azureOpenaiDeploymentNameMini string = 'gpt-4o-mini'
 param dailyRateLimit int = 1000000 // Set your daily rate limit here
