@@ -8,6 +8,7 @@ param containerAppsEnvironmentName string
 param applicationInsightsName string
 param exists bool
 
+param azureOpenaiResourceGroupName string = 'rg-infra'
 param azureOpenaiResourceName string = 'emea-aigbb-demos-oai'
 param azureOpenaiDeploymentName string = 'gpt-4o'
 param azureOpenaiDeploymentNameMini string = 'gpt-4o-mini'
@@ -21,9 +22,6 @@ param appDefinition object
 
 @description('Principal ID of the user executing the deployment')
 param userPrincipalId string
-
-// Add parameter for specifying the OpenAI resource group
-param openAIResourceGroupName string = resourceGroup().name
 
 var appSettingsArray = filter(array(appDefinition.settings), i => i.name != '')
 var secrets = map(filter(appSettingsArray, i => i.?secret != null), i => {
@@ -114,7 +112,7 @@ resource app 'Microsoft.App/containerApps@2023-05-02-preview' = {
             }
             {
               name: 'AZURE_OPENAI_ENDPOINT'
-              value: openai.properties.endpoint
+              value: openaiModule.outputs.openaiEndpoint
             }
             {
               name: 'POOL_MANAGEMENT_ENDPOINT'
@@ -148,18 +146,16 @@ resource app 'Microsoft.App/containerApps@2023-05-02-preview' = {
   }
 }
 
-resource openai 'Microsoft.CognitiveServices/accounts@2024-10-01' existing = {
-  scope: resourceGroup(openAIResourceGroupName)
-  name: azureOpenaiResourceName
-}
-
-// Define the OpenAI deployment
-resource openaideployment 'Microsoft.CognitiveServices/accounts/deployments@2024-10-01' existing = {
-  name: azureOpenaiDeploymentName
-}
-
-resource openaideploymentmini 'Microsoft.CognitiveServices/accounts/deployments@2024-10-01' existing = {
-  name: azureOpenaiDeploymentNameMini
+module openaiModule '../modules/openai.bicep' = {
+  scope: resourceGroup(azureOpenaiResourceGroupName)
+  name: '${name}-openai'
+  params: {
+    azureOpenaiResourceName: azureOpenaiResourceName
+    azureOpenaiDeploymentName: azureOpenaiDeploymentName
+    azureOpenaiDeploymentNameMini: azureOpenaiDeploymentNameMini
+    identityName: identityName
+    userPrincipalId: userPrincipalId
+  }
 }
 
 resource dynamicsession 'Microsoft.App/sessionPools@2024-02-02-preview' = {
@@ -204,28 +200,9 @@ resource appSessionPoolRoleAssignment 'Microsoft.Authorization/roleAssignments@2
   }
 }
 
-resource userOpenaiRoleAssignment 'Microsoft.Authorization/roleAssignments@2022-04-01' = {
-  name: guid(openai.id, userPrincipalId, 'Cognitive Services OpenAI User')
-  scope: openai
-  properties: {
-    principalId: userPrincipalId
-    roleDefinitionId: subscriptionResourceId('Microsoft.Authorization/roleDefinitions', '5e0bd9bd-7b93-4f28-af87-19fc36ad61bd')
-  }
-} 
-
-resource appOpenaiRoleAssignment 'Microsoft.Authorization/roleAssignments@2022-04-01' = {
-  name: guid(openai.id, identity.id, 'Cognitive Services OpenAI User')
-  scope: openai
-  properties: {
-    principalId: identity.properties.principalId
-    principalType: 'ServicePrincipal'
-    roleDefinitionId: subscriptionResourceId('Microsoft.Authorization/roleDefinitions', '5e0bd9bd-7b93-4f28-af87-19fc36ad61bd')
-  }
-}
-
 output defaultDomain string = containerAppsEnvironment.properties.defaultDomain
 output name string = app.name
 output uri string = 'https://${app.properties.configuration.ingress.fqdn}'
 output id string = app.id
-output azure_endpoint string = openai.properties.endpoint
+output azure_endpoint string = openaiModule.outputs.openaiEndpoint
 output pool_endpoint string = dynamicsession.properties.poolManagementEndpoint
