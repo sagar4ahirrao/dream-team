@@ -8,12 +8,10 @@ param containerAppsEnvironmentName string
 param applicationInsightsName string
 param exists bool
 
-param azureOpenaiResourceName string 
+param azureOpenaiResourceName string = 'emea-aigbb-demos-oai'
 param azureOpenaiDeploymentName string = 'gpt-4o'
 param azureOpenaiDeploymentNameMini string = 'gpt-4o-mini'
 param dailyRateLimit int = 1000000 // Set your daily rate limit here
-// Add a new parameter to indicate if the OpenAI resource already exists
-param openaiExists bool = false
 
 @description('Custom subdomain name for the OpenAI resource (must be unique in the region)')
 param customSubDomainName string
@@ -23,8 +21,6 @@ param appDefinition object
 
 @description('Principal ID of the user executing the deployment')
 param userPrincipalId string
-
-
 
 var appSettingsArray = filter(array(appDefinition.settings), i => i.name != '')
 var secrets = map(filter(appSettingsArray, i => i.?secret != null), i => {
@@ -149,49 +145,18 @@ resource app 'Microsoft.App/containerApps@2023-05-02-preview' = {
   }
 }
 
-// Replace the original OpenAI resource with a conditional new deployment
-resource openaiNew 'Microsoft.CognitiveServices/accounts@2024-10-01' = if (!openaiExists) {
-  name: azureOpenaiResourceName
-  location: location
-  sku: {
-    name: 'S0'
-  }
-  kind: 'OpenAI'
-  properties: {
-    customSubDomainName: customSubDomainName
-    dailyRateLimit: dailyRateLimit
-  }
-}
-
-// Reference the existing OpenAI resource when applicable
-resource openaiExisting 'Microsoft.CognitiveServices/accounts@2024-10-01' existing = {
+resource openai 'Microsoft.CognitiveServices/accounts@2024-10-01' existing = {
   name: azureOpenaiResourceName
 }
 
-// Select the final reference based on the flag
-var finalOpenai = openaiExists ? openaiExisting : openaiNew
-
-// Update OpenAI deployment(s) to use finalOpenai instead of "openai"
-resource openaideployment 'Microsoft.CognitiveServices/accounts/deployments@2024-10-01' = {
+// Define the OpenAI deployment
+resource openaideployment 'Microsoft.CognitiveServices/accounts/deployments@2024-10-01' existing = {
   name: azureOpenaiDeploymentName
-  parent: finalOpenai
-  sku: {
-    name: 'GlobalStandard'
-    capacity: 30
-  }
-  properties: {
-    model: {
-      name: 'gpt-4o'
-      format: 'OpenAI'
-      version: '2024-11-20'
-    }
-    versionUpgradeOption: 'OnceCurrentVersionExpired'
-  }
 }
 
 resource openaideploymentmini 'Microsoft.CognitiveServices/accounts/deployments@2024-10-01' = {
   name: azureOpenaiDeploymentNameMini
-  parent: finalOpenai
+  parent: openai
   sku: {
     name: 'GlobalStandard'
     capacity: 30
@@ -201,6 +166,7 @@ resource openaideploymentmini 'Microsoft.CognitiveServices/accounts/deployments@
       name: 'gpt-4o-mini'
       format: 'OpenAI'
       version: '2024-07-18'
+      
     }
     versionUpgradeOption: 'OnceCurrentVersionExpired'
   }
@@ -249,10 +215,9 @@ resource appSessionPoolRoleAssignment 'Microsoft.Authorization/roleAssignments@2
   }
 }
 
-// Update role assignments that reference the OpenAI resource
 resource userOpenaiRoleAssignment 'Microsoft.Authorization/roleAssignments@2022-04-01' = {
-  name: guid(finalOpenai.id, userPrincipalId, 'Cognitive Services OpenAI User')
-  scope: finalOpenai
+  name: guid(openai.id, userPrincipalId, 'Cognitive Services OpenAI User')
+  scope: openai
   properties: {
     principalId: userPrincipalId
     roleDefinitionId: subscriptionResourceId('Microsoft.Authorization/roleDefinitions', '5e0bd9bd-7b93-4f28-af87-19fc36ad61bd')
@@ -260,8 +225,8 @@ resource userOpenaiRoleAssignment 'Microsoft.Authorization/roleAssignments@2022-
 } 
 
 resource appOpenaiRoleAssignment 'Microsoft.Authorization/roleAssignments@2022-04-01' = {
-  name: guid(finalOpenai.id, identity.id, 'Cognitive Services OpenAI User')
-  scope: finalOpenai
+  name: guid(openai.id, identity.id, 'Cognitive Services OpenAI User')
+  scope: openai
   properties: {
     principalId: identity.properties.principalId
     principalType: 'ServicePrincipal'
@@ -272,6 +237,6 @@ resource appOpenaiRoleAssignment 'Microsoft.Authorization/roleAssignments@2022-0
 output defaultDomain string = containerAppsEnvironment.properties.defaultDomain
 output name string = app.name
 output uri string = 'https://${app.properties.configuration.ingress.fqdn}'
-// Update outputs to reference finalOpenai
-output azure_endpoint string = finalOpenai.properties.endpoint
+output id string = app.id
+output azure_endpoint string = openai.properties.endpoint
 output pool_endpoint string = dynamicsession.properties.poolManagementEndpoint
