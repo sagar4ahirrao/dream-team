@@ -22,6 +22,9 @@ param appDefinition object
 @description('Principal ID of the user executing the deployment')
 param userPrincipalId string
 
+// Add parameter for specifying the OpenAI resource group
+param openAIResourceGroupName string = resourceGroup().name
+
 var appSettingsArray = filter(array(appDefinition.settings), i => i.name != '')
 var secrets = map(filter(appSettingsArray, i => i.?secret != null), i => {
   name: i.name
@@ -146,6 +149,7 @@ resource app 'Microsoft.App/containerApps@2023-05-02-preview' = {
 }
 
 resource openai 'Microsoft.CognitiveServices/accounts@2024-10-01' existing = {
+  scope: resourceGroup(openAIResourceGroupName)
   name: azureOpenaiResourceName
 }
 
