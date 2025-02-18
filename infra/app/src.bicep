@@ -154,23 +154,8 @@ resource openaideployment 'Microsoft.CognitiveServices/accounts/deployments@2024
   name: azureOpenaiDeploymentName
 }
 
-resource openaideploymentmini 'Microsoft.CognitiveServices/accounts/deployments@2024-10-01' = {
+resource openaideploymentmini 'Microsoft.CognitiveServices/accounts/deployments@2024-10-01' existing = {
   name: azureOpenaiDeploymentNameMini
-  parent: openai
-  sku: {
-    name: 'GlobalStandard'
-    capacity: 30
-  }
-  properties: {
-    model: {
-      name: 'gpt-4o-mini'
-      format: 'OpenAI'
-      version: '2024-07-18'
-      
-    }
-    versionUpgradeOption: 'OnceCurrentVersionExpired'
-  }
-  dependsOn: [openaideployment]
 }
 
 resource dynamicsession 'Microsoft.App/sessionPools@2024-02-02-preview' = {
