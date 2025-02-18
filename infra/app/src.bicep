@@ -8,6 +8,7 @@ param containerAppsEnvironmentName string
 param applicationInsightsName string
 param exists bool
 
+param reuseAzureOpenaiResource bool = false
 param azureOpenaiResourceGroupName string = 'rg-infra'
 param azureOpenaiResourceName string = 'emea-aigbb-demos-oai'
 param azureOpenaiDeploymentName string = 'gpt-4o'
@@ -112,7 +113,7 @@ resource app 'Microsoft.App/containerApps@2023-05-02-preview' = {
             }
             {
               name: 'AZURE_OPENAI_ENDPOINT'
-              value: openaiModule.outputs.openaiEndpoint
+              value: (reuseAzureOpenaiResource ? openaiModuleExisting.outputs.openaiEndpoint : openaiModuleNew.outputs.openaiEndpoint)
             }
             {
               name: 'POOL_MANAGEMENT_ENDPOINT'
@@ -146,7 +147,7 @@ resource app 'Microsoft.App/containerApps@2023-05-02-preview' = {
   }
 }
 
-module openaiModule '../modules/openai.bicep' = {
+module openaiModuleExisting '../modules/reuse-modules/openai.bicep' = if (reuseAzureOpenaiResource) {
   scope: resourceGroup(azureOpenaiResourceGroupName)
   name: '${name}-openai'
   params: {
@@ -157,6 +158,21 @@ module openaiModule '../modules/openai.bicep' = {
     userPrincipalId: userPrincipalId
   }
 }
+
+module openaiModuleNew '../modules/new-modules/openai.bicep' = if (!reuseAzureOpenaiResource) {
+  scope: resourceGroup(azureOpenaiResourceGroupName)
+  name: '${name}-openai'
+  params: {
+    azureOpenaiResourceName: azureOpenaiResourceName
+    azureOpenaiDeploymentName: azureOpenaiDeploymentName
+    azureOpenaiDeploymentNameMini: azureOpenaiDeploymentNameMini
+    identityName: identityName
+    userPrincipalId: userPrincipalId
+    customSubDomainName: customSubDomainName
+    dailyRateLimit: dailyRateLimit
+  }
+}
+
 
 resource dynamicsession 'Microsoft.App/sessionPools@2024-02-02-preview' = {
   name: 'sessionPool'
@@ -204,5 +220,5 @@ output defaultDomain string = containerAppsEnvironment.properties.defaultDomain
 output name string = app.name
 output uri string = 'https://${app.properties.configuration.ingress.fqdn}'
 output id string = app.id
-output azure_endpoint string = openaiModule.outputs.openaiEndpoint
+output azure_endpoint string = (reuseAzureOpenaiResource ? openaiModuleExisting.outputs.openaiEndpoint : openaiModuleNew.outputs.openaiEndpoint)
 output pool_endpoint string = dynamicsession.properties.poolManagementEndpoint
