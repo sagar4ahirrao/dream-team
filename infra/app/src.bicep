@@ -154,8 +154,6 @@ module openaiModuleExisting '../modules/reuse-modules/openai.bicep' = if (reuseA
     azureOpenaiResourceName: azureOpenaiResourceName
     azureOpenaiDeploymentName: azureOpenaiDeploymentName
     azureOpenaiDeploymentNameMini: azureOpenaiDeploymentNameMini
-    identityName: identityName
-    userPrincipalId: userPrincipalId
   }
 }
 
@@ -166,10 +164,27 @@ module openaiModuleNew '../modules/new-modules/openai.bicep' = if (!reuseAzureOp
     azureOpenaiResourceName: azureOpenaiResourceName
     azureOpenaiDeploymentName: azureOpenaiDeploymentName
     azureOpenaiDeploymentNameMini: azureOpenaiDeploymentNameMini
-    identityName: identityName
-    userPrincipalId: userPrincipalId
     customSubDomainName: customSubDomainName
     dailyRateLimit: dailyRateLimit
+  }
+}
+
+resource userOpenaiRoleAssignmentNew 'Microsoft.Authorization/roleAssignments@2022-04-01' = {
+  name: guid('openai.id', userPrincipalId, 'Cognitive Services OpenAI User')
+  scope: reuseAzureOpenaiResource ? openaiModuleExisting : openaiModuleNew
+  properties: {
+    principalId: userPrincipalId
+    roleDefinitionId: subscriptionResourceId('Microsoft.Authorization/roleDefinitions', '5e0bd9bd-7b93-4f28-af87-19fc36ad61bd')
+  }
+} 
+
+resource appOpenaiRoleAssignmentNew 'Microsoft.Authorization/roleAssignments@2022-04-01' = {
+  name: guid('openai.id', identity.id, 'Cognitive Services OpenAI User')
+  scope: reuseAzureOpenaiResource ? openaiModuleExisting : openaiModuleNew
+  properties: {
+    principalId: identity.properties.principalId
+    principalType: 'ServicePrincipal'
+    roleDefinitionId: subscriptionResourceId('Microsoft.Authorization/roleDefinitions', '5e0bd9bd-7b93-4f28-af87-19fc36ad61bd')
   }
 }
 
