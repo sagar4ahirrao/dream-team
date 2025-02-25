@@ -19,7 +19,7 @@ This repository leverages Microsoft Autogen 0.4, Azure OpenAI and integrates it 
 Dream Team offers the following key features:
 
 - **Advanced multi agent framework**: this solution is based on the popular framework Autogen(35K stars) and Magentic One
-- **Friendly UI**: easy way to build and share data apps powered by Streamlit
+- **Friendly UI**: easy way to build and share data apps powered by React / Vite.js / Tailwind / Shadcn
 - **Single line deployment**: developer-friendly deployment that accelerates your path from a local development environment to Azure with single line of code - azd up.
 - **Secure code execution**:  Fast access to secure sandboxed with strong isolation environments that are ideal for running code or applications with Azure Container Apps dynamic sessions.
 - **Managed Identities**: Built in Azure Managed identities to eliminate the need for developers to manage these credentials
@@ -52,9 +52,23 @@ azd auth login
 azd up
 ```
 
+# Notes 
+
+- while using Web Surfer agent, you might want to change Content Safety on Azure OpenAI to accomodate your needs
+- currently it is "bring your own AI Search" (BYOS) - since its assuming you have your own search engine, we are working on a solution to make it easier for you
+   - you must add two ENV variables to backend service to connect to your search engine
+   - `AZURE_SEARCH_SERVICE_ENDPOINT` - your search engine endpoint
+   - `AZURE_SEARCH_ADMIN_KEY` - your search engine key (we are working to enable managed identity for this service)
+ 
+
 # Working locally  
+
+There are two parts to this project: the backend and the frontend. The backend is written in Python, and the frontend is written in JavaScript using React.
+
+## Backend
+
 ```bash  
-cd src 
+cd backend  
 ```
 Set up a virtual environment (Preferred)
 ```bash
@@ -76,28 +90,56 @@ deactivate
 ```
 > More information about virtual environments can be found [here](https://docs.python.org/3/tutorial/venv.html)
 
-## Install dependencies
+### Install dependencies
 ```bash
 uv sync
 playwright install --with-deps chromium
 ```
 
-## Update configuration
+### Update configuration
 
    - If you used AZD to deploy the resources just run the code below
    ```bash
    azd env get-values > .env
    ```` 
-   - Alternatively, copy `.env.sample` (under src) into `.env`
+   - Alternatively, copy `.env.sample` (under backend) into `.env`
 
 > Important: Magentic-One code uses code execution, you need to have Docker installed to run the examples if you use local execution
 
+### Run
+```bash
+uvicorn main:app --reload
+```
+
+## Frontend
+```bash
+cd frontend
+```
+### Install dependencies
+```bash
+npm install
+```
+
+> Note: In case you don't have necessary dependencies, you can run: 
+```bash
+npm install -D @types/react @types/react-dom @types/node typescript @vitejs/plugin-react vite
+```
+
+### Update configuration
+
+Change `env.local`
+```bash
+VITE_BASE_URL=http://localhost:8000
+VITE_ACTIVATON_CODE=
+VITE_ALLWAYS_LOGGED_IN=true
+```
+
 ## Run
 ```bash
-streamlit run app.py
+npm run dev
 ```
 If your app is ready, you can browse to (typically) http://localhost:8501 to see the app in action.
-![Screenshot](./assets/fe01.png)
+![Screenshot](./assets/application.png)
 
 # Learn
 Check these resources:

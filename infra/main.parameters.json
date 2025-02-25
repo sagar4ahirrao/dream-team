@@ -13,6 +13,9 @@
       },
       "srcDefinition": {
         "value": {
+          "repositoryUrl": "${FRONTEND_REPOSITORY_URL}",
+          "frontendArtifactLocation": "${FRONTEND_ARTIFACT_LOCATION}",
+          "branch": "${FRONTEND_BRANCH}",
           "settings": [
             {
               "name": "",

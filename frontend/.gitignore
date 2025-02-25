@@ -7,9 +7,9 @@ yarn-error.log*
 pnpm-debug.log*
 lerna-debug.log*
 
-frontend/node_modules
-frontend/dist
-frontend/dist-ssr
+node_modules
+dist
+dist-ssr
 *.local
 
 # Editor directories and files
@@ -26,19 +26,4 @@ frontend/dist-ssr
 .env.*
 .env
 
-frontend/test
-backend/test
-
-.azure
-.env
-.vscode/
-.venv/
-
-__pycache__/
-dream/
-.cache/
-logs/
-data/
-tmp/
-
-
+test
