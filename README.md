@@ -58,11 +58,7 @@ azd up
 ```
 
 # Notes 
-- create .env file in frontend and copy the backend url to VITE_BASE_URL
-VITE_BASE_URL= "https://abc.swedencentral.azurecontainerapps.io/"
-VITE_ACTIVATON_CODE= 237810
-VITE_ALLWAYS_LOGGED_IN=true
--Run azd up again
+- Under frontend folder update sample.env to .env file and copy the backend url to VITE_BASE_URL ->run azd up again
 - While using Web Surfer agent, you might want to change Content Safety on Azure OpenAI to accomodate your needs
 - currently it is "bring your own AI Search" (BYOS) - since its assuming you have your own search engine, we are working on a solution to make it easier for you
    - you must add two ENV variables to backend service to connect to your search engine
