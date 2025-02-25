@@ -23,6 +23,7 @@ param environmentName string
   'japaneast'
   'australiaeast'
   'westcentralus'
+  'westeurope'
 ]) // limit to regions where Dynamic sessions are available as of 2024-11-29
 param location string
 
@@ -44,6 +45,8 @@ var tags = {
 
 var abbrs = loadJsonContent('./abbreviations.json')
 var resourceToken = toLower(uniqueString(subscription().id, environmentName, location))
+// New variable for prefix used in customSubDomainName
+var prefix = 'dreamv2'
 
 resource rg 'Microsoft.Resources/resourceGroups@2022-09-01' = {
   name: 'rg-${environmentName}'
@@ -106,20 +109,36 @@ module appsEnv './shared/apps-env.bicep' = {
   scope: rg
 }
 
-module src './app/src.bicep' = {
-  name: 'src'
+module backend './app/backend.bicep' = {
+  name: 'backend'
   params: {
-    name: 'src'
+    name: 'backend'
     location: location
     tags: tags
-    identityName: '${abbrs.managedIdentityUserAssignedIdentities}src-${resourceToken}'
+    identityName: '${abbrs.managedIdentityUserAssignedIdentities}backend-${resourceToken}'
     applicationInsightsName: monitoring.outputs.applicationInsightsName
     containerAppsEnvironmentName: appsEnv.outputs.name
     containerRegistryName: registry.outputs.name
     exists: srcExists
     appDefinition: srcDefinition
     userPrincipalId: principalId
-    customSubDomainName: 'dream-${resourceToken}'
+    customSubDomainName: '${prefix}-${resourceToken}'
+    cosmosdbName: '${abbrs.documentDBDatabaseAccounts}${resourceToken}'
+    aiSearchName: '${abbrs.searchSearchServices}${resourceToken}'
+  }
+  scope: rg
+}
+
+// Add frontend deployment module
+module frontend './app/frontend.bicep' = {
+  name: 'frontend'
+  params: {
+    name: '${abbrs.webStaticSites}${resourceToken}'
+    location: 'westeurope'
+    tags: tags
+    repositoryUrl: srcDefinition.repositoryUrl
+    branch: srcDefinition.branch
+    appArtifactLocation: srcDefinition.frontendArtifactLocation
   }
   scope: rg
 }
@@ -127,5 +146,14 @@ module src './app/src.bicep' = {
 output AZURE_CONTAINER_REGISTRY_ENDPOINT string = registry.outputs.loginServer
 output AZURE_KEY_VAULT_NAME string = keyVault.outputs.name
 output AZURE_KEY_VAULT_ENDPOINT string = keyVault.outputs.endpoint
-output AZURE_OPENAI_ENDPOINT string = src.outputs.azure_endpoint
-output POOL_MANAGEMENT_ENDPOINT string = src.outputs.pool_endpoint
+output AZURE_OPENAI_ENDPOINT string = backend.outputs.azure_endpoint
+output POOL_MANAGEMENT_ENDPOINT string = backend.outputs.pool_endpoint
+output SERVICE_BACKEND_URI string = backend.outputs.uri
+output STATIC_SITE_ENDPOINT string = frontend.outputs.staticSiteEndpoint
+output COSMOS_DB_URI string = backend.outputs.cosmosdb_uri
+output COSMOS_DB_DATABASE string = backend.outputs.cosmosdb_database
+output CONTAINER_NAME string = backend.outputs.container_name
+output AZURE_SEARCH_SERVICE_ENDPOINT string = backend.outputs.ai_search_endpoint
+// output AZURE_SEARCH_ADMIN_KEY string = backend.outputs.ai_search_admin_key
+
+
