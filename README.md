@@ -8,7 +8,8 @@ This repository leverages Microsoft Autogen 0.4, Azure OpenAI and integrates it 
 
 ![Architecture](assets/architecture.png)
 
-:tada: February 25, 2025: We have a new React based UI 
+:tada: February 25, 2025: We have a new React based UI with new business use cases
+
 :tada: January 11, 2025: The repo now support [Autogen 0.4.0 stable version](https://microsoft.github.io/autogen/stable/)
 
 :tada: December 3, 2024: The repo now support one click deployment with [Azure Developer CLI](https://learn.microsoft.com/en-us/azure/developer/azure-developer-cli/), if you would like to run it with the full process localy you can check [v0.21](https://github.com/yanivvak/dream-team/tree/v0.21)
@@ -116,15 +117,10 @@ playwright install --with-deps chromium
 uvicorn main:app --reload
 ```
 
-## Frontend
+## Frontend (open a new terminal)
 ```bash
 cd frontend
 ```
-### Install dependencies
-```bash
-npm install -D @types/react @types/react-dom @types/node typescript @vitejs/plugin-react vite
-```
-
 
 ## Run
 ```bash
