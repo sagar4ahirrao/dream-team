@@ -261,7 +261,7 @@ export default function PlaygroundHistory() {
                                 <AvatarFallback>{getAvatarFallback(message.source)}</AvatarFallback>
                                 {/* <Bot className="ml-autoaspect-square h-full w-full" /> */}
                               </Avatar>
-                              <div className="break-all max-w-[100%]">
+                              <div className="break-all max-w-[100%] message">
                                 <p className="text-sm font-semibold">{message.source}</p>
                                 <MarkdownRenderer markdownText={message.content} />
                                 {/* Display image if available */}
