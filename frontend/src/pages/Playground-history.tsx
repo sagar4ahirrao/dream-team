@@ -15,7 +15,7 @@ import {
 } from "@/components/ui/sidebar"
 import { ThemeProvider } from "@/components/theme-provider"
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
-import { Download, Delete, Loader2, Eye } from "lucide-react"
+import { Download, Loader2, Eye, Trash } from "lucide-react"
 import { ScrollArea } from "@/components/ui/scroll-area"
 import { Button } from "@/components/ui/button"
 import {
@@ -172,7 +172,7 @@ export default function PlaygroundHistory() {
                         Download
                       </Button>
                       <Button variant="destructive" size="sm">
-                        <Delete className="h-4 w-4" />
+                        <Trash className="h-4 w-4" />
                         Clear
                       </Button>
                     </div>
@@ -211,7 +211,7 @@ export default function PlaygroundHistory() {
                                   </Button>
                                   &nbsp;&nbsp;
                                   <Button variant="destructive" size="icon" onClick={() => handleDeleteSession(item.session_id)}>
-                                    <Delete  />
+                                    <Trash  />
                                   </Button>
                                 </TableCell>
                               </TableRow>
