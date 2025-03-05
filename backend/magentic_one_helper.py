@@ -158,6 +158,7 @@ class MagenticOneHelper:
             # This is default MagenticOne agent - FileSurfer
             elif (agent["type"] == "MagenticOne" and agent["name"] == "FileSurfer"):
                 file_surfer = FileSurfer("FileSurfer", model_client=client)
+                file_surfer._browser.set_path(os.path.join(os.getcwd(), "data"))  # Set the path to the data folder in the current working directory
                 agent_list.append(file_surfer)
                 print("FileSurfer added!")
             
