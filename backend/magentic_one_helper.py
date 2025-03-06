@@ -130,7 +130,7 @@ class MagenticOneHelper:
 
             # This is default MagenticOne agent - Executor
             elif (agent["type"] == "MagenticOne" and agent["name"] == "Executor"):
-                # hangle local = local docker execution
+                # handle local = local docker execution
                 if self.run_locally:
                     #docker
                     code_executor = DockerCommandLineCodeExecutor(work_dir=logs_dir)
@@ -143,7 +143,12 @@ class MagenticOneHelper:
                     pool_endpoint=os.getenv("POOL_MANAGEMENT_ENDPOINT")
                     assert pool_endpoint, "POOL_MANAGEMENT_ENDPOINT environment variable is not set"
                     with tempfile.TemporaryDirectory() as temp_dir:
-                        executor = CodeExecutorAgent("Executor", code_executor=ACADynamicSessionsCodeExecutor(pool_management_endpoint=pool_endpoint, credential=azure_credential, work_dir=temp_dir))
+                        executor = CodeExecutorAgent("Executor", code_executor=ACADynamicSessionsCodeExecutor(
+                            pool_management_endpoint=pool_endpoint,
+                            credential=azure_credential,
+                            work_dir=os.path.join(os.getcwd(), "data"),
+                            upload_dir=os.path.join(os.getcwd(), "data") # Directory to upload files from
+                        ))
                 
                 
                 agent_list.append(executor)
@@ -270,5 +275,5 @@ if __name__ == "__main__":
 
     asyncio.run(main(MAGENTIC_ONE_DEFAULT_AGENTS,args.task, args.run_locally))
 
-    
-    
+
+
