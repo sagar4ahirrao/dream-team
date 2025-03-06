@@ -34,7 +34,7 @@ token_provider = get_bearer_token_provider(
 
 #You can view the traces in http://127.0.0.1:23333/v1.0/ui/traces/
 # start_trace()
-
+#analyze the file maintenance.csv data in the folder pred_maint, use coder and executor
 def generate_session_name():
     '''Generate a unique session name based on random sci-fi words, e.g. quantum-cyborg-1234'''
     import random
@@ -135,21 +135,22 @@ class MagenticOneHelper:
                     #docker
                     code_executor = DockerCommandLineCodeExecutor(work_dir=logs_dir)
                     await code_executor.start()
-
                     executor = CodeExecutorAgent("Executor", code_executor=code_executor)
                 
                 # or remote = Azure ACA Dynamic Sessions execution
                 else:
-                    pool_endpoint=os.getenv("POOL_MANAGEMENT_ENDPOINT")
+                    pool_endpoint = os.getenv("POOL_MANAGEMENT_ENDPOINT")
                     assert pool_endpoint, "POOL_MANAGEMENT_ENDPOINT environment variable is not set"
-                    with tempfile.TemporaryDirectory() as temp_dir:
-                        executor = CodeExecutorAgent("Executor", code_executor=ACADynamicSessionsCodeExecutor(
+                    with tempfile.TemporaryDirectory() as temp_dir:# Define the correct path to the data folder for file access
+                        code_executor=ACADynamicSessionsCodeExecutor(
                             pool_management_endpoint=pool_endpoint,
                             credential=azure_credential,
-                            work_dir=os.path.join(os.getcwd(), "data"),
-                            upload_dir=os.path.join(os.getcwd(), "data") # Directory to upload files from
-                        ))
-                
+                            work_dir=temp_dir
+                        )
+                        print(code_executor._session_id)
+                        #code_executor.upload_files(os.path.join(os.getcwd(), "data"))
+                        print("Files uploaded!")
+                        executor = CodeExecutorAgent("Executor",code_executor=code_executor )
                 
                 agent_list.append(executor)
                 print("Executor added!")

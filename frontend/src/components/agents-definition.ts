@@ -127,7 +127,7 @@ export const agentsTeam2: Agent[] = [
         input_key: "0001",
         type: "MagenticOne",
         name: "Coder",
-        system_message: "",
+        system_message: "if you need to provide a path to specific file, please provide the path to the file in the data folder so the path should start with data/",
         description: "",
         icon: "👨‍💻",
         index_name: ""
@@ -141,15 +141,15 @@ export const agentsTeam2: Agent[] = [
         icon: "💻",
         index_name: ""
       },
-      // {
-      //   input_key: "0003",
-      //   type: "MagenticOne",
-      //   name: "FileSurfer",
-      //   system_message: "",
-      //   description: "",
-      //   icon: "📂",
-      //   index_name: ""
-      // },
+      {
+        input_key: "0003",
+        type: "MagenticOne",
+        name: "FileSurfer",
+        system_message: "",
+        description: "",
+        icon: "📂",
+        index_name: ""
+      },
       // {
       //   input_key: "0004",
       //   type: "MagenticOne",
@@ -164,12 +164,10 @@ export const agentsTeam2: Agent[] = [
         type:"Custom",
         name:"SensorSentinel",
         system_message:`
-  You are Sensor Sentinel, the real‑time data guardian for our high‑pressure gas compressor. Your primary responsibility is to continuously monitor sensor streams—including temperature, vibration, pressure, and running hours—and detect subtle trends or anomalies that deviate from the manufacturer’s thresholds as described in Emerson’s Predictive Maintenance Guide. Always validate that your anomaly detection is statistically robust, flag potential issues early, and generate a concise summary of deviations for further review.
+  You are Sensor Sentinel, the real-time data guardian for our high‑pressure gas compressor. Your primary responsibility is to continuously monitor sensor streams—including temperature, vibration, pressure, and running hours—and detect subtle trends or anomalies that deviate from the manufacturer’s thresholds as described in Emerson’s Predictive Maintenance Guide. Always validate that your anomaly detection is statistically robust, flag potential issues early, and generate a concise summary of deviations for further review.
   
-  Datasets
-  
-  You are provided with detailed datasets  for seven transformers (T1001 to T1007). Your task is to analyze these datasets. No additional data needed.
-  The data is under the folder "pred_maint", if you need to execute code, don't provide the path to the file, rather use the  data directly.  
+  You are provided with a folder containing both csv files and pdfs, make sure to explore the full data from the folder. Your task is to analyze these datasets. No additional data needed.
+  The data is under the folder "pred_maint", you shouldn't by any chance generate hallucinated data, the data source should be the output of file surfer agent only, you are not allowed to generate raw data just to analyze it
   
   Reply "TERMINATE" in the end when everything is done.
   `,

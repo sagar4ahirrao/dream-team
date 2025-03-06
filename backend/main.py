@@ -21,9 +21,9 @@ from datetime import datetime
 from schemas import AutoGenMessage
 
 print("Starting the server...")
-print(f'AZURE_OPENAI_ENDPOINT:{os.getenv("AZURE_OPENAI_ENDPOINT")}')
-print(f'COSMOS_DB_URI:{os.getenv("COSMOS_DB_URI")}')
-print(f'AZURE_SEARCH_SERVICE_ENDPOINT:{os.getenv("AZURE_SEARCH_SERVICE_ENDPOINT")}')
+#print(f'AZURE_OPENAI_ENDPOINT:{os.getenv("AZURE_OPENAI_ENDPOINT")}')
+#print(f'COSMOS_DB_URI:{os.getenv("COSMOS_DB_URI")}')
+#print(f'AZURE_SEARCH_SERVICE_ENDPOINT:{os.getenv("AZURE_SEARCH_SERVICE_ENDPOINT")}')
 
 session_data = {}
 MAGENTIC_ONE_DEFAULT_AGENTS = [
