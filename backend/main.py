@@ -399,3 +399,8 @@ async def delete_conversation(session_id: str = Query(...), user: dict = Depends
     except Exception as e:
         print(f"Error deleting conversation {session_id}: {str(e)}")
         return {"status": "error", "message": f"Error deleting conversation: {str(e)}"}
+    
+@app.get("/health")
+async def health_check():
+    print("Health check endpoint called")
+    return {"status": "healthy"}
