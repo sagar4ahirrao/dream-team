@@ -8,6 +8,7 @@ This repository leverages Microsoft Autogen 0.4, Azure OpenAI and integrates it 
 
 ![Architecture](assets/architecture.png)
 
+
 :tada: February 25, 2025: We have a new React based UI with new business use cases
 
 :tada: January 11, 2025: The repo now support [Autogen 0.4.0 stable version](https://microsoft.github.io/autogen/stable/)
@@ -15,6 +16,9 @@ This repository leverages Microsoft Autogen 0.4, Azure OpenAI and integrates it 
 :tada: December 3, 2024: The repo now support one click deployment with [Azure Developer CLI](https://learn.microsoft.com/en-us/azure/developer/azure-developer-cli/), if you would like to run it with the full process localy you can check [v0.21](https://github.com/yanivvak/dream-team/tree/v0.21)
 
 :tada: November 18, 2024: we are porting this repo to  [Autogen 0.4](https://microsoft.github.io/autogen/0.4.0.dev6/index.html), A new event driven, asynchronous architecture for AutoGen and [Magentic One](https://github.com/microsoft/autogen/tree/main/python/packages/autogen-magentic-one)
+
+![Demo](https://raw.githubusercontent.com/Azure-Samples/dream-team/main/assets/demo.mov)
+
 
 # Key Features
 
@@ -58,7 +62,7 @@ cd frontend && npm install -D @types/react @types/react-dom @types/node typescri
 azd up
 ```
 
-> Under frontend folder update sample.env to .env file and copy the backend url to VITE_BASE_URL -> run azd up again
+> Note: 1/ After the deployment copy the backend url and nder frontend folder update sample.env to .env file and copy the backend url to VITE_BASE_URL 2/ run azd up again
 
 # Notes 
 - While using Web Surfer agent, you might want to change Content Safety on Azure OpenAI to accomodate your needs
