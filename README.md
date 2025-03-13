@@ -17,7 +17,7 @@ This repository leverages Microsoft Autogen 0.4, Azure OpenAI and integrates it 
 
 :tada: November 18, 2024: we are porting this repo to  [Autogen 0.4](https://microsoft.github.io/autogen/0.4.0.dev6/index.html), A new event driven, asynchronous architecture for AutoGen and [Magentic One](https://github.com/microsoft/autogen/tree/main/python/packages/autogen-magentic-one)
 
-![Demo](https://raw.githubusercontent.com/Azure-Samples/dream-team/main/assets/demo.mov)
+[![Watch the video](https://raw.githubusercontent.com/Azure-Samples/dream-team/main/assets/demo.png)](https://raw.githubusercontent.com/Azure-Samples/dream-team/main/assets/demo.mov)
 
 
 # Key Features
