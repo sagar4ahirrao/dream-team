@@ -16,9 +16,13 @@ from magentic_one_helper import MagenticOneHelper
 from autogen_agentchat.messages import MultiModalMessage, TextMessage, ToolCallExecutionEvent, ToolCallRequestEvent
 from autogen_agentchat.base import TaskResult
 from magentic_one_helper import generate_session_name
+import aisearch
 
 from datetime import datetime 
 from schemas import AutoGenMessage
+from typing import List
+from fastapi import File, Form
+import time
 
 print("Starting the server...")
 #print(f'AZURE_OPENAI_ENDPOINT:{os.getenv("AZURE_OPENAI_ENDPOINT")}')
@@ -360,7 +364,7 @@ async def stop(session_id: str = Query(...)):
     try:
         print("Stopping session:", session_id)
         cancellation_token = session_data[session_id].get("cancellation_token")
-        if cancellation_token:
+        if (cancellation_token):
             cancellation_token.cancel()
             return {"status": "success", "message": f"Session {session_id} cancelled successfully."}
         else:
@@ -404,3 +408,15 @@ async def delete_conversation(session_id: str = Query(...), user: dict = Depends
 async def health_check():
     print("Health check endpoint called")
     return {"status": "healthy"}
+
+@app.post("/upload")
+async def upload_files(indexName: str = Form(...), files: List[UploadFile] = File(...)):
+    print("Received indexName:", indexName)
+    for file in files:
+        print("Uploaded file:", file.filename)
+    try:
+        aisearch.process_upload_and_index(indexName, files)
+    except Exception as err:
+        print(f"Error processing upload and index: {err}")
+        return {"status": "error", "message": str(err)}
+    return {"status": "success", "filenames": [f.filename for f in files]}
