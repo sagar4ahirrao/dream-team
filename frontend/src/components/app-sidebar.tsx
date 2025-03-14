@@ -146,17 +146,58 @@ const data = {
 }
 
 export function AppSidebar({ onTeamSelect, ...restProps }: AppSidebarProps) {
-  return (
-    <Sidebar collapsible="icon" {...restProps}>
-      <SidebarHeader>
-        <TeamSwitcher teams={data.teams} onTeamSelect={onTeamSelect} />
-      </SidebarHeader>
-      <SidebarContent>
-        <NavMain items={data.navMain} />
-      </SidebarContent>
-      <SidebarFooter>
-        <NavUser user={data.user} />
-      </SidebarFooter>
-    </Sidebar>
-  )
+    const [userInfo, setUserInfo] = React.useState<{ name: string; email: string; avatar: string }>(
+      { name: "", email: "", avatar: "" }
+    );
+
+       async function getUserInfo() {
+        try {
+            const response = await fetch('/.auth/me');
+            const payload = await response.json();
+            const { clientPrincipal } = payload;
+    
+            // Extract the username from the email
+            const email = clientPrincipal.userDetails;
+            const username = email.split('@')[0];
+
+            return {
+                user: {
+                    name: username,
+                    email: email,
+                    avatar: h1,
+                },
+            };
+        } catch (error) {
+            // console.error("Failed to fetch user info:", error);
+            return {
+                user: {
+                    name: "Jon Doe",
+                    email: "johne@microsoft.com",
+                    avatar: h1,
+                },
+            };
+        }
+    }
+
+    React.useEffect(() => {
+        async function loadUser() {
+            const { user } = await getUserInfo();
+            setUserInfo(user);
+        }
+        loadUser();
+    }, []);
+
+    return (
+        <Sidebar collapsible="icon" {...restProps}>
+            <SidebarHeader>
+                <TeamSwitcher teams={data.teams} onTeamSelect={onTeamSelect} />
+            </SidebarHeader>
+            <SidebarContent>
+                <NavMain items={data.navMain} />
+            </SidebarContent>
+            <SidebarFooter>
+                <NavUser user={userInfo} />
+            </SidebarFooter>
+        </Sidebar>
+    )
 }
