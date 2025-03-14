@@ -29,6 +29,7 @@ import { agentsTeam1, agentsTeam2, agentsTeam3, agentsTeam4, agentsTeamFSI1, age
 
 interface AppSidebarProps extends React.ComponentProps<typeof Sidebar> {
   onTeamSelect: (team: { teamId: string; agents: any[] }) => void;
+  onUserNameChange?: (name: string) => void;
 }
 
 const data = {
@@ -145,59 +146,62 @@ const data = {
   ],
 }
 
-export function AppSidebar({ onTeamSelect, ...restProps }: AppSidebarProps) {
-    const [userInfo, setUserInfo] = React.useState<{ name: string; email: string; avatar: string }>(
-      { name: "", email: "", avatar: "" }
-    );
+export function AppSidebar({
+  onTeamSelect,
+  onUserNameChange,
+  ...sidebarProps
+}: AppSidebarProps) {
+  const [userInfo, setUserInfo] = React.useState<{ name: string; email: string; avatar: string }>({ name: "", email: "", avatar: "" });
 
-       async function getUserInfo() {
-        try {
-            const response = await fetch('/.auth/me');
-            const payload = await response.json();
-            const { clientPrincipal } = payload;
-    
-            // Extract the username from the email
-            const email = clientPrincipal.userDetails;
-            const username = email.split('@')[0];
+  async function getUserInfo() {
+    try {
+        const response = await fetch('/.auth/me');
+        const payload = await response.json();
+        const { clientPrincipal } = payload;
 
-            return {
-                user: {
-                    name: username,
-                    email: email,
-                    avatar: h1,
-                },
-            };
-        } catch (error) {
-            // console.error("Failed to fetch user info:", error);
-            return {
-                user: {
-                    name: "Jon Doe",
-                    email: "johne@microsoft.com",
-                    avatar: h1,
-                },
-            };
-        }
+        // Extract the username from the email
+        const email = clientPrincipal.userDetails;
+        const username = email.split('@')[0];
+
+        return {
+            user: {
+                name: username,
+                email: email,
+                avatar: h1,
+            },
+        };
+    } catch (error) {
+        // console.error("Failed to fetch user info:", error);
+        return {
+            user: {
+                name: "Jon Doe",
+                email: "johne@microsoft.com",
+                avatar: h1,
+            },
+        };
     }
+  }
 
-    React.useEffect(() => {
-        async function loadUser() {
-            const { user } = await getUserInfo();
-            setUserInfo(user);
-        }
-        loadUser();
-    }, []);
+  React.useEffect(() => {
+    async function loadUser() {
+      const { user } = await getUserInfo();
+      setUserInfo(user);
+      onUserNameChange?.(user.email);
+    }
+    loadUser();
+  }, []);
 
-    return (
-        <Sidebar collapsible="icon" {...restProps}>
-            <SidebarHeader>
-                <TeamSwitcher teams={data.teams} onTeamSelect={onTeamSelect} />
-            </SidebarHeader>
-            <SidebarContent>
-                <NavMain items={data.navMain} />
-            </SidebarContent>
-            <SidebarFooter>
-                <NavUser user={userInfo} />
-            </SidebarFooter>
-        </Sidebar>
-    )
+  return (
+    <Sidebar collapsible="icon" {...sidebarProps}>
+      <SidebarHeader>
+        <TeamSwitcher teams={data.teams} onTeamSelect={onTeamSelect} />
+      </SidebarHeader>
+      <SidebarContent>
+        <NavMain items={data.navMain} />
+      </SidebarContent>
+      <SidebarFooter>
+        <NavUser user={userInfo} />
+      </SidebarFooter>
+    </Sidebar>
+  );
 }

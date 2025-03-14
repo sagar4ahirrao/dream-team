@@ -106,6 +106,7 @@ export default function App() {
   // const [isSettingsCardVisible, setIsSettingsCardVisible] = useState(false)
   const [isTyping, setIsTyping] = useState(false);
   const [agents, setAgents] = useState<Agent[]>(agentsTeam1);
+  const [sidebarUserName, setSidebarUserName] = useState('');
 
   // Initialize agents from default team (will be updated by sidebar selection)
   // Optionally use an effect to set initial team agents if needed
@@ -259,11 +260,12 @@ export default function App() {
     try {
       const response = await axios.post(`${BASE_URL}/start`, { 
         content: userMessage, 
+        user_id: sidebarUserName,
         agents: JSON.stringify(selectedAgents)
       });
       const sessionId = response.data.response;  // Get the session ID from the response
       setSessionID(sessionId);
-      const eventSource = new EventSource(`${BASE_URL}/chat-stream?session_id=${encodeURIComponent(sessionId)}`);
+      const eventSource = new EventSource(`${BASE_URL}/chat-stream?session_id=${encodeURIComponent(sessionId)}&user_id=${encodeURIComponent(sidebarUserName)}`);
       eventSource.onmessage = (event) => {
         // console.log('EventSource message:', event.data);
         const data = JSON.parse(event.data);
@@ -325,7 +327,7 @@ export default function App() {
       <LoginCard handleLogin={handleLogin} />
     ) : (
     <SidebarProvider defaultOpen={true}>
-      <AppSidebar onTeamSelect={handleTeamSelect} />
+      <AppSidebar onTeamSelect={handleTeamSelect} onUserNameChange={(name) => setSidebarUserName(name)} />
       <SidebarInset>
         <header className="flex sticky top-0 bg-background h-14 shrink-0 items-center gap-2 border-b px-4 z-10 shadow">
           <div className="flex items-center gap-2 px-4 w-full">

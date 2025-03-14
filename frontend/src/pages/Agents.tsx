@@ -75,6 +75,7 @@ export default function Agents() {
   
 //   const [sessionID, setSessionID] = useState('')
   const [isAuthenticated, setIsAuthenticated] = useState(BASE_URL)
+  const [ _ ,setSidebarUserName] = useState('');
   
   const [agents, setAgents] = useState<Agent[]>([
     {
@@ -242,7 +243,7 @@ export default function Agents() {
       <LoginCard handleLogin={handleLogin} />
     ) : (
     <SidebarProvider defaultOpen={true}>
-      <AppSidebar onTeamSelect={handleTeamSelect}/>
+      <AppSidebar onTeamSelect={handleTeamSelect} onUserNameChange={(name) => setSidebarUserName(name)} />
       <SidebarInset>
         <header className="flex sticky top-0 bg-background h-14 shrink-0 items-center gap-2 border-b px-4 z-10 shadow">
           <div className="flex items-center gap-2 px-4 w-full">
