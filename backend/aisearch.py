@@ -212,6 +212,9 @@ def setup_index(azure_credential, azure_storage_endpoint, uami_resource_id,  ind
 
 
 def upload_documents(azure_credential, source_folder, indexer_name, azure_search_endpoint, azure_storage_endpoint, azure_storage_container):
+    logging.basicConfig(level=logging.WARNING, format="%(message)s", datefmt="[%X]")
+    logger = logging.getLogger("upload_documents")
+    logger.setLevel(logging.INFO)
     indexer_client = SearchIndexerClient(azure_search_endpoint, azure_credential)
     # Upload the documents in /data folder to the blob storage container
     blob_client = BlobServiceClient(
