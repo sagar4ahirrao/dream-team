@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react'
 import { AppSidebar } from "@/components/app-sidebar"
+import { useUserContext } from '@/contexts/UserContext'
 import {
   Breadcrumb,
   BreadcrumbItem,
@@ -65,7 +66,7 @@ export default function PlaygroundHistory() {
   // New state to store the selected conversation data
   const [selectedConversation, setSelectedConversation] = useState<any>(null);
   const [isConversationLoading, setIsConversationLoading] = useState(false);
-  const [sidebarUserName, setSidebarUserName] = useState('');
+  const { userInfo } = useUserContext();
 
   // Updated function to fetch conversation details
   const handleShowDetails = async (userId: string, sessionId: string) => {
@@ -90,12 +91,12 @@ export default function PlaygroundHistory() {
   
 
 
-    async function fetchHistory() {
+    async function fetchHistory(userId: string) {
       try {
         setIsHistoryLoading(true);
-        console.log('Fetching for:', sidebarUserName);
+        console.log('Fetching for:', userId);
         const response = await axios.post(`${BASE_URL}/conversations`, { 
-                user_id: sidebarUserName,
+                user_id: userId,
               });
         console.log('Response:', response.data);
         setHistoryItems(response.data);
@@ -142,13 +143,13 @@ export default function PlaygroundHistory() {
         <LoginCard handleLogin={handleLogin} />
       ) : (
         <SidebarProvider defaultOpen={true}>
-          <AppSidebar onTeamSelect={handleTeamSelect} onUserNameChange={(name) => setSidebarUserName(name)} />
+          <AppSidebar onTeamSelect={handleTeamSelect} />
           {(() => {
             useEffect(() => {
-              if (sidebarUserName) {
-                fetchHistory();
+              if (userInfo.email) {
+                fetchHistory(userInfo.email);
               }
-            }, [sidebarUserName]);
+            }, [userInfo.email]);
             return null;
           })()}
           <SidebarInset>

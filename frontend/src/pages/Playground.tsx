@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { AppSidebar } from "@/components/app-sidebar"
+import { useUserContext } from '@/contexts/UserContext'
 import {
   Breadcrumb,
   BreadcrumbItem,
@@ -106,7 +107,7 @@ export default function App() {
   // const [isSettingsCardVisible, setIsSettingsCardVisible] = useState(false)
   const [isTyping, setIsTyping] = useState(false);
   const [agents, setAgents] = useState<Agent[]>(agentsTeam1);
-  const [sidebarUserName, setSidebarUserName] = useState('');
+  const { userInfo } = useUserContext();
 
   // Initialize agents from default team (will be updated by sidebar selection)
   // Optionally use an effect to set initial team agents if needed
@@ -260,12 +261,12 @@ export default function App() {
     try {
       const response = await axios.post(`${BASE_URL}/start`, { 
         content: userMessage, 
-        user_id: sidebarUserName,
+        user_id: userInfo.email, // Use directly from context
         agents: JSON.stringify(selectedAgents)
       });
       const sessionId = response.data.response;  // Get the session ID from the response
       setSessionID(sessionId);
-      const eventSource = new EventSource(`${BASE_URL}/chat-stream?session_id=${encodeURIComponent(sessionId)}&user_id=${encodeURIComponent(sidebarUserName)}`);
+      const eventSource = new EventSource(`${BASE_URL}/chat-stream?session_id=${encodeURIComponent(sessionId)}&user_id=${encodeURIComponent(userInfo.email)}`);
       eventSource.onmessage = (event) => {
         // console.log('EventSource message:', event.data);
         const data = JSON.parse(event.data);
@@ -327,7 +328,7 @@ export default function App() {
       <LoginCard handleLogin={handleLogin} />
     ) : (
     <SidebarProvider defaultOpen={true}>
-      <AppSidebar onTeamSelect={handleTeamSelect} onUserNameChange={(name) => setSidebarUserName(name)} />
+      <AppSidebar onTeamSelect={handleTeamSelect} /> {/* Remove onUserNameChange prop */}
       <SidebarInset>
         <header className="flex sticky top-0 bg-background h-14 shrink-0 items-center gap-2 border-b px-4 z-10 shadow">
           <div className="flex items-center gap-2 px-4 w-full">
