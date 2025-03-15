@@ -351,6 +351,26 @@ export default function App() {
               </BreadcrumbList>
             </Breadcrumb>
             <div className="ml-auto hidden items-center gap-2 md:flex">
+     
+            {/* if the session end display elapsed time */}
+            <div className="flex gap-0 p-0 pt-0 justify-end">
+              {sessionTime && !isTyping ? (
+                <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                  <p className='text-sm text-muted-foreground'>Session {sessionID} completed in {sessionTime}s.</p>
+                  <Button variant="secondary" onClick={() => stopSession()}>
+                    Run new
+                  </Button>
+                </div>
+              ) : null}
+              {isTyping ? (
+                <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                  <p className='text-sm text-muted-foreground'>Running {sessionID} session...</p>
+                  <Loader2 className="lucide lucide-loader2 mr-2 h-4 animate-spin loader-green" />
+                  {/* button to stop the session */}
+                  <Button variant="destructive" onClick={() => stopSession()}>Stop</Button>
+                </div>
+              ) : <p className='text-sm text-muted-foreground loader-green'></p>}
+            </div>
         
    
             {/* <Separator orientation="vertical" className="mr-2 h-4" /> */}
@@ -381,25 +401,6 @@ export default function App() {
               isCollapsed={isTyping || (sessionTime) ? true : false}
             />
            {/* if session is running display loader */}
-        {/* if the session end display elapsed time */}
-        <div className="flex gap-0 p-2 pt-0 justify-end">
-          {sessionTime && !isTyping ? (
-            <div className="flex items-center gap-2 text-sm text-muted-foreground">
-              <p className='text-sm text-muted-foreground'>Session {sessionID} completed in {sessionTime}s.</p>
-              <Button variant="secondary" onClick={() => stopSession()}>
-                Run new
-              </Button>
-            </div>
-          ) : null}
-          {isTyping ? (
-            <div className="flex items-center gap-2 text-sm text-muted-foreground">
-              <p className='text-sm text-muted-foreground'>Running {sessionID} session...</p>
-              <Loader2 className="lucide lucide-loader2 mr-2 h-4 animate-spin loader-green" />
-              {/* button to stop the session */}
-              <Button variant="destructive" onClick={() => stopSession()}>Stop</Button>
-            </div>
-          ) : <p className='text-sm text-muted-foreground loader-green'></p>}
-        </div>
           <div className="min-h-[100vh] flex-1 rounded-xl bg-muted/50 md:min-h-min">
             {/* Chat Interface */}
             <Card className={`md:col-span-2 h-full flex flex-col`}>
