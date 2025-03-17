@@ -54,16 +54,12 @@ git clone https://github.com/Azure-Samples/dream-team
 azd auth login
 ```
 > You need to choose your preferred region (you can start with east us or sweden central or any other available region)
+
 ## 3. Deploy Azure Resources and the app
-```bash
-cd frontend && npm install -D @types/react @types/react-dom @types/node typescript @vitejs/plugin-react vite
-```
 
 ```bash
 azd up
 ```
-
-> Note: 1/ After the deployment copy the backend url and nder frontend folder update sample.env to .env file and copy the backend url to VITE_BASE_URL 2/ run azd up again
 
 ## 4. [Optional] Ingest the demo documents into your AI Search
 
