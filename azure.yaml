@@ -15,6 +15,14 @@ services:
         language: python
         docker:
             path: Dockerfile
+        hooks:
+          postdeploy: 
+            windows:
+                shell: pwsh
+                run: 'azd env get-values > .env'
+            posix:
+                shell: sh
+                run: 'azd env get-values > .env'
     frontend:
         project: frontend
         host: staticwebapp
@@ -28,10 +36,10 @@ services:
             prebuild:
                 windows:
                     shell: pwsh
-                    run: 'echo "VITE_BASE_URL=""$env:SERVICE_BACKEND_URI""" > .env ; echo "VITE_ALLWAYS_LOGGED_IN="true"" >> .env'
+                    run: 'npm install -D @types/react @types/react-dom @types/node typescript @vitejs/plugin-react vite; echo "VITE_BASE_URL=""$env:SERVICE_BACKEND_URI""" > .env ; echo "VITE_ALLWAYS_LOGGED_IN="true"" >> .env'
                 posix:
                     shell: sh
-                    run: 'echo VITE_BASE_URL=\"$SERVICE_BACKEND_URI\" > .env && echo VITE_ALLWAYS_LOGGED_IN=\"true\" >> .env'    
+                    run: 'npm install -D @types/react @types/react-dom @types/node typescript @vitejs/plugin-react vite && echo VITE_BASE_URL=\"$SERVICE_BACKEND_URI\" > .env && echo VITE_ALLWAYS_LOGGED_IN=\"true\" >> .env'     
             postdeploy:
                 windows:
                     shell: pwsh
