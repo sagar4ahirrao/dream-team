@@ -118,14 +118,6 @@ uv sync
 playwright install --with-deps chromium
 ```
 
-### Update configuration
-
-   - If you used AZD to deploy the resources just run the code below
-   ```bash
-   azd env get-values > .env
-   ```` 
-   - Alternatively, copy `.env.sample` (under backend) into `.env`
-
 > Important: Magentic-One code uses code execution, you need to have Docker installed to run the examples if you use local execution
 
 ### Run
