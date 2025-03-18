@@ -129,6 +129,7 @@ uvicorn main:app --reload
 ```bash
 cd frontend
 ```
+> Upadte the env variables in sample.env and rename to .env
 
 ## Run
 ```bash
