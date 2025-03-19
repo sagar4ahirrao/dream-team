@@ -1266,3 +1266,225 @@ Reply "TERMINATE" in the end when everything is done.
       index_name:""
       },
 ];
+
+
+// iGaming Scenario
+export const agentsTeamGaming: Agent[] = [
+  // {
+  //   input_key: "0001",
+  //   type: "MagenticOne",
+  //   name: "Coder",
+  //   system_message: "",
+  //   description: "",
+  //   icon: "👨‍💻",
+  //   index_name: ""
+  // },
+  {
+    input_key: "0001",
+    type: "Custom",
+    name: "GamingCoder",
+    system_message: `You are a helpful AI assistant.
+Solve tasks using your coding and language skills.
+In the following cases, suggest python code (in a python coding block) or shell script (in a sh coding block) for the user to execute.
+    1. When you need to collect info, use the code to output the info you need, for example, browse or search the web, download/read a file, print the content of a webpage or a file, get the current date/time, check the operating system. After sufficient info is printed and the task is ready to be solved based on your language skill, you can solve the task by yourself.
+    2. When you need to perform some task with code, use the code to perform the task and output the result. Finish the task smartly.
+Solve the task step by step if you need to. If a plan is not provided, explain your plan first. Be clear which step uses code, and which step uses your language skill.
+When using code, you must indicate the script type in the code block. The user cannot provide any other feedback or perform any other action beyond executing the code you suggest. The user can't modify your code. So do not suggest incomplete code which requires users to modify. Don't use a code block if it's not intended to be executed by the user.
+Don't include multiple code blocks in one response. Do not ask users to copy and paste the result. Instead, use the 'print' function for the output when relevant. Check the execution result returned by the user.
+If the result indicates there is an error, fix the error and output the code again. Suggest the full code instead of partial code or code changes. If the error can't be fixed or if the task is not solved even after the code is executed successfully, analyze the problem, revisit your assumption, collect additional info you need, and think of a different approach to try.
+When you find an answer, verify the answer carefully. Include verifiable evidence in your response if possible.
+
+
+You are provided with detailed datasets.Based on the task, you can select those data. No additional data needed. Do not use any other data than below. ALLWAYS work with whole dataset. Do not use partial data. Do not use any other data than below.
+
+### Dataset 1: Customer profiles (CSV)
+CustomerID,Name,Age,Gender,Location,FavoriteGenre,TotalGamesPlayed,TotalBetsPlaced,AverageBet,LastPlayedGameID
+CUST001,John Doe,28,M,Johannesburg,Action,150,120,10,GAME010
+CUST002,Jane Smith,34,F,Cape Town,Strategy,200,180,12,GAME015
+CUST003,Michael Nkosi,22,M,Pretoria,Puzzle,100,85,8,GAME002
+CUST004,Thandiwe Moyo,29,F,Durban,Adventure,175,160,11,GAME007
+CUST005,Liam van Wyk,31,M,Port Elizabeth,Sports,220,200,15,GAME025
+CUST006,Aisha Patel,27,F,Johannesburg,Casino,190,170,9,GAME033
+CUST007,David Khumalo,36,M,Cape Town,Action,210,190,14,GAME010
+CUST008,Nicole Botha,24,F,Pretoria,Strategy,130,110,7,GAME015
+CUST009,Sibusiso Dlamini,30,M,Durban,Puzzle,160,140,10,GAME002
+CUST010,Simphiwe Ndlovu,32,M,Port Elizabeth,Adventure,180,160,12,GAME007
+CUST011,Emily Naidoo,26,F,Johannesburg,Sports,200,180,13,GAME025
+CUST012,Jason Mthembu,35,M,Cape Town,Casino,230,210,16,GAME033
+CUST013,Leah Mkhize,28,F,Pretoria,Action,140,130,9,GAME010
+CUST014,Andrew Jacobs,40,M,Durban,Strategy,250,230,17,GAME015
+CUST015,Thabo Sithole,23,M,Port Elizabeth,Puzzle,110,95,8,GAME002
+CUST016,Zara Naidoo,29,F,Johannesburg,Adventure,170,155,11,GAME007
+CUST017,Daniel van der Merwe,33,M,Cape Town,Sports,240,220,15,GAME025
+CUST018,Kabelo Mabuza,27,M,Pretoria,Casino,190,175,10,GAME033
+CUST019,Michelle Moyo,31,F,Durban,Action,160,145,8,GAME010
+CUST020,Kevin Botha,38,M,Port Elizabeth,Strategy,220,205,14,GAME015
+CUST021,Sarah Khumalo,25,F,Johannesburg,Puzzle,120,100,7,GAME002
+CUST022,Ryan Jacobs,34,M,Cape Town,Adventure,210,190,12,GAME007
+CUST023,Nomsa Ngcobo,29,F,Pretoria,Sports,180,165,11,GAME025
+CUST024,Brandon Smith,32,M,Durban,Casino,200,185,13,GAME033
+CUST025,Chloe van Wyk,28,F,Port Elizabeth,Action,150,135,10,GAME010
+CUST026,Mike Ndlovu,30,M,Johannesburg,Strategy,190,175,12,GAME015
+CUST027,Angela Mthembu,27,F,Cape Town,Puzzle,130,115,8,GAME002
+CUST028,Victor Khumalo,35,M,Pretoria,Adventure,240,220,15,GAME007
+CUST029,Emma Jacobs,26,F,Durban,Sports,170,155,9,GAME025
+CUST030,Lucas Botha,31,M,Port Elizabeth,Casino,210,195,14,GAME033
+CUST031,Olivia Naidoo,24,F,Johannesburg,Action,140,125,7,GAME010
+CUST032,Sam Mabuza,37,M,Cape Town,Strategy,230,210,16,GAME015
+CUST033,Linda Dlamini,28,F,Pretoria,Puzzle,160,140,10,GAME002
+CUST034,Peter Sithole,33,M,Durban,Adventure,190,170,12,GAME007
+CUST035,Nina van der Merwe,30,F,Port Elizabeth,Sports,220,200,15,GAME025
+CUST036,George Moyo,27,M,Johannesburg,Casino,180,165,11,GAME033
+CUST037,Rebecca Khumalo,29,F,Cape Town,Action,150,135,9,GAME010
+CUST038,Oscar Jacobs,32,M,Pretoria,Strategy,200,185,13,GAME015
+CUST039,Amanda Ngcobo,26,F,Durban,Puzzle,120,105,7,GAME002
+CUST040,Samuel Botha,34,M,Port Elizabeth,Adventure,210,190,12,GAME007
+CUST041,Jessica Mthembu,28,F,Johannesburg,Sports,180,165,10,GAME025
+CUST042,Tyler van Wyk,31,M,Cape Town,Casino,200,180,14,GAME033
+CUST043,Grace Ndlovu,25,F,Pretoria,Action,140,125,8,GAME010
+CUST044,Henry Khumalo,36,M,Durban,Strategy,230,210,16,GAME015
+CUST045,Paula Jacobs,29,F,Port Elizabeth,Puzzle,160,145,9,GAME002
+CUST046,Leon Mabuza,32,M,Johannesburg,Adventure,190,175,12,GAME007
+CUST047,Samantha Botha,27,F,Cape Town,Sports,150,135,10,GAME025
+CUST048,Rachel Moyo,30,F,Pretoria,Casino,180,165,11,GAME033
+CUST049,Chris Sithole,33,M,Durban,Action,210,195,15,GAME010
+CUST050,Amber Ngcobo,28,F,Port Elizabeth,Strategy,170,155,12,GAME015
+
+
+### Dataset 2: Game Catalog (CSV)
+GameID,GameName,Genre,AverageRating,PopularityScore,Features,Developer
+GAME001,Pixel Quest,Adventure,4.2,85,"Retro graphics, Puzzle elements, Single-player",DevStudio Alpha
+GAME002,Brainy Puzzle,Puzzle,4.5,90,"Logic challenges, Timed puzzles, Multiplayer",Clever Games Inc.
+GAME003,Warfront Tactics,Strategy,4.0,80,"Turn-based combat, Resource management, Multiplayer",Tacticore
+GAME004,Slot Frenzy,Casino,3.8,75,"Bright animations, Bonus rounds, Progressive jackpots",LuckySpin
+GAME005,Speed Racer,Action,4.3,88,"Fast-paced, Vehicle racing, Multiplayer",Velocity Games
+GAME006,Fantasy Realm,Adventure,4.6,92,"Epic quests, Open world, RPG elements",Mystic Forge
+GAME007,Grid Master,Strategy,4.1,82,"Grid-based challenges, AI opponents, Multiplayer",StratX
+GAME008,Jackpot Bonanza,Casino,3.9,78,"High volatility, Bonus features, Free spins",GoldStar Gaming
+GAME009,Island Escape,Adventure,4.4,87,"Survival elements, Open world, Crafting",Tropical Games
+GAME010,Action Hero,Action,4.0,80,"Fast reflexes, Combo moves, Multiplayer",Heroic Interactive
+GAME011,Deep Space,Adventure,4.5,89,"Exploration, Sci-fi narrative, Puzzle solving",Galactic Studios
+GAME012,Empire Builder,Strategy,4.2,84,"City building, Resource management, Multiplayer",BuildMaster
+GAME013,Spin to Win,Casino,3.7,70,"Simple gameplay, High rewards, Progressive jackpots",Reel Magic
+GAME014,Logic Legend,Puzzle,4.6,91,"Challenging puzzles, Brain training, Single-player",MindSpark
+GAME015,Chess Master,Strategy,4.8,95,"Classic game, AI challenges, Multiplayer",Royal Games
+GAME016,Ultimate Racer,Action,4.3,86,"High speed, Realistic physics, Multiplayer",SpeedZone
+GAME017,Dragon Quest,Adventure,4.7,93,"RPG elements, Fantasy world, Story-driven",Epic Dragon
+GAME018,Table Tennis Pro,Sports,4.0,80,"Realistic physics, Multiplayer, Tournaments",Smash Sports
+GAME019,Poker Elite,Casino,4.1,83,"Skill-based, Multiplayer tournaments, Leaderboards",CardSharp
+GAME020,Mystery Mansion,Adventure,4.2,85,"Mystery solving, Hidden objects, Story mode",Haunted Pixel
+GAME021,Alien Invasion,Action,4.4,87,"Sci-fi shooter, Co-op multiplayer, Power-ups",Cosmo Interactive
+GAME022,Quiz Wiz,Puzzle,4.3,82,"Trivia challenges, Multiplayer mode, Leaderboards",BrainStorm
+GAME023,Real Soccer,Sports,4.5,90,"Realistic gameplay, Online tournaments, Multiplayer",SoccerHub
+GAME024,Virtual Casino,Casino,3.8,77,"Variety of games, Real-time tournaments, Virtual currency",WinSphere
+GAME025,Racing Rivals,Action,4.1,84,"Competitive racing, Customizable cars, Multiplayer",NitroDrive
+GAME026,Empire Conquest,Strategy,4.3,86,"Real-time strategy, Multiplayer, Territory expansion",BattleForge
+GAME027,Logic Labyrinth,Puzzle,4.5,90,"Complex puzzles, Hints and clues, Single-player",PuzzleWorks
+GAME028,Island Tycoon,Adventure,4.0,81,"Business simulation, Island management, Multiplayer",TropicSim
+GAME029,Fortune Wheel,Casino,3.9,75,"Randomized rewards, Bonus spins, Simple interface",WheelMagic
+GAME030,Urban Racer,Action,4.2,85,"City racing, Drift mechanics, Multiplayer",MetroSpeed
+GAME031,Space Colony,Strategy,4.6,92,"Colony building, Resource management, Multiplayer",StellarBase
+GAME032,Word Quest,Puzzle,4.1,83,"Word puzzles, Timed challenges, Single-player",LexiPlay
+GAME033,Blackjack Pro,Casino,4.0,80,"Card games, Multiplayer mode, Strategy elements",AceDeck
+GAME034,Super Brawler,Action,4.4,88,"Beat 'em up, Combo system, Multiplayer",PunchLine
+GAME035,Realm of Magic,Adventure,4.5,90,"Spell casting, Quest-driven, Fantasy setting",WizardWorks
+GAME036,Empire Tactics,Strategy,4.2,84,"Turn-based tactics, Multiplayer, Resource management",TactiCore
+GAME037,Coin Collector,Casino,3.8,76,"Simple slot mechanics, Progressive jackpots, Bonus rounds",ReelKing
+GAME038,Block Builder,Puzzle,4.3,85,"Tile matching, Creative challenges, Single-player",MindBlocks
+GAME039,Fast Lane,Action,4.1,82,"High-octane racing, Stunt challenges, Multiplayer",SpeedMaster
+GAME040,Quest for Gold,Adventure,4.6,91,"Treasure hunt, Puzzle solving, Story-driven",GoldQuest
+GAME041,Virtual Football,Sports,4.4,87,"Realistic simulation, Multiplayer leagues, Strategy",KickOff Interactive
+GAME042,Casino Royale,Casino,4.0,80,"High stakes, Multiplayer poker, Strategy elements",Royal Flush Games
+GAME043,Brain Teaser,Puzzle,4.5,90,"Challenging riddles, Time-limited, Single-player",MindMeld
+GAME044,Race Extreme,Action,4.3,86,"Extreme racing, Customizable vehicles, Multiplayer",TurboDrive
+GAME045,Island Survival,Adventure,4.2,84,"Survival simulation, Resource gathering, Multiplayer",SurviveSoft
+GAME046,Grand Strategy,Strategy,4.6,92,"Epic battles, Resource allocation, Multiplayer",Strategix
+GAME047,Slot Mania,Casino,3.7,72,"Variety of slot games, Fun animations, Progressive jackpots",SpinStar
+GAME048,Crossword Craze,Puzzle,4.0,78,"Word puzzles, Daily challenges, Single-player",PuzzleHouse
+GAME049,Street Basketball,Sports,4.2,83,"Realistic simulation, Multiplayer, Tournaments",HoopDreams
+GAME050,Ultimate Casino,Casino,4.1,85,"All-in-one casino, Multiplayer, High rewards",CasinoHub
+
+`,
+    description: "A helpful and general-purpose AI assistant that has strong language skills, Python skills, and Linux command line skills. Also has access to all necessary data.",
+    icon: "🌐",
+    index_name: ""
+  },
+  {
+    input_key: "0002",
+    type: "MagenticOne",
+    name: "Executor",
+    system_message: "",
+    description: "",
+    icon: "💻",
+    index_name: ""
+  },
+  // {
+  //   input_key: "0003",
+  //   type: "MagenticOne",
+  //   name: "FileSurfer",
+  //   system_message: "",
+  //   description: "",
+  //   icon: "📂",
+  //   index_name: ""
+  // },
+  {
+    input_key: "0004",
+    type: "MagenticOne",
+    name: "WebSurfer",
+    system_message: "",
+    description: "",
+    icon: "🏄‍♂️",
+    index_name: ""
+  },
+  {
+    input_key:"0005",
+    type:"Custom",
+    name:"GameInsights",
+    system_message:`
+You are Game Insight Agent. Your role is to analyze customer profiles and historical gameplay data and identify behavioral patterns—such as favorite genres, frequent game play, and betting habits. Correlate these patterns with the attributes in the game catalog data such as Genre, AverageRating, and Features. Use insights from unstructured game reviews data and trending topics fetched via our web surfer agent to enrich your analysis. Your output should highlight the most relevant game features and provide detailed insights into customer preferences.
+
+
+
+### Dataset 3: Game Reviews (documents)
+User Review 1:
+"I’ve been a long-time fan of 'Chess Master' (GAME015). The strategic depth and challenging AI opponents truly push my skills to the limit. 
+Every multiplayer session feels competitive and engaging. The recent update introducing advanced tournament modes has only enhanced the 
+experience further."
+User Review 2:
+"'Dragon Quest' (GAME017) has completely captivated me! The immersive fantasy storyline and epic quests make it an unforgettable 
+adventure. The balance between action and strategy is superb, and the cooperative multiplayer mode adds a whole new dimension to 
+gameplay."
+Social Media Post 1:
+"Just fnished a marathon session of 'Brainy Puzzle' (GAME002)! The puzzles are brilliantly designed and keep my mind sharp. #PuzzleLover 
+#GamingCommunity"
+Forum Discussion 1:
+"Has anyone else noticed the latest update in 'Realm of Magic' (GAME035)? The new spell-casting mechanics have completely transformed the 
+gameplay. I’m curious if these changes have balanced the multiplayer mode better. Let’s share tips and strategies!"
+User Comment 1:
+"Playing 'Racing Rivals' (GAME025) these days is a blast. The customization options for vehicles and the competitive multiplayer races keep me 
+coming back. I’d love to hear from seasoned racers on the best car setups."
+User Review 3:
+"'Logic Legend' (GAME014) challenges me every time I play. The intricate puzzles and progressively difcult levels make it both frustrating and 
+rewarding. I appreciate the hint system which never gives away too much yet nudges you in the right direction."
+
+
+Reply "TERMINATE" in the end when everything is done.
+`,
+    description:"This agent provides game insights based on customer behavior from the customer profiles,  game details in the game catalog and game reviews. Agent has access to Game Reviews data.",
+    icon:"🎻",
+    index_name:""
+    },
+  {
+    input_key:"0006",
+    type:"Custom",
+    name:"RecoAgent",
+    system_message:`
+    You are Recommendation Agent. Your task is to generate personalized game and betting recommendations based on the insights provided by Game Insight Agent. Map customer behavior (e.g., FavoriteGenre, LastPlayedGameID) from the customer profiles to corresponding game details in the game catalog. Leverage current trends and sentiment extracted from the unstructured game reviews and real‑time web data. Collaborate with the coding agent to ensure the mapping between the two structured tables is accurate. Your final output should be a prioritized recommendation list tailored for each customer, including suggested games and betting strategies.
+
+Reply "TERMINATE" in the end when everything is done.
+    `,
+    description:"This agent only does a recommendation based on already provided analysis.",
+    icon:"📖",
+    index_name:""
+    }
+];
