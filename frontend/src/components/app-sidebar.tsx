@@ -26,7 +26,7 @@ import {
 import { useUserContext } from "@/contexts/UserContext"
 import h1 from '@/assets/h1.png'
 
-import { agentsTeam1, agentsTeam2, agentsTeam3, agentsTeam4, agentsTeamFSI1, agentsTeamRetail1 } from '@/components/agents-definition';
+import { agentsTeam1, agentsTeam2, agentsTeam3, agentsTeam4, agentsTeamFSI1, agentsTeamRetail1, agentsTeamGaming } from '@/components/agents-definition';
 
 interface AppSidebarProps extends React.ComponentProps<typeof Sidebar> {
   onTeamSelect: (team: { teamId: string; agents: any[] }) => void;
@@ -81,6 +81,13 @@ const data = {
       logo: ShoppingBasket,
       plan: "Inventory analysis.",
       agents: agentsTeamRetail1,
+    },
+    {
+      teamId: "team-7",
+      name: "Gaming - Recommendation engine",
+      logo: Map,
+      plan: "Game development.",
+      agents: agentsTeamGaming,
     },
   ],
   navMain: [

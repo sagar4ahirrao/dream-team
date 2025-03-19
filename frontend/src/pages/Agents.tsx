@@ -43,7 +43,7 @@ const ACTIVATION_CODE = import.meta.env.VITE_ACTIVATON_CODE || "0000";
 // console.log('VITE_ACTIVATON_CODE:', ACTIVATION_CODE);
 
 
-import { agentsTeam1, agentsTeam2, agentsTeam3, agentsTeam4, agentsTeamFSI1} from '@/components/agents-definition';
+import { agentsTeam1, agentsTeam2, agentsTeam3, agentsTeam4, agentsTeamFSI1, agentsTeamGaming} from '@/components/agents-definition';
 import { Footer } from '@/components/Footer'
 
 interface Agent {
@@ -138,6 +138,12 @@ export default function Agents() {
         agents: agentsTeamFSI1,
         description: 'Team focused on Financial Services Industry tasks. Namely Loan upsell scenario by analyzing financial transaction data for our customer base, focusing on identifying customers with frequent overdrafts, recurring cash flow gaps, and rapid declines in account balances.'
       },
+      {
+        teamId: 'team-6',
+        name: 'Team Gaming - Game Design',
+        agents: agentsTeamGaming,
+        description: 'Team focused on Gaming tasks. Namely Game Design scenario by analyzing gaming data for our customer base, focusing on identifying customers with frequent game sessions, recurring cash flow gaps, and rapid declines in account balances.'
+      }
     ]);
 
 
