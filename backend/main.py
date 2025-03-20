@@ -419,7 +419,7 @@ async def health_check():
 async def upload_files(indexName: str = Form(...), files: List[UploadFile] = File(...)):
     print("Received indexName:", indexName)
     for file in files:
-        print("Uploaded file:", file.filename)
+        print("Uploading file:", file.filename)
     try:
         aisearch.process_upload_and_index(indexName, files)
     except Exception as err:

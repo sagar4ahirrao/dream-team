@@ -1,18 +1,18 @@
 import * as React from "react"
 import {
-  AudioWaveform,
+  // AudioWaveform,
   BookOpen,
   Bot,
-  ChartNoAxesCombined,
-  DollarSign,
+  // ChartNoAxesCombined,
+  // DollarSign,
   Frame,
   Map,
   PieChart,
   Settings2,
-  ShieldAlert,
-  ShoppingBasket,
+  // ShieldAlert,
+  // ShoppingBasket,
   SquareTerminal,
-  Wrench,
+  // Wrench,
 } from "lucide-react"
 import { NavMain } from "@/components/nav-main"
 import { NavUser } from "@/components/nav-user"
@@ -26,10 +26,10 @@ import {
 import { useUserContext } from "@/contexts/UserContext"
 import h1 from '@/assets/h1.png'
 
-import { agentsTeam1, agentsTeam2, agentsTeam3, agentsTeam4, agentsTeamFSI1, agentsTeamRetail1, agentsTeamGaming } from '@/components/agents-definition';
+import { Team, useTeamsContext } from '@/contexts/TeamsContext';
 
 interface AppSidebarProps extends React.ComponentProps<typeof Sidebar> {
-  onTeamSelect: (team: { teamId: string; agents: any[] }) => void;
+  onTeamSelect: (team: Team) => void;
   // Removed onUserNameChange prop
 }
 
@@ -39,57 +39,6 @@ const data = {
     email: "johne@microsoft.com",
     avatar: h1,
   },
-  teams: [
-    {
-      teamId: "team-1",
-      name: "MagenticOne",
-      logo: AudioWaveform,
-      plan: "Original MagenticOne Team",
-      agents: agentsTeam1,
-    },
-    {
-      teamId: "team-2",
-      name: "Oil & Gas - Predictive Maintenance",
-      logo: Wrench,
-      plan: "Team focused on Predictive Maintenance tasks",
-      agents: agentsTeam2,
-    },
-    {
-      teamId: "team-3",
-      name: "Oil & Gas - Safety Compliance",
-      logo: ShieldAlert,
-      plan: "Team analyzing Safety & Incident Reporting",
-      agents: agentsTeam3,
-    },
-    {
-      teamId: "team-4",
-      name: "Oil & Gas - Investment research",
-      logo: ChartNoAxesCombined,
-      plan: "Decision support team through comprehensive, data-driven assessments...",
-      agents: agentsTeam4,
-    },
-    {
-      teamId: "team-5",
-      name: "FSI - Banking Loan Upsell",
-      logo: DollarSign,
-      plan: "Loan upsell scenario by analyzing financial transaction ",
-      agents: agentsTeamFSI1,
-    },
-    {
-      teamId: "team-6",
-      name: "Retail	- Inventory optimization",
-      logo: ShoppingBasket,
-      plan: "Inventory analysis.",
-      agents: agentsTeamRetail1,
-    },
-    {
-      teamId: "team-7",
-      name: "Gaming - Recommendation engine",
-      logo: Map,
-      plan: "Game development.",
-      agents: agentsTeamGaming,
-    },
-  ],
   navMain: [
     {
       title: "Playground",
@@ -159,13 +108,12 @@ export function AppSidebar({
   ...sidebarProps
 }: AppSidebarProps) {
   const { userInfo } = useUserContext();
-  
-  // Removed the useEffect for onUserNameChange
+  const { teams } = useTeamsContext();
 
   return (
     <Sidebar collapsible="icon" {...sidebarProps}>
       <SidebarHeader>
-        <TeamSwitcher teams={data.teams} onTeamSelect={onTeamSelect} />
+        <TeamSwitcher teams={teams} onTeamSelect={onTeamSelect} />
       </SidebarHeader>
       <SidebarContent>
         <NavMain items={data.navMain} />

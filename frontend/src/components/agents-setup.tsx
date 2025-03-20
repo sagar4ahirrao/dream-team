@@ -7,34 +7,25 @@ import { Dialog, DialogTrigger, DialogContent, DialogHeader, DialogTitle, Dialog
 import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
-
-interface Agent {
-  input_key: string;
-  type: string;
-  name: string;
-  system_message: string;
-  description: string;
-  icon: string;
-  index_name: string;
-}
+import { useTeamsContext, Agent, Team } from '@/contexts/TeamsContext';
 
 interface AgentsSetupProps {
-  agents: Agent[];
-  removeAgent: (key: string) => void;
-  addAgent: (name: string, description: string, systemMessage: string) => void;
-  addRAGAgent: (name: string, description: string, indexName: string, files: FileList | null) => void;
-  editAgent: (key: string, name: string, description: string, systemMessage: string) => void; // <-- added new prop for editing
+  team: Team;
   getAvatarSrc: (user: string) => string;
-  isCollapsed: boolean | true;
+  isCollapsed: boolean;
 }
 
-export function AgentsSetup({ agents, removeAgent, addAgent, addRAGAgent, editAgent, getAvatarSrc, isCollapsed }: AgentsSetupProps) {
+export function AgentsSetup({ team, getAvatarSrc, isCollapsed }: AgentsSetupProps) {
+  const { addAgent, removeAgent, addRAGAgent, editAgent } = useTeamsContext();
   const [editingAgent, setEditingAgent] = useState<Agent | null>(null);
 
   return (
     <div className="space-y-4">
+      <div className="grid auto-rows-min gap-4 md:grid-cols-5 text-sm">
+        <h2>{team.name}</h2>
+      </div>
       <div className="grid auto-rows-min gap-4 md:grid-cols-5">
-        {agents.map((agent) => (
+        {team.agents.map((agent) => (
           <div key={agent.input_key} className={`rounded-xl bg-muted/50 shadow ${isCollapsed ? 'p-0 duration-300 animate-in fade-in-0 zoom-in-75 origin-bottom-right' : 'p-4'}`}>
             <div className="flex items-center space-x-2">
               <Avatar>
@@ -50,7 +41,7 @@ export function AgentsSetup({ agents, removeAgent, addAgent, addRAGAgent, editAg
               <>
                 <Separator className="my-2" />
                 <div className="flex space-x-2">
-                  <Button size="icon" variant="outline" onClick={() => removeAgent(agent.input_key)}>
+                  <Button size="icon" variant="outline" onClick={() => removeAgent(team.teamId, agent.input_key)}>
                     <Trash />
                   </Button>
                   <Button size="icon" variant="outline" onClick={() => setEditingAgent(agent)}>
@@ -108,7 +99,7 @@ export function AgentsSetup({ agents, removeAgent, addAgent, addRAGAgent, editAg
                         const name = (document.getElementById('name') as HTMLInputElement).value;
                         const description = (document.getElementById('description') as HTMLTextAreaElement).value;
                         const systemMessage = (document.getElementById('system_message') as HTMLTextAreaElement).value;
-                        addAgent(name, description, systemMessage);
+                        addAgent(team.teamId, name, description, systemMessage);
                       }}
                       variant="default"
                     >
@@ -177,7 +168,7 @@ export function AgentsSetup({ agents, removeAgent, addAgent, addRAGAgent, editAg
                         const description = (document.getElementById('description') as HTMLTextAreaElement).value;
                         const indexName = (document.getElementById('index_name') as HTMLInputElement).value;
                         const files = (document.getElementById('file_upload') as HTMLInputElement).files;
-                        addRAGAgent(name, description, indexName, files);
+                        addRAGAgent(team.teamId, name, description, indexName, files);
                       }}
                       variant="default"
                     >
@@ -229,7 +220,7 @@ export function AgentsSetup({ agents, removeAgent, addAgent, addRAGAgent, editAg
                     const description = (document.getElementById('edit_description') as HTMLTextAreaElement).value;
                     const systemMessage = (document.getElementById('edit_system_message') as HTMLTextAreaElement).value;
                     // Call the editAgent callback with the updated values
-                    editAgent(editingAgent.input_key, name, description, systemMessage);
+                    editAgent(team.teamId, editingAgent.input_key, name, description, systemMessage);
                     setEditingAgent(null);
                   }}
                   variant="default"
