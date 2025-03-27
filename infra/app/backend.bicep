@@ -445,7 +445,7 @@ resource openaideployment 'Microsoft.CognitiveServices/accounts/deployments@2024
   parent: openai
   sku: {
     name: 'GlobalStandard'
-    capacity: 30
+    capacity: 400
   }
   properties: {
     model: {
@@ -463,7 +463,7 @@ resource openaideploymentmini 'Microsoft.CognitiveServices/accounts/deployments@
   parent: openai
   sku: {
     name: 'GlobalStandard'
-    capacity: 30
+    capacity: 400
   }
   properties: {
     model: {
@@ -482,7 +482,7 @@ resource openaideploymentembedding 'Microsoft.CognitiveServices/accounts/deploym
   parent: openai
   sku: {
     name: 'Standard'
-    capacity: 15
+    capacity: 300
   }
   properties: {
     model: {
