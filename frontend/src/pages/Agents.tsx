@@ -1,4 +1,3 @@
-
 import { useState } from 'react'
 import { AppSidebar } from "@/components/app-sidebar"
 // import { useUserContext } from '@/contexts/UserContext'
@@ -43,177 +42,18 @@ const ACTIVATION_CODE = import.meta.env.VITE_ACTIVATON_CODE || "0000";
 // console.log('VITE_ACTIVATON_CODE:', ACTIVATION_CODE);
 
 
-import { agentsTeam1, agentsTeam2, agentsTeam3, agentsTeam4, agentsTeamFSI1, agentsTeamGaming} from '@/components/agents-definition';
 import { Footer } from '@/components/Footer'
 
-interface Agent {
-  input_key: string;
-  type: string;
-  name: string;
-  system_message: string;
-  description: string;
-  icon: string;
-  index_name: string;
-}
-interface Team {
-  teamId: string;
-  name: string;
-  agents: Agent[];
-  description?: string;
-}
+import { Agent, Team, useTeamsContext } from '@/contexts/TeamsContext';
 
 export default function Agents() {
-
+  const { teams } = useTeamsContext();
+  const [agents, setAgents] = useState<Agent[]>([]);
+  const [selectedTeam, setSelectedTeam] = useState<Team>(teams[0]);
 
   const [isAuthenticated, setIsAuthenticated] = useState(BASE_URL)
   // const { userInfo } = useUserContext();
   
-  const [agents, setAgents] = useState<Agent[]>([
-    {
-      input_key: "0001",
-      type: "MagenticOne",
-      name: "Coder",
-      system_message: "",
-      description: "",
-      icon: "👨‍💻",
-      index_name: ""
-    },
-    {
-      input_key: "0002",
-      type: "MagenticOne",
-      name: "Executor",
-      system_message: "",
-      description: "",
-      icon: "💻",
-      index_name: ""
-    },
-    {
-      input_key: "0003",
-      type: "MagenticOne",
-      name: "FileSurfer",
-      system_message: "",
-      description: "",
-      icon: "📂",
-      index_name: ""
-    },
-    {
-      input_key: "0004",
-      type: "MagenticOne",
-      name: "WebSurfer",
-      system_message: "",
-      description: "",
-      icon: "🏄‍♂️",
-      index_name: ""
-    }
-  ]);
-   // New states for teams and selected team
-    const [teams] = useState<Team[]>([
-      {
-        teamId: 'team-1',
-        name: 'MagenticOne Team',
-        agents: agentsTeam1,
-        description: 'Original MagenticOne Team. Includes Coder, Executor, FileSurfer and WebSurfer.'
-      },
-      {
-        teamId: 'team-2',
-        name: 'Team Predictive Maintenance',
-        agents: agentsTeam2,
-        description: 'Team focused on Predictive Maintenance tasks. Besides default agents includes RAG agent for Emerson Predictive Maintenance Guide and Sentinel Sentinel agent specialized in monitoring sensor streams and detecting trends or anomalies for particular device.'
-      },
-      {
-        teamId: 'team-3',
-        name: 'Team Safety & Incident Reporting',
-        agents: agentsTeam3,
-        description: 'Team focused on Safety & Incident Reporting tasks. Besides default agents includes RAG agent for BSEE Incident Reporting & HSE Compliance Guidelines 2024 and Compliance Sentinel agent, the watchdog for our incident reporting system at Well Site and Trend Analyzer agent, responsible for scrutinizing historical incident data to identify recurring patterns and underlying causes'
-      },
-      {
-        teamId: 'team-4',
-        name: 'Team Decision Support on Market Analysis',
-        agents: agentsTeam4,
-        description: 'Team helping with decision support on comprehensive, data-driven assessment of current market forecasts, commodity price trends, and OPEC announcements.'
-      },
-      {
-        teamId: 'team-5',
-        name: 'Team FSI - Loan Upsell',
-        agents: agentsTeamFSI1,
-        description: 'Team focused on Financial Services Industry tasks. Namely Loan upsell scenario by analyzing financial transaction data for our customer base, focusing on identifying customers with frequent overdrafts, recurring cash flow gaps, and rapid declines in account balances.'
-      },
-      {
-        teamId: 'team-6',
-        name: 'Team Gaming - Game Design',
-        agents: agentsTeamGaming,
-        description: 'Team focused on Gaming tasks. Namely Game Design scenario by analyzing gaming data for our customer base, focusing on identifying customers with frequent game sessions, recurring cash flow gaps, and rapid declines in account balances.'
-      }
-    ]);
-
-
-  
-  const addAgent = (name: string, description: string, systemMessage: string) => {
-    const newAgent = {
-      input_key: (agents.length + 1).toString().padStart(4, '0'),
-      type: "Custom",
-      name,
-      system_message: systemMessage,
-      description,
-      icon: "🤖",
-      index_name: ""
-    };
-    setAgents([...agents, newAgent]);
-  };
-
-  const editAgent = (key: string, name: string, description: string, systemMessage: string) => {
-    const updatedAgents = agents.map((agent) =>
-      agent.input_key === key
-        ? { ...agent, name, description, system_message: systemMessage }
-        : agent
-    );
-    setAgents(updatedAgents);
-  };
-
-
-  const addRAGAgent = (name: string, description: string, indexName: string) => {
-    const newAgent = {
-      input_key: (agents.length + 1).toString().padStart(4, '0'),
-      type: "RAG",
-      name,
-      system_message: "",
-      description,
-      icon: "🤖",
-      index_name: indexName
-    };
-    setAgents([...agents, newAgent]);
-  };
-
-  const removeAgent = (inputKey: string) => {
-    setAgents(agents.filter((agent) => agent.input_key !== inputKey));
-  };
-  
-  // // Helper functions to get avatar source and fallback
-  // const getAvatarSrc = (user: string) => {
-  //   switch (user.toLowerCase()) {
-  //     case 'user':
-  //       return h1;
-  //     case 'magenticoneorchestrator':
-  //       return lBrain;
-  //     case 'coder':
-  //       return lPen;
-  //     case 'filesurfer':
-  //       return lSearch;
-  //     case 'websurfer':
-  //       return lSearch;
-  //     case 'ragagent':
-  //       return lSearch;
-  //     case 'executor':
-  //       return lPen;
-  //     case 'taskresult':
-  //       return lAi;
-  //     default:
-  //       return 'https://example.com/default.png';
-  //   }
-  // };
-
-
-
   /// TODO: better login -> MS EntraID
   const handleLogin = (email: string, password: string) => {
     console.log('Logging in with:', email)
@@ -228,10 +68,11 @@ export default function Agents() {
   //   setIsAuthenticated(false)
   // }
 
-  const handleTeamSelect = (team: { teamId: string; agents: Agent[] }) => {
-    // Update agents based on selected team from sidebar
-    // setAgents(team.agents);
-    console.log('Selected team:', team);
+  const handleTeamSelect = (team: Team) => {
+    setAgents(team.agents);
+    setSelectedTeam(team);
+    console.log('Selected team:', selectedTeam.name);
+    console.log('Selected agents:', agents);
   }
 
   return (
@@ -295,11 +136,7 @@ export default function Agents() {
                 <CardContent className="flex-1 h-96">
                   
                   <AgentsSetup
-                  agents={team.agents}
-                  removeAgent={removeAgent}
-                  addAgent={addAgent}
-                  addRAGAgent={addRAGAgent}
-                  editAgent={editAgent}
+                  team={team}
                   getAvatarSrc={getAvatarSrc}
                   isCollapsed={false}
                   />

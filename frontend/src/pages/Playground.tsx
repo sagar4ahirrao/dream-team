@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { AppSidebar } from "@/components/app-sidebar"
 import { useUserContext } from '@/contexts/UserContext'
 import {
@@ -32,15 +32,14 @@ import { LoginCard } from "@/components/login";
 import axios from 'axios';
 
 import ag from '@/assets/ag.png';
-// import aAif from '@/assets/azure-aif.png';
 
 import { getAvatarSrc, getAvatarFallback } from '@/components/agents-definition'
 
-// import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-
-// import { agentsTeam1, agentsTeam2, agentsTeam3, agentsTeam4, agentsTeamFSI1 } from '@/components/agents-definition';
-import { agentsTeam1 } from '@/components/agents-definition';
 import { Footer } from "@/components/Footer";
+
+// If you need teams or methods:
+import { Team, Agent, useTeamsContext } from '@/contexts/TeamsContext';
+
 
 // Define environment variables with default values
 const BASE_URL = import.meta.env.VITE_BASE_URL;
@@ -66,22 +65,6 @@ interface ChatMessage {
   elapsed_time?: number;
 }
 
-interface Agent {
-  input_key: string;
-  type: string;
-  name: string;
-  system_message: string;
-  description: string;
-  icon: string;
-  index_name: string;
-}
-
-// interface Team {
-//   teamId: string;
-//   name: string;
-//   agents: Agent[];
-//   description?: string;
-// }
 export default function App() {
 
   const wellcomeMessage: ChatMessage = {
@@ -106,16 +89,28 @@ export default function App() {
   // const [isFileCardVisible, setIsFileCardVisible] = useState(false)
   // const [isSettingsCardVisible, setIsSettingsCardVisible] = useState(false)
   const [isTyping, setIsTyping] = useState(false);
-  const [agents, setAgents] = useState<Agent[]>(agentsTeam1);
   const { userInfo } = useUserContext();
+  const { teams } = useTeamsContext();
+  const [agents, setAgents] = useState<Agent[]>([]);
+  const [selectedTeam, setSelectedTeam] = useState<Team>(teams[0]);
 
   // Initialize agents from default team (will be updated by sidebar selection)
   // Optionally use an effect to set initial team agents if needed
 
-  const handleTeamSelect = (team: { teamId: string; agents: Agent[] }) => {
-    // Update agents based on selected team from sidebar
+  const handleTeamSelect = (team: Team) => {
     setAgents(team.agents);
+    setSelectedTeam(team);
   }
+  
+  // Propagate team changes from TeamsContext to Playground local state
+  useEffect(() => {
+    const updatedTeam = teams.find(team => team.name === selectedTeam.name);
+    if (updatedTeam) {
+      setSelectedTeam(updatedTeam);
+      setAgents(updatedTeam.agents);
+    }
+    console.log('Selected team in play:', selectedTeam.name);
+  }, [teams, selectedTeam.name]);
 
   const stopSession = async () => {
     try {
@@ -132,82 +127,6 @@ export default function App() {
     }
   };
   
-  const addAgent = (name: string, description: string, systemMessage: string) => {
-    const newAgent = {
-      input_key: (agents.length + 1).toString().padStart(4, '0'),
-      type: "Custom",
-      name,
-      system_message: systemMessage,
-      description,
-      icon: "🤖",
-      index_name: ""
-    };
-    setAgents([...agents, newAgent]);
-  };
-
-  const editAgent = (key: string, name: string, description: string, systemMessage: string) => {
-    const updatedAgents = agents.map((agent) =>
-      agent.input_key === key
-        ? { ...agent, name, description, system_message: systemMessage }
-        : agent
-    );
-    setAgents(updatedAgents);
-  };
-
-  const addRAGAgent = async (
-    name: string,
-    description: string,
-    indexName: string,
-    files: FileList | null
-  ) => {
-    if (files && files.length > 0) {
-      const temporaryRandomName = Math.random().toString(36).substring(2, 15);
-      const newAgent = {
-        input_key: temporaryRandomName,
-        type: "temporary",
-        name: "Processing & Uploading...",
-        system_message: "",
-        description,
-        icon: "⌛",
-        index_name: "tmp"
-      };
-      setAgents([...agents, newAgent]);
-
-      const formData = new FormData();
-      formData.append("indexName", indexName);
-      for (let i = 0; i < files.length; i++) {
-        formData.append('files', files[i]);
-      }
-           try {
-          const response = await axios.post(`${BASE_URL}/upload`, formData);
-          if (response.data.status === "error") {
-              console.error('Upload API Error:', response.data.message);
-              //TODO handle error -> propagate to UI
-              return;
-          }
-          console.log('Upload response:', response.data);
-      } catch (error) {
-          console.error('Upload error:', error);
-      } finally {
-          // Remove the temporary agent after processing
-          setAgents(agents.filter((agent) => agent.input_key !== temporaryRandomName));
-      }
-    }
-    const newAgent = {
-      input_key: (agents.length + 1).toString().padStart(4, '0'),
-      type: "RAG",
-      name,
-      system_message: "",
-      description,
-      icon: "🤖",
-      index_name: indexName
-    };
-    setAgents([...agents, newAgent]);
-  };
-
-  const removeAgent = (inputKey: string) => {
-    setAgents(agents.filter((agent) => agent.input_key !== inputKey));
-  };
 
 
   // const handleSendMessage = async () => {
@@ -392,11 +311,7 @@ export default function App() {
           <Separator  />
           {/* Agents setup */}
           <AgentsSetup
-              agents={agents}
-              removeAgent={removeAgent}
-              addAgent={addAgent}
-              addRAGAgent={addRAGAgent}
-              editAgent={editAgent}
+              team={selectedTeam}
               getAvatarSrc={getAvatarSrc}
               isCollapsed={isTyping || (sessionTime) ? true : false}
             />

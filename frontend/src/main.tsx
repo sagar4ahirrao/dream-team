@@ -6,6 +6,7 @@ import Agents from './pages/Agents'
 import PlaygroundHistory from './pages/Playground-history'
 import './index.css'
 import { UserProvider, UserContext, getUserInfo } from './contexts/UserContext'
+import { TeamsProvider } from './contexts/TeamsContext'
 
 function App() {
   const [isLoading, setIsLoading] = React.useState(true);
@@ -37,7 +38,9 @@ ReactDOM.createRoot(document.getElementById('root') as HTMLElement).render(
   <React.StrictMode>
     <UserProvider>
       <BrowserRouter>
-        <App />
+        <TeamsProvider>
+          <App />
+        </TeamsProvider>
       </BrowserRouter>
     </UserProvider>
   </React.StrictMode>
