@@ -241,6 +241,31 @@ export default function App() {
   //   setIsAuthenticated(false)
   // }
 
+  const getTaskIcon = (task_name: string) => {
+    switch (task_name) {
+      case 'Find restaurant':
+        return <Soup />;
+      case 'Check football game':
+        return <Volleyball />;
+      case 'Market assessment':
+        return <ChartNoAxesCombined />;
+      case 'Predictive Maintenance':
+        return <Wrench />;
+      case 'Safety':
+        return <ShieldAlert />;
+      case 'Loan Upsell':
+        return <DollarSign />;
+      case 'Retail':
+        return <ShoppingBasket />;
+      case 'Gaming':
+        return <Gamepad2 />;
+      case 'Generate script':
+        return <Terminal />;
+      default:
+        return null;
+    }
+  }
+
   return (
     <ThemeProvider defaultTheme="light" storageKey="vite-ui-theme">
     {!isAuthenticated ? (
@@ -387,18 +412,17 @@ export default function App() {
                     <SendHorizonal />
                   </Button>
                 </div>
-                <div className="flex space-x-2">
-                <Button variant="outline" className="text-sm bg-muted" onClick={() => setUserMessage("Find me a French restaurant in Dubai with 2 Michelin stars?")}><Soup />Find restaurant...</Button>
-                <Button variant="outline" className="text-sm bg-muted" onClick={() => setUserMessage("When and where is the next game of Arsenal, print a link for purchase")}><Volleyball /> Check football game...</Button>
-                <Button variant="outline" className="text-sm bg-muted" onClick={() => setUserMessage("Generate a python script and execute Fibonacci series below 1000")}><Terminal />Generate script...</Button>
-                <Button variant="outline" className="text-sm bg-muted" onClick={() => setUserMessage("Use advanced financial modelling, scenario analysis, geopolitical forecasting, and risk quantification to produce a comprehensive, data-driven assessment of current market forecasts, commodity price trends, and OPEC announcements. In this process, identify and deeply evaluate the relative growth potential of various upstream investment areas—ranging from unconventional reservoirs to deepwater projects and advanced EOR techniques—across Africa, the Middle East, and Central Europe. Based on publicly available data (e.g., IEA, EIA, and OPEC bulletins), synthesize your findings into specific, country-level recommendations that incorporate ROI calculations, scenario-based risk assessments, and robust justifications reflecting both market and geopolitical considerations. Present the final deliverable as a well-structured table​")}><ChartNoAxesCombined /> Market assessment...</Button>
-                </div>
-                <div className="flex space-x-2">
-                <Button variant="outline" className="text-sm bg-muted" onClick={() => setUserMessage("Analyze the sensor data and historical maintenance logs for the high‑pressure gas compressor (EquipmentID: COMP-001). Using real‑time measurements of temperature, vibration, and pressure, along with the asset’s running hours, detect any early signs of mechanical degradation. After this, correlate these findings with the vendor’s guidelines (downloaded from Emerson’s Predictive Maintenance Guide for Gas Compressors) and the maintenance history. In particular, determine if rising vibration amplitudes, combined with temperature excursions and delayed calibrations, suggest that the compressor is trending toward failure. Based on this analysis, generate a detailed maintenance alert (text only, formatted as Markdown) including a prioritized repair schedule and recommended corrective actions to mitigate downtime.")}><Wrench /> Predictive Maintenance...</Button>
-                <Button variant="outline" className="text-sm bg-muted" onClick={() => setUserMessage("Analyze the internal incident reports for the upstream oil and gas facility (Asset: Well Site A-17) to detect compliance gaps. Using real‑time incident data (including near misses, safety violations, and environmental events) along with historical incident outcomes, correlate these findings with the updated BSEE Incident Reporting & HSE Compliance Guidelines 2024. Identify missing data fields or delayed reporting that do not meet the new regulatory requirements and generate a prioritized set of corrective recommendations to enhance incident reporting and overall safety compliance. Your output should include detailed observations on which aspects of the incident logs (e.g., incomplete descriptions, inconsistent outcome classifications) need improvement.​")}><ShieldAlert /> Safety...</Button>
-                <Button variant="outline" className="text-sm bg-muted" onClick={() => setUserMessage("Analyze the financial transaction data for our customer base, focusing on identifying customers with frequent overdrafts, recurring cash flow gaps, and rapid declines in account balances. Use this analysis, combined with customer profile details (such as account balance, current loan amount, and credit score), and cross‑reference these findings with the risk thresholds from the Experian Credit Risk Scorecard PDF. Your task is to dynamically generate personalized upsell recommendations for each customer. The recommendations should include suggestions such as higher credit lines or tailored personal loans, with actionable insights based on each customer’s behavior.")}><DollarSign /> Loan upsell...</Button>
-                <Button variant="outline" className='text-sm bg-muted' onClick={() => setUserMessage("Analyze the real‑time inventory and sales data for the cinema concessions at Well‑in‑Mall Cinema (Location: Cinema A1). Your task is to identify products that are nearing or falling below their reorder points. Cross‑reference these findings with the recommended restocking strategies outlined in the Microsoft Dynamics 365 Retail Inventory & Supply Chain Optimization Best Practices Guide 2024 (see link above). Additionally, use real‑time supply chain news—retrieved via our web surfer agent—to adjust for any external factors affecting lead times. Based on your analysis, produce a detailed restocking alert report that includes: \n\n - A prioritized list of items needing replenishment. \n\n - Recommended order quantities based on recent sales trends and forecasted demand. \n\n - Actionable recommendations to optimize the supply chain and reduce stockouts..")}><ShoppingBasket /> Retail...</Button>
-                <Button variant="outline" className='text-sm bg-muted' onClick={() => setUserMessage("Analyze the real‑time customer profiles and game catalog data to deliver personalized game and betting recommendations for iGaming platform. First, map each customer's gaming history - particularly their 'LastPlayedGameID' and 'FavoriteGenre' - to the corresponding game details from the catalog. Then, leverage unstructured data from game reviews (which includes social media posts and forum discussions) and current trending topics to refine these recommendations. Your output should generate a prioritized list of recommended games for each customer along with suggested betting strategies, taking into account historical engagement and current market sentiment. Use your coding agent to perform the data mapping between the customer profiles and game catalog. Do not retrieve or use any external data files (e.g., CSVs, JSONs). Please use the web for current trending topics.")}><Gamepad2 /> Gaming...</Button>
+                                <div className="flex space-x-2">
+                    {selectedTeam.starting_tasks?.map(task => (
+                        <Button
+                            key={task.id} 
+                            variant="outline"
+                            className="text-sm bg-muted"
+                            onClick={() => setUserMessage(task.prompt)}
+                        >
+                            {task.name && getTaskIcon(task.name)} {task.name}
+                        </Button>
+                    ))}
                 </div>
               </CardFooter>
             </Card>

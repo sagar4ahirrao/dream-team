@@ -17,13 +17,7 @@ import {
   useSidebar,
 } from "@/components/ui/sidebar"
 
-interface Team {
-  teamId: string;
-  name: string;
-  logo: React.ElementType;
-  plan: string;
-  agents: any[]; // teams now include agents array
-}
+import { Team } from "@/contexts/TeamsContext"
 
 export function TeamSwitcher({
   teams,
