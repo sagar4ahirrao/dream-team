@@ -1,14 +1,15 @@
 FROM python:3-slim
+COPY --from=ghcr.io/astral-sh/uv:latest /uv /uvx /bin/
+
 
 # Set the working directory in the container
 WORKDIR /code
 
-# Copy the requirements file into the container
-COPY requirements.txt .
+COPY uv.lock pyproject.toml /code/
+RUN uv sync --frozen
 
-# Install the dependencies
-RUN pip install --no-cache-dir --upgrade -r requirements.txt
-
+# Install browser dependencies
+RUN pip install playwright
 RUN playwright install --with-deps chromium
 
 # Copy the rest of the application code into the container
