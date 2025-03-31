@@ -9,7 +9,7 @@ from azure.identity import AzureDeveloperCliCredential, DefaultAzureCredential, 
 from azure.search.documents.indexes import SearchIndexClient, SearchIndexerClient
 from azure.search.documents.indexes.models import (
     AzureOpenAIEmbeddingSkill,
-    AzureOpenAIVectorizerParameters,
+    AzureOpenAIParameters,
     AzureOpenAIVectorizer,
     FieldMapping,
     HnswAlgorithmConfiguration,
@@ -26,7 +26,7 @@ from azure.search.documents.indexes.models import (
     SearchIndexerDataSourceConnection,
     SearchIndexerDataSourceType,
     SearchIndexerDataUserAssignedIdentity,
-    SearchIndexerIndexProjection,
+    SearchIndexerIndexProjections,
     SearchIndexerIndexProjectionSelector,
     SearchIndexerIndexProjectionsParameters,
     SearchIndexerSkillset,
@@ -128,7 +128,7 @@ def setup_index(azure_credential, azure_storage_endpoint, uami_resource_id,  ind
                     vectorizers=[
                         AzureOpenAIVectorizer(
                             vectorizer_name="openai_vectorizer",
-                            parameters=AzureOpenAIVectorizerParameters(
+                            parameters=AzureOpenAIParameters(
                                 resource_url=azure_openai_embedding_endpoint,
                                 auth_identity=SearchIndexerDataUserAssignedIdentity(resource_id=uami_resource_id),
                                 deployment_name=azure_openai_embedding_deployment,
@@ -178,7 +178,7 @@ def setup_index(azure_credential, azure_storage_endpoint, uami_resource_id,  ind
                         inputs=[InputFieldMappingEntry(name="text", source="/document/pages/*")],
                         outputs=[OutputFieldMappingEntry(name="embedding", target_name="text_vector")])
                 ],
-                index_projection=SearchIndexerIndexProjection(
+                index_projection=SearchIndexerIndexProjections(
                     selectors=[
                         SearchIndexerIndexProjectionSelector(
                             target_index_name=index_name,
