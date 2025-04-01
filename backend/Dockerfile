@@ -5,11 +5,10 @@ COPY --from=ghcr.io/astral-sh/uv:latest /uv /uvx /bin/
 # Set the working directory in the container
 WORKDIR /code
 
-COPY requirements.txt .
+COPY uv.lock pyproject.toml /code/
+RUN uv sync --frozen
 
-
-RUN pip install --no-cache-dir --upgrade -r requirements.txt
-
+RUN pip install playwright
 RUN playwright install --with-deps chromium
 
 
