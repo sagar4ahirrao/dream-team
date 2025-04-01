@@ -288,7 +288,7 @@ wheels = [
 
 [[package]]
 name = "azure-search-documents"
-version = "11.6.0b11"
+version = "11.6.0b10"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "azure-common" },
@@ -296,9 +296,9 @@ dependencies = [
     { name = "isodate" },
     { name = "typing-extensions" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/98/9e/49a87dacdebdbe76543c092d5eb09ee716a51c124d578bcfb5acd0b6971a/azure_search_documents-11.6.0b11.tar.gz", hash = "sha256:6c38bc4f9d3c2a79fda1f4d95b16f06ba8dacb26b6c8753e56146535c61561f8", size = 337947 }
+sdist = { url = "https://files.pythonhosted.org/packages/8d/9a/d31cba781b1fbc8af611d106d8cb7b71442214f9a59260c813ef7dd8809a/azure_search_documents-11.6.0b10.tar.gz", hash = "sha256:aaf27e92dc1770f96283aa6c4985861ba0b66b81c8252e4dff8fa22f3d35165b", size = 337974 }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/06/d3/0a44553976f133def4543dd35e370366217c8e49bfe59ff9e21a868596ba/azure_search_documents-11.6.0b11-py3-none-any.whl", hash = "sha256:8f0882c9ac3b54936fa5c3e69ed4312cc94219462c5b0f2258b0062a727905f1", size = 338377 },
+    { url = "https://files.pythonhosted.org/packages/6d/f4/5afe7bb304bd9b7a0ae4a824d4bd2e74c31110bd83859e615efb184dc267/azure_search_documents-11.6.0b10-py3-none-any.whl", hash = "sha256:d794cb945253afe1c3327074dbe2ffb31eb7dd5afafe16a8bd1ccac0f113c829", size = 338383 },
 ]
 
 [[package]]
@@ -351,14 +351,14 @@ requires-dist = [
     { name = "autogen-ext", extras = ["azure", "docker", "mcp"], specifier = "==0.4.9.3" },
     { name = "azure-cosmos", specifier = ">=4.9.0" },
     { name = "azure-identity", specifier = ">=1.19.0" },
-    { name = "azure-search-documents", specifier = "==11.6.0b11" },
+    { name = "azure-search-documents", specifier = "==11.6.0b10" },
     { name = "azure-storage-blob", specifier = ">=12.25.0" },
     { name = "fastapi", specifier = "==0.115.11" },
     { name = "fastapi-cors", specifier = ">=0.0.6" },
     { name = "jinja2", specifier = ">=3.1.6" },
     { name = "markitdown", specifier = "==0.0.2" },
     { name = "openai", specifier = "==1.66.0" },
-    { name = "playwright", specifier = ">=1.51.0" },
+    { name = "playwright", specifier = ">=1.50.0" },
     { name = "python-dotenv", specifier = ">=1.0.1" },
     { name = "python-multipart", specifier = ">=0.0.20" },
     { name = "tiktoken", specifier = ">=0.9.0" },
