@@ -3,7 +3,7 @@
 
 # Build your dream team with Autogen
 
-This repository leverages Microsoft Autogen 0.4, Azure OpenAI and integrates it with Streamlit, to build an end to end multi agents application, this repo makes it easy to build test and deploy an advanced multi agent framework, based on [Magentic One](https://www.microsoft.com/en-us/research/articles/magentic-one-a-generalist-multi-agent-system-for-solving-complex-tasks/)
+This repository is a part of the Azure Samples collection and utilizes Microsoft Autogen 0.4 alongside Azure OpenAI. It seamlessly integrates with a React UI to create a comprehensive end-to-end multi-agent application. Designed for simplicity, this repository streamlines the process of building, testing, and deploying an advanced multi-agent framework. [Magentic One](https://www.microsoft.com/en-us/research/articles/magentic-one-a-generalist-multi-agent-system-for-solving-complex-tasks/)
  
 
 ![Architecture](assets/architecture.png)
