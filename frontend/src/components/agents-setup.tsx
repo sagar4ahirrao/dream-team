@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
 import { Separator } from '@/components/ui/separator';
-import { Trash, Plus, Edit, Download, AlertTriangle, SaveAll, Save } from 'lucide-react';
+import { Trash, Plus, Edit, Download, AlertTriangle, SaveAll, Save, Loader2 } from 'lucide-react';
 import { Dialog, DialogTrigger, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogClose, DialogFooter } from '@/components/ui/dialog';
 import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
@@ -19,15 +19,18 @@ export function AgentsSetup({ team, getAvatarSrc, isCollapsed }: AgentsSetupProp
   const { addAgent, removeAgent, addRAGAgent, editAgent, saveTeam } = useTeamsContext();
   const [editingAgent, setEditingAgent] = useState<Agent | null>(null);
   const [hasTeamChanged, setHasTeamChanged] = useState<boolean>(false);
+  const [isSavingTeam, setIsSavingTeam] = useState<boolean>(false);
 
   return (
     <div className="space-y-4">
       <div className="grid auto-rows-min gap-4 md:grid-cols-2 text-sm">
         <h2>{team.name}</h2>
         {hasTeamChanged && (
-          <Button variant="destructive" onClick={() => { 
-            saveTeam(team);
+          <Button variant="destructive" onClick={async () => { 
+            setIsSavingTeam(true);
+            await saveTeam(team);
             setHasTeamChanged(false);
+            setIsSavingTeam(false);
           }}>
             <Save /> Save Team Definition
           </Button>
@@ -244,7 +247,19 @@ export function AgentsSetup({ team, getAvatarSrc, isCollapsed }: AgentsSetupProp
         </Dialog>
       )}
       
-      
+      {/* Progress Dialog for saving team */}
+      {isSavingTeam && (
+        <Dialog open={true} onOpenChange={() => {}}>
+          <DialogContent className="max-w-sm">
+            <DialogHeader>
+              <DialogTitle>Saving Team</DialogTitle>
+            </DialogHeader>
+            <div className="py-4">
+            <Loader2 className="h-8 w-8 animate-spin" />  Team is being saved...
+            </div>
+          </DialogContent>
+        </Dialog>
+      )}
     </div>
   );
 }
