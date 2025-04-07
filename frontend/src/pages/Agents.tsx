@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { AppSidebar } from "@/components/app-sidebar"
 // import { useUserContext } from '@/contexts/UserContext'
 import {
@@ -47,13 +47,22 @@ import { Footer } from '@/components/Footer'
 import { Agent, Team, useTeamsContext } from '@/contexts/TeamsContext';
 
 export default function Agents() {
-  const { teams } = useTeamsContext();
+  const { teams, loading, reloadTeams } = useTeamsContext();
   const [agents, setAgents] = useState<Agent[]>([]);
   const [selectedTeam, setSelectedTeam] = useState<Team>(teams[0]);
 
   const [isAuthenticated, setIsAuthenticated] = useState(BASE_URL)
   // const { userInfo } = useUserContext();
-  
+
+
+  useEffect(() => {
+    // console.log("Teams in consumer:", teams);
+    if (teams.length > 0 && !selectedTeam) {
+      setSelectedTeam(teams[0]);
+      setAgents(teams[0].agents);
+    }
+  }, [teams]);
+    
   /// TODO: better login -> MS EntraID
   const handleLogin = (email: string, password: string) => {
     console.log('Logging in with:', email)
@@ -73,6 +82,10 @@ export default function Agents() {
     setSelectedTeam(team);
     console.log('Selected team:', selectedTeam.name);
     console.log('Selected agents:', agents);
+  }
+
+  if (loading) {
+    return <div>Loading Teams...</div>;
   }
 
   return (
@@ -172,6 +185,10 @@ export default function Agents() {
                 <Button variant="destructive" size="sm">
                   <Delete className="h-4 w-4" />
                   Delete team
+                </Button>
+                <Separator orientation="vertical" className="mr-2 h-4 invisible" />
+                <Button variant="default" size="sm" onClick={reloadTeams}>
+                  Reload Teams
                 </Button>
               </CardContent>
               <CardFooter className="flex space-x-2">
