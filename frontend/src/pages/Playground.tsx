@@ -90,7 +90,8 @@ export default function App() {
   // const [isSettingsCardVisible, setIsSettingsCardVisible] = useState(false)
   const [isTyping, setIsTyping] = useState(false);
   const { userInfo } = useUserContext();
-  const { teams } = useTeamsContext();
+  // const { teams } = useTeamsContext();
+  const { teams, loading, reloadTeams } = useTeamsContext();
   const [agents, setAgents] = useState<Agent[]>([]);
   const [selectedTeam, setSelectedTeam] = useState<Team>(teams[0]);
 
@@ -266,6 +267,20 @@ export default function App() {
     }
   }
 
+  if (loading) {
+    return (
+      <ThemeProvider defaultTheme="light" storageKey="vite-ui-theme">
+        <SidebarProvider defaultOpen={true}>
+          <AppSidebar onTeamSelect={handleTeamSelect} />
+          <SidebarInset>
+            <div className="flex items-center justify-center h-40">
+              <Loader2 className="h-8 w-8 animate-spin" />  Initialzing...
+            </div>
+          </SidebarInset>
+        </SidebarProvider>
+      </ThemeProvider>
+    );
+  }
   return (
     <ThemeProvider defaultTheme="light" storageKey="vite-ui-theme">
     {!isAuthenticated ? (

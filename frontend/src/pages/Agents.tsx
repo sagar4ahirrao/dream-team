@@ -16,7 +16,7 @@ import {
 } from "@/components/ui/sidebar"
 import { ThemeProvider } from "@/components/theme-provider"
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
-import { Plus, Download, Delete} from "lucide-react"
+import { Plus, Download, Delete, Loader2} from "lucide-react"
 import { Button } from "@/components/ui/button"
 
 
@@ -85,7 +85,18 @@ export default function Agents() {
   }
 
   if (loading) {
-    return <div>Loading Teams...</div>;
+    return (
+      <ThemeProvider defaultTheme="light" storageKey="vite-ui-theme">
+        <SidebarProvider defaultOpen={true}>
+          <AppSidebar onTeamSelect={handleTeamSelect} />
+          <SidebarInset>
+            <div className="flex items-center justify-center h-40">
+              <Loader2 className="h-8 w-8 animate-spin" />  Initialzing...
+            </div>
+          </SidebarInset>
+        </SidebarProvider>
+      </ThemeProvider>
+    );
   }
 
   return (
