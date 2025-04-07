@@ -91,7 +91,7 @@ export default function App() {
   const [isTyping, setIsTyping] = useState(false);
   const { userInfo } = useUserContext();
   // const { teams } = useTeamsContext();
-  const { teams, loading, reloadTeams } = useTeamsContext();
+  const { teams, loading } = useTeamsContext();
   const [agents, setAgents] = useState<Agent[]>([]);
   const [selectedTeam, setSelectedTeam] = useState<Team>(teams[0]);
 

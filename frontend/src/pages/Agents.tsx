@@ -16,7 +16,7 @@ import {
 } from "@/components/ui/sidebar"
 import { ThemeProvider } from "@/components/theme-provider"
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
-import { Plus, Download, Delete, Loader2} from "lucide-react"
+import { Loader2, RefreshCcw} from "lucide-react"
 import { Button } from "@/components/ui/button"
 
 
@@ -182,13 +182,13 @@ export default function Agents() {
               </CardHeader>
               <CardContent className="flex-1 h-96">
                 {/* <Separator className="my-2 invisible" /> */}
-  
+                {/*
                 <Button size="sm" variant="default" className="">
                   <Plus className="h-4 w-4" />
                   Create new team
                 </Button>
                 <Separator orientation="vertical" className="mr-2 h-4 invisible" />
-                <Button variant="outline" size="sm">
+                 <Button variant="outline" size="sm">
                   <Download className="h-4 w-4" />
                   Download team specification
                 </Button>
@@ -196,9 +196,10 @@ export default function Agents() {
                 <Button variant="destructive" size="sm">
                   <Delete className="h-4 w-4" />
                   Delete team
-                </Button>
+                </Button> */}
                 <Separator orientation="vertical" className="mr-2 h-4 invisible" />
                 <Button variant="default" size="sm" onClick={reloadTeams}>
+                  <RefreshCcw className="h-4 w-4" />
                   Reload Teams
                 </Button>
               </CardContent>

@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
 import { Separator } from '@/components/ui/separator';
-import { Trash, Plus, Edit, Download, AlertTriangle, SaveAll, Save, Loader2 } from 'lucide-react';
+import { Trash, Plus, Edit, Download, Save, Loader2 } from 'lucide-react';
 import { Dialog, DialogTrigger, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogClose, DialogFooter } from '@/components/ui/dialog';
 import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
@@ -32,7 +32,7 @@ export function AgentsSetup({ team, getAvatarSrc, isCollapsed }: AgentsSetupProp
             setHasTeamChanged(false);
             setIsSavingTeam(false);
           }}>
-            <Save /> Save Team Definition
+            <Save /> Update
           </Button>
         )}
       </div>
