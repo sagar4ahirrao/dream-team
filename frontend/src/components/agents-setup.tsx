@@ -41,7 +41,7 @@ export function AgentsSetup({ team, getAvatarSrc, isCollapsed }: AgentsSetupProp
               <>
                 <Separator className="my-2" />
                 <div className="flex space-x-2">
-                  <Button size="icon" variant="outline" onClick={() => removeAgent(team.teamId, agent.input_key)}>
+                  <Button size="icon" variant="outline" onClick={() => removeAgent(team.team_id, agent.input_key)}>
                     <Trash />
                   </Button>
                   <Button size="icon" variant="outline" onClick={() => setEditingAgent(agent)}>
@@ -99,7 +99,7 @@ export function AgentsSetup({ team, getAvatarSrc, isCollapsed }: AgentsSetupProp
                         const name = (document.getElementById('name') as HTMLInputElement).value;
                         const description = (document.getElementById('description') as HTMLTextAreaElement).value;
                         const systemMessage = (document.getElementById('system_message') as HTMLTextAreaElement).value;
-                        addAgent(team.teamId, name, description, systemMessage);
+                        addAgent(team.team_id, name, description, systemMessage);
                       }}
                       variant="default"
                     >
@@ -168,7 +168,7 @@ export function AgentsSetup({ team, getAvatarSrc, isCollapsed }: AgentsSetupProp
                         const description = (document.getElementById('description') as HTMLTextAreaElement).value;
                         const indexName = (document.getElementById('index_name') as HTMLInputElement).value;
                         const files = (document.getElementById('file_upload') as HTMLInputElement).files;
-                        addRAGAgent(team.teamId, name, description, indexName, files);
+                        addRAGAgent(team.team_id, name, description, indexName, files);
                       }}
                       variant="default"
                     >
@@ -220,7 +220,7 @@ export function AgentsSetup({ team, getAvatarSrc, isCollapsed }: AgentsSetupProp
                     const description = (document.getElementById('edit_description') as HTMLTextAreaElement).value;
                     const systemMessage = (document.getElementById('edit_system_message') as HTMLTextAreaElement).value;
                     // Call the editAgent callback with the updated values
-                    editAgent(team.teamId, editingAgent.input_key, name, description, systemMessage);
+                    editAgent(team.team_id, editingAgent.input_key, name, description, systemMessage);
                     setEditingAgent(null);
                   }}
                   variant="default"

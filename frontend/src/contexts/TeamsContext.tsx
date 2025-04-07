@@ -21,7 +21,7 @@ export interface TeamTask {
 }
 
 export interface Team {
-  teamId: string;
+  team_id: string;
   name: string;
   agents: Agent[];
   description?: string;
@@ -33,16 +33,16 @@ export interface Team {
 
 interface TeamsContextType {
     teams: Team[];
-    addAgent: (teamId: string, name: string, description: string, systemMessage: string) => void;
+    addAgent: (team_id: string, name: string, description: string, systemMessage: string) => void;
     addRAGAgent: (
-      teamId: string,
+      team_id: string,
       name: string,
       description: string,
       indexName: string,
       files?: FileList | null
     ) => Promise<void>;
-    editAgent: (teamId: string, inputKey: string, name: string, description: string, systemMessage: string) => void;
-    removeAgent: (teamId: string, inputKey: string) => void;
+    editAgent: (team_id: string, inputKey: string, name: string, description: string, systemMessage: string) => void;
+    removeAgent: (team_id: string, inputKey: string) => void;
   }
 
 const TeamsContext = createContext<TeamsContextType>({} as TeamsContextType);
@@ -1538,7 +1538,7 @@ export const TeamsProvider: React.FC<{ children: React.ReactNode }> = ({ childre
   const [teams, setTeams] = useState<Team[]>([
     // ...moved default teams from agents-definition or app-sidebar...
     {
-        teamId: "team-1",
+        team_id: "team-1",
         name: "MagenticOne",
         logo: AudioWaveform,
         plan: "Original MagenticOne Team",
@@ -1547,7 +1547,7 @@ export const TeamsProvider: React.FC<{ children: React.ReactNode }> = ({ childre
         starting_tasks: [getTeamTaskByName("Find restaurant"), getTeamTaskByName("Check football game"), getTeamTaskByName("Generate script")],
       },
       {
-        teamId: "team-2",
+        team_id: "team-2",
         name: "Oil & Gas - Predictive Maintenance",
         logo: Wrench,
         plan: "Team focused on Predictive Maintenance tasks",
@@ -1556,7 +1556,7 @@ export const TeamsProvider: React.FC<{ children: React.ReactNode }> = ({ childre
         starting_tasks: [getTeamTaskByName("Predictive Maintenance")],
       },
       {
-        teamId: "team-3",
+        team_id: "team-3",
         name: "Oil & Gas - Safety Compliance",
         logo: ShieldAlert,
         plan: "Team analyzing Safety & Incident Reporting",
@@ -1565,7 +1565,7 @@ export const TeamsProvider: React.FC<{ children: React.ReactNode }> = ({ childre
         starting_tasks: [getTeamTaskByName("Safety")],
       },
       {
-        teamId: "team-4",
+        team_id: "team-4",
         name: "Oil & Gas - Investment research",
         logo: ChartNoAxesCombined,
         plan: "Decision support team through comprehensive, data-driven assessments...",
@@ -1574,7 +1574,7 @@ export const TeamsProvider: React.FC<{ children: React.ReactNode }> = ({ childre
         starting_tasks: [getTeamTaskByName("Market assessment")],
       },
       {
-        teamId: "team-5",
+        team_id: "team-5",
         name: "FSI - Banking Loan Upsell",
         logo: DollarSign,
         plan: "Loan upsell scenario by analyzing financial transaction ",
@@ -1583,7 +1583,7 @@ export const TeamsProvider: React.FC<{ children: React.ReactNode }> = ({ childre
         starting_tasks: [getTeamTaskByName("Loan Upsell")],
       },
       {
-        teamId: "team-6",
+        team_id: "team-6",
         name: "Retail	- Inventory optimization",
         logo: ShoppingBasket,
         plan: "Inventory analysis.",
@@ -1592,7 +1592,7 @@ export const TeamsProvider: React.FC<{ children: React.ReactNode }> = ({ childre
         starting_tasks: [getTeamTaskByName("Retail")],
       },
       {
-        teamId: "team-7",
+        team_id: "team-7",
         name: "Gaming - Recommendation engine",
         logo: Map,
         plan: "Game development.",
@@ -1611,12 +1611,12 @@ export const TeamsProvider: React.FC<{ children: React.ReactNode }> = ({ childre
 //     );
 //   }, [teams]);
 
+  console.log("Teams state updated:", teams);
 
-
-  const addAgent = (teamId: string, name: string, description: string, systemMessage: string) => {
+  const addAgent = (team_id: string, name: string, description: string, systemMessage: string) => {
     setTeams((prev) =>
       prev.map((t) => {
-        if (t.teamId !== teamId) return t;
+        if (t.team_id !== team_id) return t;
         const newAgent: Agent = {
           input_key: String(t.agents.length + 1).padStart(4, '0'),
           type: 'Custom',
@@ -1631,10 +1631,10 @@ export const TeamsProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     );
   };
 
-  const editAgent = (teamId: string, inputKey: string, name: string, description: string, systemMessage: string) => {
+  const editAgent = (team_id: string, inputKey: string, name: string, description: string, systemMessage: string) => {
     setTeams((prev) =>
       prev.map((t) => {
-        if (t.teamId !== teamId) return t;
+        if (t.team_id !== team_id) return t;
         const updatedAgents = t.agents.map((agent) =>
           agent.input_key === inputKey
             ? { ...agent, name, description, system_message: systemMessage }
@@ -1645,38 +1645,20 @@ export const TeamsProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     );
   };
 
-//   const addRAGAgentX = (teamId: string, name: string, description: string, indexName: string, files?: FileList | null) => {
-//     setTeams((prev) =>
-//       prev.map((t) => {
-//         if (t.teamId !== teamId) return t;
-//         const newAgent: Agent = {
-//           input_key: String(t.agents.length + 1).padStart(4, '0'),
-//           type: 'RAG',
-//           name,
-//           system_message: '',
-//           description,
-//           icon: '🤖',
-//           index_name: indexName,
-//         };
-//         return { ...t, agents: [...t.agents, newAgent] };
-//       })
-//     );
-//   };
-
 
   const addRAGAgent = async (
-    teamId: string,
+    team_id: string,
     name: string,
     description: string,
     indexName: string,
     files?: FileList | null
   ): Promise<void> => {
 
-    // get the team by teamId
-    const team = teams.find((team) => team.teamId === teamId);
+    // get the team by team_id
+    const team = teams.find((team) => team.team_id === team_id);
     if (!team) {
         
-      console.error(`Team with ID ${teamId} not found.`);
+      console.error(`Team with ID ${team_id} not found.`);
         return;
     }
 
@@ -1694,7 +1676,7 @@ export const TeamsProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     //   setAgents([...agents, newAgent]);
         setTeams((prevTeams) =>
             prevTeams.map((team) =>
-            team.teamId === teamId
+            team.team_id === team_id
                 ? { ...team, agents: [...team.agents, newAgent] }
                 : team
             )
@@ -1720,7 +1702,7 @@ export const TeamsProvider: React.FC<{ children: React.ReactNode }> = ({ childre
         //   setAgents(agents.filter((agent) => agent.input_key !== temporaryRandomName));
             setTeams((prevTeams) =>
                 prevTeams.map((team) =>
-                team.teamId === teamId
+                team.team_id === team_id
                     ? { ...team, agents: team.agents.filter((agent) => agent.input_key !== temporaryRandomName) }
                     : team
                 )
@@ -1739,7 +1721,7 @@ export const TeamsProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     // setAgents([...agents, newAgent]);
     setTeams((prevTeams) =>
       prevTeams.map((team) =>
-        team.teamId === teamId
+        team.team_id === team_id
           ? { ...team, agents: [...team.agents, newAgent] }
           : team
       )
@@ -1747,11 +1729,11 @@ export const TeamsProvider: React.FC<{ children: React.ReactNode }> = ({ childre
   };
 
 
-const removeAgent = (teamId: string, inputKey: string) => {
-    console.log("removeAgent", teamId, inputKey);
+const removeAgent = (team_id: string, inputKey: string) => {
+    console.log("removeAgent", team_id, inputKey);
     setTeams((prevTeams) =>
       prevTeams.map((team) =>
-        team.teamId === teamId
+        team.team_id === team_id
           ? { ...team, agents: team.agents.filter((agent) => agent.input_key !== inputKey) }
           : team
       )

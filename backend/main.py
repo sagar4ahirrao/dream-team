@@ -6,7 +6,7 @@ from azure.identity import DefaultAzureCredential, get_bearer_token_provider
 from azure.storage.blob import BlobServiceClient
 # from sqlalchemy.orm import Session
 import schemas, crud
-from database import store_conversation, fetch_user_conversatons,fetch_user_conversation, delete_user_conversation
+from database import store_conversation, fetch_user_conversatons,fetch_user_conversation, delete_user_conversation, get_teams, get_team, update_team, create_team, delete_team
 import os
 import uuid
 from contextlib import asynccontextmanager
@@ -426,3 +426,51 @@ async def upload_files(indexName: str = Form(...), files: List[UploadFile] = Fil
         print(f"Error processing upload and index: {err}")
         return {"status": "error", "message": str(err)}
     return {"status": "success", "filenames": [f.filename for f in files]}
+
+from fastapi import HTTPException
+
+@app.get("/teams")
+async def get_teams_api():
+    try:
+        teams = get_teams()  # Replace with get_teams from database.py
+        return teams
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error retrieving teams: {str(e)}")
+
+@app.get("/teams/{team_id}")
+async def get_team_api(team_id: str):
+    try:
+        team = get_team(team_id)  # Replace with get_team from database.py
+        if not team:
+            raise HTTPException(status_code=404, detail="Team not found")
+        return team
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error retrieving team: {str(e)}")
+
+@app.post("/teams")
+async def create_team_api(team: dict):
+    try:
+        response = create_team(team)  # Replace with create_team from database.py
+        return response
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error creating team: {str(e)}")
+
+@app.put("/teams/{team_id}")
+async def update_team_api(team_id: str, team: dict):
+    try:
+        response = update_team(team_id, team)  # Replace with update_team from database.py
+        if "error" in response:
+            raise HTTPException(status_code=404, detail=response["error"])
+        return response
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error updating team: {str(e)}")
+
+@app.delete("/teams/{team_id}")
+async def delete_team_api(team_id: str):
+    try:
+        response = delete_team(team_id)  # Replace with delete_team from database.py
+        if "error" in response:
+            raise HTTPException(status_code=404, detail=response["error"])
+        return response
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error deleting team: {str(e)}")
