@@ -46,6 +46,7 @@ interface TeamsContextType {
   editAgent: (team_id: string, inputKey: string, name: string, description: string, systemMessage: string) => void;
   removeAgent: (team_id: string, inputKey: string) => void;
   reloadTeams: () => Promise<void>;
+  saveTeam: (team: Team) => Promise<void>; // <-- new function
 }
 
 const TeamsContext = createContext<TeamsContextType>({} as TeamsContextType);
@@ -63,18 +64,6 @@ export const TeamsProvider: React.FC<{ children: React.ReactNode }> = ({ childre
 
   const [teams, setTeams] = useState<Team[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
-
-  // // Write teams to sessionStorage whenever teams changes.
-  // useEffect(() => {
-  //   if (teams.length === 0) {
-  //     console.log("No teams to write to sessionStorage.");
-  //     sessionStorage.removeItem('teams');
-  //     return;
-  //   }
-  //   console.log("Writing teams to sessionStorage:", teams);
-  //   sessionStorage.setItem('teams', JSON.stringify(teams));
-  //   // console.log("Teams written to sessionStorage:", teams);
-  // }, [teams]);
 
   // Move fetchTeams out so we can reuse it.
   const fetchTeams = async () => {
@@ -117,14 +106,9 @@ export const TeamsProvider: React.FC<{ children: React.ReactNode }> = ({ childre
   // On initial load, load from session or fetch teams.
   useEffect(() => {
     const storedTeams = sessionStorage.getItem('teams');
-    // console.log("Stored teams:", storedTeams);
-
     if (storedTeams) {
-      // sessionStorage.removeItem('teams'); // Remove from sessionStorage after loading
-      // console.log("Loading teams from sessionStorage:", storedTeams);
       setTeams(JSON.parse(storedTeams));
       setLoading(false);
-      
     } else {
       console.log("No teams in sessionStorage, fetching from API...");
       fetchTeams();
@@ -135,6 +119,15 @@ export const TeamsProvider: React.FC<{ children: React.ReactNode }> = ({ childre
   const reloadTeams = async () => {
     setLoading(true);
     await fetchTeams();
+  };
+
+  const saveTeam = async (team: Team): Promise<void> => {
+    try {
+      await axios.put(`${BASE_URL}/teams/${team.team_id}`, team);
+      await reloadTeams();
+    } catch (error) {
+      console.error("Error saving team:", error);
+    }
   };
 
   const addAgent = (team_id: string, name: string, description: string, systemMessage: string) => {
@@ -219,7 +212,6 @@ export const TeamsProvider: React.FC<{ children: React.ReactNode }> = ({ childre
         console.error('Upload error:', error);
       } finally {
 // Remove the temporary agent after processing
-        //   setAgents(agents.filter((agent) => agent.input_key !== temporaryRandomName));
         setTeams((prevTeams) =>
           prevTeams.map((team) =>
             team.team_id === team_id
@@ -259,7 +251,7 @@ export const TeamsProvider: React.FC<{ children: React.ReactNode }> = ({ childre
   };
 
   return (
-    <TeamsContext.Provider value={{ teams, loading, addAgent, addRAGAgent, editAgent, removeAgent, reloadTeams }}>
+    <TeamsContext.Provider value={{ teams, loading, addAgent, addRAGAgent, editAgent, removeAgent, reloadTeams, saveTeam }}>
       {children}
     </TeamsContext.Provider>
   );
