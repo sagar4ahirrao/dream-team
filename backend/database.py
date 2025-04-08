@@ -10,14 +10,17 @@ from schemas import AutoGenMessage
 import uuid
 
 
-def get_db():
+def get_db(container_name: str = "ag_demo"):
     """
     Returns the Cosmos DB container.
     """
     # Get Cosmos DB account details from environment variables
     COSMOS_DB_URI = os.getenv("COSMOS_DB_URI", "https://YOURDB.documents.azure.com:443/")
     COSMOS_DB_DATABASE = os.getenv("COSMOS_DB_DATABASE", "ag_demo")
-    COSMOS_DB_CONTAINER = os.getenv("COSMOS_DB_CONTAINER", "ag_demo")
+    if container_name is None:
+        COSMOS_DB_CONTAINER = os.getenv("COSMOS_DB_CONTAINER", "ag_demo")
+    else:
+        COSMOS_DB_CONTAINER = container_name
     
     # Use DefaultAzureCredential for AAD token authorization
     credential = DefaultAzureCredential()
@@ -217,3 +220,49 @@ def delete_user_all_conversations(user_id: str):
     for item in items:
         container.delete_item(item=item["id"], partition_key=item["user_id"])
     return True
+
+def create_team(team: dict):
+    container = get_db()
+    team_document = {
+        "id": team["teamId"],
+        "name": team["name"],
+        "agents": team["agents"],
+        "description": team.get("description"),
+        "logo": team["logo"],
+        "plan": team["plan"],
+        "starting_tasks": team["starting_tasks"],
+    }
+    response = container.create_item(body=team_document)
+    return response
+
+def get_teams():
+    container = get_db(container_name= "agent_teams")
+    query = "SELECT * FROM c "
+    items = list(container.query_items(query=query, enable_cross_partition_query=True))
+    return items
+
+def get_team(team_id: str):
+    container = get_db(container_name= "agent_teams")
+    query = "SELECT * FROM c WHERE c.team_id = @teamId"
+    parameters = [{"name": "@teamId", "value": team_id}]
+    items = list(container.query_items(query=query, parameters=parameters, enable_cross_partition_query=True))
+    return items[0] if items else None
+
+def update_team(team_id: str, team: dict):
+    container = get_db(container_name= "agent_teams")
+    existing_team = get_team(team_id)
+    if not existing_team:
+        return {"error": "Team not found"}
+
+    updated_team = {**existing_team, **team}
+    response = container.replace_item(item=existing_team["id"], body=updated_team)
+    return response
+
+def delete_team(team_id: str):
+    container = get_db(container_name= "agent_teams")
+    existing_team = get_team(team_id)
+    if not existing_team:
+        return {"error": "Team not found"}
+
+    response = container.delete_item(item=existing_team["id"], partition_key=existing_team["id"])
+    return response
