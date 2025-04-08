@@ -1,12 +1,12 @@
 # File: main.py
-from fastapi import FastAPI, Depends, UploadFile, HTTPException, Query
+from fastapi import FastAPI, Depends, UploadFile, HTTPException, Query, File, Form
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.security import OAuth2AuthorizationCodeBearer
 from azure.identity import DefaultAzureCredential, get_bearer_token_provider
 from azure.storage.blob import BlobServiceClient
 # from sqlalchemy.orm import Session
 import schemas, crud
-from database import store_conversation, fetch_user_conversatons,fetch_user_conversation, delete_user_conversation, get_teams, get_team, update_team, create_team, delete_team
+from database import CosmosDB
 import os
 import uuid
 from contextlib import asynccontextmanager
@@ -21,7 +21,6 @@ import aisearch
 from datetime import datetime 
 from schemas import AutoGenMessage
 from typing import List
-from fastapi import File, Form
 import time
 
 print("Starting the server...")
@@ -188,7 +187,7 @@ async def display_log_message(log_entry, logs_dir, session_id, user_id, client=N
         _response.source = "TaskResult"
         _response.content = _log_entry_json.messages[-1].content
         _response.stop_reason = _log_entry_json.stop_reason
-        store_conversation(_log_entry_json, _response)
+        app.state.db.store_conversation(_log_entry_json, _response)
 
     elif isinstance(_log_entry_json, MultiModalMessage):
         _response.type = _log_entry_json.type
@@ -382,8 +381,7 @@ async def list_all_conversations(
     user: dict = Depends(validate_token)
     ):
     try:
-        # conversations = fetch_user_conversatons(user_id=user_id.user_id)
-        conversations = fetch_user_conversatons(user_id=None) # Fetch all conversations
+        conversations = app.state.db.fetch_user_conversatons(user_id=None) # Fetch all conversations
         return conversations
     except Exception as e:
         print(f"Error retrieving conversations: {str(e)}")
@@ -394,14 +392,14 @@ async def list_all_conversations(
 async def list_user_conversation(request_data: dict = None, user: dict = Depends(validate_token)):
     session_id = request_data.get("session_id") if request_data else None
     user_id = request_data.get("user_id") if request_data else None
-    conversations = fetch_user_conversation(user_id, session_id=session_id)
+    conversations = app.state.db.fetch_user_conversation(user_id, session_id=session_id)
     return conversations
 
 @app.post("/conversations/delete")
 async def delete_conversation(session_id: str = Query(...), user_id: str = Query(...), user: dict = Depends(validate_token)):
     try:
         # result = crud.delete_conversation(user["sub"], session_id)
-        result = delete_user_conversation(user_id=user_id, session_id=session_id)
+        result = app.state.db.delete_user_conversation(user_id=user_id, session_id=session_id)
         if result:
             return {"status": "success", "message": f"Conversation {session_id} deleted successfully."}
         else:
@@ -432,7 +430,7 @@ from fastapi import HTTPException
 @app.get("/teams")
 async def get_teams_api():
     try:
-        teams = get_teams()  # Replace with get_teams from database.py
+        teams = app.state.db.get_teams()
         return teams
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Error retrieving teams: {str(e)}")
@@ -440,7 +438,7 @@ async def get_teams_api():
 @app.get("/teams/{team_id}")
 async def get_team_api(team_id: str):
     try:
-        team = get_team(team_id)  # Replace with get_team from database.py
+        team = app.state.db.get_team(team_id)
         if not team:
             raise HTTPException(status_code=404, detail="Team not found")
         return team
@@ -450,7 +448,7 @@ async def get_team_api(team_id: str):
 @app.post("/teams")
 async def create_team_api(team: dict):
     try:
-        response = create_team(team)  # Replace with create_team from database.py
+        response = app.state.db.create_team(team)
         return response
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Error creating team: {str(e)}")
@@ -458,7 +456,7 @@ async def create_team_api(team: dict):
 @app.put("/teams/{team_id}")
 async def update_team_api(team_id: str, team: dict):
     try:
-        response = update_team(team_id, team)  # Replace with update_team from database.py
+        response = app.state.db.update_team(team_id, team)
         if "error" in response:
             raise HTTPException(status_code=404, detail=response["error"])
         return response
@@ -468,9 +466,18 @@ async def update_team_api(team_id: str, team: dict):
 @app.delete("/teams/{team_id}")
 async def delete_team_api(team_id: str):
     try:
-        response = delete_team(team_id)  # Replace with delete_team from database.py
+        response = app.state.db.delete_team(team_id)
         if "error" in response:
             raise HTTPException(status_code=404, detail=response["error"])
         return response
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Error deleting team: {str(e)}")
+
+@app.on_event("startup")
+async def startup_event():
+    app.state.db = CosmosDB()
+
+@app.on_event("shutdown")
+async def shutdown_event():
+    # ...any needed cleanup...
+    pass
