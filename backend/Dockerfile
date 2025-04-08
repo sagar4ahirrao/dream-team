@@ -6,14 +6,8 @@ COPY --from=ghcr.io/astral-sh/uv:latest /uv /uvx /bin/
 WORKDIR /code
 
 COPY requirements.txt .
-
-
 RUN pip install --no-cache-dir --upgrade -r requirements.txt
-
 RUN playwright install --with-deps chromium
-# RUN playwright install chromium
-
-
 # Copy the rest of the application code into the container
 COPY . .
 

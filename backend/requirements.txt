@@ -1,27 +1,23 @@
-python-dotenv>=1.0.1
-azure-identity>=1.19.0
-fastapi==0.109.2 
-uvicorn>=0.34.0  
+python-dotenv==1.0.1
+azure-identity==1.19.0
+fastapi==0.115.11 
+uvicorn==0.34.0  
 fastapi-cors==0.0.6
-python-multipart>=0.0.20
-tiktoken>=0.9.0
-jinja2>=3.1.6
+python-multipart==0.0.20
+tiktoken==0.9.0
+jinja2==3.1.6
 openai==1.66.0
 
 # autogen packages
-autogen-agentchat==0.4.9 
-autogen-ext[azure]==0.4.9  
-autogen-ext[docker]==0.4.9 
-autogen-core==0.4.9 
-
-#promptflow-tracing==1.17.2  
-#promptflow-devkit==1.17.2 
-# azure-search-documents==11.5.2  
+autogen-agentchat==0.4.9.3
+autogen-ext[azure,docker]==0.4.9.3
+autogen-core==0.4.9.3
+openai==1.66.0
 azure-search-documents==11.6.0b10
 markitdown==0.0.2  
 aiofiles==24.1.0  
 aiohttp==3.11.11  
-playwright>=1.50.0  
+playwright==1.50.0  
 
-azure-cosmos>=4.9.0
+azure-cosmos==4.9.0
 azure-storage-blob==12.25.0
