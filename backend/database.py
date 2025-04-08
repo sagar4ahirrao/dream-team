@@ -8,12 +8,17 @@ from autogen_agentchat.messages import MultiModalMessage, TextMessage, ToolCallE
 
 from schemas import AutoGenMessage
 import uuid
+from dotenv import load_dotenv
+import time
 
+def load_azd_env():
+    load_dotenv("./.env", override=True)
 
 def get_db(container_name: str = "ag_demo"):
     """
     Returns the Cosmos DB container.
     """
+    start_time = time.perf_counter()
     # Get Cosmos DB account details from environment variables
     COSMOS_DB_URI = os.getenv("COSMOS_DB_URI", "https://YOURDB.documents.azure.com:443/")
     COSMOS_DB_DATABASE = os.getenv("COSMOS_DB_DATABASE", "ag_demo")
@@ -38,6 +43,9 @@ def get_db(container_name: str = "ag_demo"):
         partition_key=PartitionKey(path="/user_id"),
         offer_throughput=400
     ) 
+    elapsed_time = time.perf_counter() - start_time
+    print(f"get_db executed in {elapsed_time:.4f} seconds")
+    
     return container
     # return True
 def format_message(_log_entry_json):
@@ -222,9 +230,10 @@ def delete_user_all_conversations(user_id: str):
     return True
 
 def create_team(team: dict):
-    container = get_db()
+    container = get_db(container_name= "agent_teams")
     team_document = {
-        "id": team["teamId"],
+        "id": team["id"],
+        "team_id": team["team_id"],
         "name": team["name"],
         "agents": team["agents"],
         "description": team.get("description"),
@@ -266,3 +275,38 @@ def delete_team(team_id: str):
 
     response = container.delete_item(item=existing_team["id"], partition_key=existing_team["id"])
     return response
+
+if __name__ == "__main__":
+    import json
+    import glob
+    import os
+
+    load_azd_env()
+
+    # Initialize the database by creating teams from JSON files in ./data/folder
+    teams_folder = os.path.join(os.path.dirname(__file__), "./data/teams-definitions")
+    json_files = glob.glob(os.path.join(teams_folder, "*.json"))
+
+    # sort the files by name
+    json_files.sort()
+    
+
+    print(f"Found {len(json_files)} JSON files in {teams_folder}.")
+    
+    created_items = 0
+    for file_path in json_files:
+        with open(file_path, "r") as f:
+            team = json.load(f)
+        # Assuming JSON key "teamId" exists; adjust mapping if necessary.
+        response = create_team(team)
+        print(f"Created team from {os.path.basename(file_path)}")
+        created_items += 1
+    print(f"Created {created_items}/{len(json_files)} items in the database.")
+    
+    # Example usage
+    # container = get_db()
+    # print(container)
+    # fetch_user_conversatons("user_id")
+    # fetch_user_conversation("user_id", "session_id")
+    # delete_user_conversation("user_id", "session_id")
+    pass
