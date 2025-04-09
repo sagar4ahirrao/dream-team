@@ -131,7 +131,7 @@ export default function PlaygroundHistory() {
     }
   };
 
-  const handleTeamSelect = (team: { teamId: string; agents: Agent[] }) => {
+  const handleTeamSelect = (team: { team_id: string; agents: Agent[] }) => {
     // Update agents based on selected team from sidebar
     // setAgents(team.agents);
     console.log('Selected team:', team);

@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { AppSidebar } from "@/components/app-sidebar"
 // import { useUserContext } from '@/contexts/UserContext'
 import {
@@ -16,7 +16,7 @@ import {
 } from "@/components/ui/sidebar"
 import { ThemeProvider } from "@/components/theme-provider"
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
-import { Plus, Download, Delete} from "lucide-react"
+import { Loader2, RefreshCcw} from "lucide-react"
 import { Button } from "@/components/ui/button"
 
 
@@ -47,13 +47,22 @@ import { Footer } from '@/components/Footer'
 import { Agent, Team, useTeamsContext } from '@/contexts/TeamsContext';
 
 export default function Agents() {
-  const { teams } = useTeamsContext();
+  const { teams, loading, reloadTeams } = useTeamsContext();
   const [agents, setAgents] = useState<Agent[]>([]);
   const [selectedTeam, setSelectedTeam] = useState<Team>(teams[0]);
 
   const [isAuthenticated, setIsAuthenticated] = useState(BASE_URL)
   // const { userInfo } = useUserContext();
-  
+
+
+  useEffect(() => {
+    // console.log("Teams in consumer:", teams);
+    if (teams.length > 0 && !selectedTeam) {
+      setSelectedTeam(teams[0]);
+      setAgents(teams[0].agents);
+    }
+  }, [teams]);
+    
   /// TODO: better login -> MS EntraID
   const handleLogin = (email: string, password: string) => {
     console.log('Logging in with:', email)
@@ -73,6 +82,21 @@ export default function Agents() {
     setSelectedTeam(team);
     console.log('Selected team:', selectedTeam.name);
     console.log('Selected agents:', agents);
+  }
+
+  if (loading) {
+    return (
+      <ThemeProvider defaultTheme="light" storageKey="vite-ui-theme">
+        <SidebarProvider defaultOpen={true}>
+          <AppSidebar onTeamSelect={handleTeamSelect} />
+          <SidebarInset>
+            <div className="flex items-center justify-center h-40">
+              <Loader2 className="h-8 w-8 animate-spin" />  Initialzing...
+            </div>
+          </SidebarInset>
+        </SidebarProvider>
+      </ThemeProvider>
+    );
   }
 
   return (
@@ -158,13 +182,13 @@ export default function Agents() {
               </CardHeader>
               <CardContent className="flex-1 h-96">
                 {/* <Separator className="my-2 invisible" /> */}
-  
+                {/*
                 <Button size="sm" variant="default" className="">
                   <Plus className="h-4 w-4" />
                   Create new team
                 </Button>
                 <Separator orientation="vertical" className="mr-2 h-4 invisible" />
-                <Button variant="outline" size="sm">
+                 <Button variant="outline" size="sm">
                   <Download className="h-4 w-4" />
                   Download team specification
                 </Button>
@@ -172,6 +196,11 @@ export default function Agents() {
                 <Button variant="destructive" size="sm">
                   <Delete className="h-4 w-4" />
                   Delete team
+                </Button> */}
+                <Separator orientation="vertical" className="mr-2 h-4 invisible" />
+                <Button variant="default" size="sm" onClick={reloadTeams}>
+                  <RefreshCcw className="h-4 w-4" />
+                  Reload Teams
                 </Button>
               </CardContent>
               <CardFooter className="flex space-x-2">
