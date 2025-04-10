@@ -2,9 +2,7 @@
     "id": "1",
     "team_id": "team-1",
     "name": "MagenticOneTeam",
-    "logo": {
-        "displayName": "Wrench"
-    },
+    "logo": "AudioWaveform",
     "plan": "Original MagenticOne Team",
     "agents": [
         {

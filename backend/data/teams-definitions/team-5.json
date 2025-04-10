@@ -2,7 +2,7 @@
     "id": "5",
     "team_id": "team-5",
     "name": "FSI - Banking Loan Upsell",
-    "logo": {},
+    "logo": "DollarSign",
     "plan": "Loan upsell scenario by analyzing financial transaction ",
     "agents": [
         {

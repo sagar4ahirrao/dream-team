@@ -1,5 +1,4 @@
-// import { AudioWaveform, ChartNoAxesCombined, DollarSign, Map, ShieldAlert, ShoppingBasket, Wrench } from 'lucide-react';
-import { Wrench } from 'lucide-react';
+import { AudioWaveform, ChartNoAxesCombined, DollarSign, Map, ShieldAlert, ShoppingBasket, Wrench } from 'lucide-react';
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import axios from 'axios';
 
@@ -27,7 +26,7 @@ export interface Team {
   name: string;
   agents: Agent[];
   description?: string;
-  logo: React.ElementType;
+  logo: string;
   icon?: string;
   plan: string;
   starting_tasks: TeamTask[];
@@ -51,6 +50,29 @@ interface TeamsContextType {
 }
 
 const TeamsContext = createContext<TeamsContextType>({} as TeamsContextType);
+
+export const getTeamLogo = (team: Team): React.ElementType => {
+  // if (team && team.logo && Object.keys(team.logo).length > 0) {
+  //   return team.logo;
+  // }
+  // console.log("getTeamLogo", team.logo);
+  switch (team.logo) {
+    case 'Map':
+      return Map;
+    case 'AudioWaveform':
+      return AudioWaveform;
+    case 'ChartNoAxesCombined':
+      return ChartNoAxesCombined;
+    case 'DollarSign':
+      return DollarSign;
+    case 'ShieldAlert':
+      return ShieldAlert;
+    case 'ShoppingBasket':
+      return ShoppingBasket;
+    default:
+      return Wrench; // Default logo
+  }
+}
 
 // Define environment variables with default values
 const BASE_URL = import.meta.env.VITE_BASE_URL;
@@ -79,7 +101,7 @@ export const TeamsProvider: React.FC<{ children: React.ReactNode }> = ({ childre
         name: team.name,
         agents: team.agents || [],
         description: team.description,
-        logo: team.logo && Object.keys(team.logo).length > 0 ? team.logo : Wrench,
+        logo: team.logo,
         icon: team.icon,
         plan: team.plan || "Free",
         starting_tasks: team.starting_tasks

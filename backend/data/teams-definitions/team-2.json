@@ -2,7 +2,7 @@
     "id": "2",
     "team_id": "team-2",
     "name": "Oil & Gas - Predictive Maintenance",
-    "logo": {},
+    "logo": "Wrench",
     "plan": "Team focused on Predictive Maintenance tasks",
     "agents": [
         {

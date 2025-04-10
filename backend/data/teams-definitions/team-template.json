@@ -2,9 +2,7 @@
     "id": "99",
     "team_id": "team-99",
     "name": "Default Team",
-    "logo": {
-        "displayName": "Wrench"
-    },
+    "logo": "Wrench",
     "plan": "Original MagenticOne Team",
     "agents": [
         {

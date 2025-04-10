@@ -1,3 +1,4 @@
+import React from 'react'
 import { useEffect, useState } from 'react'
 import { AppSidebar } from "@/components/app-sidebar"
 // import { useUserContext } from '@/contexts/UserContext'
@@ -44,7 +45,7 @@ const ACTIVATION_CODE = import.meta.env.VITE_ACTIVATON_CODE || "0000";
 
 import { Footer } from '@/components/Footer'
 
-import { Agent, Team, useTeamsContext } from '@/contexts/TeamsContext';
+import { Agent, getTeamLogo, Team, useTeamsContext } from '@/contexts/TeamsContext';
 
 export default function Agents() {
   const { teams, loading, reloadTeams } = useTeamsContext();
@@ -53,6 +54,7 @@ export default function Agents() {
 
   const [isAuthenticated, setIsAuthenticated] = useState(BASE_URL)
   // const { userInfo } = useUserContext();
+
 
 
   useEffect(() => {
@@ -151,7 +153,13 @@ export default function Agents() {
               {/* Chat Interface */}
               <Card className={`md:col-span-2 flex flex-col`}>
                 <CardHeader>
-                  <CardTitle>{team.name}</CardTitle>
+                  <CardTitle>
+                      <div className="flex items-center">
+                          {React.createElement(getTeamLogo(team))}
+                          <Separator orientation="vertical" className="mr-2 h-4 invisible" />
+                          {team.name}
+                      </div>
+                  </CardTitle>
                   <Separator />
                   <div className="space-x-2 container">
                     <p className="text-sm text-muted-foreground inline">{team.description}</p>
