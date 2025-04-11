@@ -99,16 +99,56 @@ class CosmosDB:
         response = container.create_item(body=conversation_document_item)
         return response
 
-    def fetch_user_conversatons(self, user_id: Optional[str] = None) -> List[Dict]:
+    def fetch_user_conversatons(self, user_id: Optional[str] = None, page: int = 1, page_size: int = 20) -> Dict:
         container = self.get_container("ag_demo")
+        
+        # First, get the total count
         if user_id is None:
-            query = "SELECT c.user_id, c.session_id, c.timestamp FROM c"
-            parameters = []
+            count_query = "SELECT VALUE COUNT(1) FROM c"
+            count_parameters = []
         else:
-            query = "SELECT c.user_id, c.session_id, c.timestamp FROM c WHERE c.user_id = @userId"
-            parameters = [{"name": "@userId", "value": user_id}]
+            count_query = "SELECT VALUE COUNT(1) FROM c WHERE c.user_id = @userId"
+            count_parameters = [{"name": "@userId", "value": user_id}]
+            
+        count_results = list(container.query_items(
+            query=count_query, 
+            parameters=count_parameters, 
+            enable_cross_partition_query=True
+        ))
+        total_count = count_results[0] if count_results else 0
+        
+        # Calculate total pages
+        total_pages = (total_count + page_size - 1) // page_size if total_count > 0 else 1
+        
+        # Ensure page is within valid range
+        page = max(1, min(page, total_pages))
+        
+        # Calculate skip for pagination
+        skip = (page - 1) * page_size
+        
+        # Get paginated results
+        if user_id is None:
+            query = "SELECT c.user_id, c.session_id, c.timestamp FROM c ORDER BY c.timestamp DESC OFFSET @skip LIMIT @limit"
+            parameters = [
+                {"name": "@skip", "value": skip},
+                {"name": "@limit", "value": page_size}
+            ]
+        else:
+            query = "SELECT c.user_id, c.session_id, c.timestamp FROM c WHERE c.user_id = @userId ORDER BY c.timestamp DESC OFFSET @skip LIMIT @limit"
+            parameters = [
+                {"name": "@userId", "value": user_id},
+                {"name": "@skip", "value": skip},
+                {"name": "@limit", "value": page_size}
+            ]
+            
         items = list(container.query_items(query=query, parameters=parameters, enable_cross_partition_query=True))
-        return items
+        
+        return {
+            "conversations": items,
+            "total_count": total_count,
+            "page": page,
+            "total_pages": total_pages
+        }
 
     def fetch_user_conversation(self, user_id: str, session_id: str):
         container = self.get_container("ag_demo")

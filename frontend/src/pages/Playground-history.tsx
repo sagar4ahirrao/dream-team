@@ -59,6 +59,11 @@ export default function PlaygroundHistory() {
   const [isAuthenticated, setIsAuthenticated] = useState(BASE_URL)
   const [historyItems, setHistoryItems] = useState<any[]>([]);
   const [isHistoryLoading, setIsHistoryLoading] = useState(true);
+  // New pagination states
+  const [currentPage, setCurrentPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
+  const [totalCount, setTotalCount] = useState(0);
+  const [pageSize, setPageSize] = useState(20);
 
   // New state for dialog display.
   const [dialogOpen, setDialogOpen] = useState(false);
@@ -91,15 +96,21 @@ export default function PlaygroundHistory() {
   
 
 
-    async function fetchHistory(userId: string) {
+    async function fetchHistory(userId: string, page = 1, itemsPerPage = 20) {
       try {
         setIsHistoryLoading(true);
-        console.log('Fetching for:', userId);
+        console.log('Fetching for:', userId, 'page:', page, 'pageSize:', itemsPerPage);
         const response = await axios.post(`${BASE_URL}/conversations`, { 
-                user_id: userId,
-              });
+          user_id: userId,
+          page: page,
+          page_size: itemsPerPage
+        });
         console.log('Response:', response.data);
-        setHistoryItems(response.data);
+        setHistoryItems(response.data.conversations);
+        setTotalCount(response.data.total_count);
+        setTotalPages(response.data.total_pages);
+        setCurrentPage(response.data.page);
+        setPageSize(itemsPerPage);
         setIsHistoryLoading(false);
       } catch (error) {
         console.error("Failed to load history:", error);
@@ -252,7 +263,62 @@ export default function PlaygroundHistory() {
                       </div>
                     </CardContent>
                   )}
-                  <CardFooter className="flex space-x-2" />
+                  <CardFooter className="flex justify-between items-center">
+                    <div className="text-sm text-muted-foreground">
+                      Showing {historyItems.length} of {totalCount} conversations
+                    </div>
+                    <div className="flex items-center space-x-2">
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => fetchHistory(userInfo.email, 1, pageSize)}
+                        disabled={currentPage === 1}
+                      >
+                        First
+                      </Button>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => fetchHistory(userInfo.email, currentPage - 1, pageSize)}
+                        disabled={currentPage === 1}
+                      >
+                        Previous
+                      </Button>
+                      <span className="text-sm">
+                        Page {currentPage} of {totalPages}
+                      </span>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => fetchHistory(userInfo.email, currentPage + 1, pageSize)}
+                        disabled={currentPage === totalPages}
+                      >
+                        Next
+                      </Button>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => fetchHistory(userInfo.email, totalPages, pageSize)}
+                        disabled={currentPage === totalPages}
+                      >
+                        Last
+                      </Button>
+                      <select
+                        className="bg-background border rounded p-1 text-sm"
+                        value={pageSize}
+                        onChange={(e) => {
+                          const newSize = Number(e.target.value);
+                          setPageSize(newSize);
+                          fetchHistory(userInfo.email, 1, newSize);
+                        }}
+                      >
+                        <option value={10}>10 per page</option>
+                        <option value={20}>20 per page</option>
+                        <option value={50}>50 per page</option>
+                        <option value={100}>100 per page</option>
+                      </select>
+                    </div>
+                  </CardFooter>
                 </Card>
               </div>
             </div>

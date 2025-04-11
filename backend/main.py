@@ -376,18 +376,25 @@ async def stop(session_id: str = Query(...)):
         print(f"Error stopping session {session_id}: {str(e)}")
         return {"status": "error", "message": f"Error stopping session: {str(e)}"}
 
-# New endpoint to retrieve all conversations.
+# New endpoint to retrieve all conversations with pagination.
 @app.post("/conversations")
 async def list_all_conversations(
-    user_id: schemas.User,
+    request_data: dict,
     user: dict = Depends(validate_token)
     ):
     try:
-        conversations = app.state.db.fetch_user_conversatons(user_id=None) # Fetch all conversations
+        user_id = request_data.get("user_id")
+        page = request_data.get("page", 1)
+        page_size = request_data.get("page_size", 20)
+        conversations = app.state.db.fetch_user_conversatons(
+            user_id=None, 
+            page=page, 
+            page_size=page_size
+        )
         return conversations
     except Exception as e:
         print(f"Error retrieving conversations: {str(e)}")
-        return []
+        return {"conversations": [], "total_count": 0, "page": 1, "total_pages": 1}
 
 # New endpoint to retrieve conversations for the authenticated user.
 @app.post("/conversations/user")
