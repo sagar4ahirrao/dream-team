@@ -2,7 +2,7 @@
     "id": "7",
     "team_id": "team-7",
     "name": "Gaming - Recommendation engine",
-    "logo": {},
+    "logo": "Map",
     "plan": "Game development.",
     "agents": [
         {
