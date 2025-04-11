@@ -274,7 +274,26 @@ export default function PlaygroundHistory() {
                       <Loader2 className="h-8 w-8 animate-spin" />
                     </div>
                   ) : (
+                    
                     <div className="space-y-2">
+                       <div className="grid auto-rows-min gap-4 md:grid-cols-5">
+                        {selectedConversation && selectedConversation.agents &&
+                          selectedConversation.agents.map((agent: Agent, index: number) => (
+                            <div key={agent.input_key} className={`rounded-xl bg-muted/50 shadow ${true ? 'p-0 duration-300 animate-in fade-in-0 zoom-in-75 origin-bottom-right' : 'p-4'}`}>
+                            <div key={index} className="flex items-center space-x-2">
+                              <Avatar>
+                                <AvatarImage src={getAvatarSrc(agent.name)} />
+                                <AvatarFallback>{getAvatarFallback(agent.type)}</AvatarFallback>
+                              </Avatar>
+                              <p className="text-sm font-semibold">{agent.name}</p>
+                              <p className="text-sm text-muted-foreground">{agent.description}</p>
+
+
+                            </div>
+                            </div>
+                          ))}
+                          </div>
+                        <Separator className='my-8 invisible' />
                       {selectedConversation && selectedConversation.messages && 
                         selectedConversation.messages
                           .filter((message: any) => message.source)

@@ -81,7 +81,7 @@ class CosmosDB:
             _response.content = "Agents mumbling."
         return _response
 
-    def store_conversation(self, conversation: TaskResult, conversation_details: AutoGenMessage):
+    def store_conversation(self, conversation: TaskResult, conversation_details: AutoGenMessage, conversation_dict: dict):
         _messsages = []
         for message in conversation.messages:
             _m = self.format_message(message)
@@ -91,7 +91,7 @@ class CosmosDB:
             "user_id": conversation_details.session_user,
             "session_id": conversation_details.session_id,
             "messages": _messsages, 
-            "agents": [],
+            "agents": conversation_dict["agents"],
             "run_mode_locally": False,
             "timestamp": conversation_details.time,
         }

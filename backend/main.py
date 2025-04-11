@@ -17,6 +17,7 @@ from autogen_agentchat.messages import MultiModalMessage, TextMessage, ToolCallE
 from autogen_agentchat.base import TaskResult
 from magentic_one_helper import generate_session_name
 import aisearch
+import logging
 
 from datetime import datetime 
 from schemas import AutoGenMessage
@@ -69,9 +70,12 @@ MAGENTIC_ONE_DEFAULT_AGENTS = [
 async def lifespan(app: FastAPI):
     # Startup code
     # Base.metadata.create_all(bind=engine)
+    # app.state.db = CosmosDB()
+    print("Database initialized.")
     yield
     # Shutdown code (optional)
     # engine.dispose()
+    app.state.db = None
 
 app = FastAPI()
 
@@ -171,7 +175,7 @@ async def summarize_plan(plan, client):
     
     plan_summary = result.content
     return plan_summary
-async def display_log_message(log_entry, logs_dir, session_id, user_id, client=None):
+async def display_log_message(log_entry, logs_dir, session_id, user_id, conversation=None):
     _log_entry_json = log_entry
     _user_id = user_id
     
@@ -187,7 +191,7 @@ async def display_log_message(log_entry, logs_dir, session_id, user_id, client=N
         _response.source = "TaskResult"
         _response.content = _log_entry_json.messages[-1].content
         _response.stop_reason = _log_entry_json.stop_reason
-        app.state.db.store_conversation(_log_entry_json, _response)
+        app.state.db.store_conversation(_log_entry_json, _response, conversation)
 
     elif isinstance(_log_entry_json, MultiModalMessage):
         _response.type = _log_entry_json.type
@@ -276,9 +280,13 @@ async def chat_endpoint(
     message: schemas.ChatMessageCreate,
     user: dict = Depends(validate_token)
 ):
+    logger = logging.getLogger("chat_endpoint")
+    logger.setLevel(logging.INFO)
+    logger.info(f"Starting agent session with message: {message.content}")
     # print("User:", user["sub"])
     _user_id=message.user_id if message.user_id else user["sub"]
-    print("Provided user_id:", message.user_id)
+    # print("Provided user_id:", message.user_id)
+    logger.info(f"User ID: {_user_id}")
     _agents = json.loads(message.agents) if message.agents else MAGENTIC_ONE_DEFAULT_AGENTS
     _session_id = generate_session_name()
     conversation = crud.save_message(
@@ -290,6 +298,8 @@ async def chat_endpoint(
         run_mode_locally=False,
         timestamp=get_current_time()
     )
+
+    logger.info(f"Conversation saved with session_id: {_session_id} and user_id: {_user_id}")
     # Return session_id as the conversation identifier
     db_message = schemas.ChatMessageResponse(
         id=uuid.uuid4(),
@@ -310,6 +320,11 @@ async def chat_stream(
     # db: Session = Depends(get_db),
     user: dict = Depends(validate_token)
 ):
+    
+   
+    logger = logging.getLogger("chat_stream")
+    logger.setLevel(logging.WARNING)
+    logger.warning(f"Chat stream started for session_id: {session_id} and user_id: {user_id}")
     # create folder for logs if not exists
     logs_dir="./logs"
     if not os.path.exists(logs_dir):    
@@ -317,6 +332,7 @@ async def chat_stream(
 
     # get the conversation from the database using user and session id
     conversation = crud.get_conversation(user_id, session_id)
+    logger.warning(f"Conversation retrieved: {conversation}")
     # get first message from the conversation
     first_message = conversation["messages"][0]
     # get the task from the first message as content
@@ -325,40 +341,26 @@ async def chat_stream(
 
     _run_locally = conversation["run_mode_locally"]
     _agents = conversation["agents"]
-    
-    
+
+
     #  Initialize the MagenticOne system
     magentic_one = MagenticOneHelper(logs_dir=logs_dir, save_screenshots=False, run_locally=_run_locally)
+    logger.warning(f"Initializing MagenticOne with agents: {len(_agents)} and session_id: {session_id}")
     await magentic_one.initialize(agents=_agents, session_id=session_id)
+    logger.warning(f"Initialized MagenticOne with agents: {len(_agents)} and session_id: {session_id}")
 
     stream, cancellation_token = magentic_one.main(task = task)
-
-    # DBG
-    # stream = [TextMessage(source="MagenticOneOrchestrator", models_usage=None, content="Please create a Python script that computes and prints the Fibonacci series where all numbers are below 1000.", type="TextMessage"),
-    #             TextMessage(source="MagenticOneOrchestrator", models_usage=None, content="Druhaa message.", type="TextMessage"),
-    #          ]
-    
-    # TODO: Store the cancellation token in the session data
-    # session_data[session_id]["cancellation_token"] = cancellation_token
-
-    # async for log_entry in stream:
-    #     yield f"data: {json.dumps({'response': f'session {session_id} and message: {log_entry.content}'})}\n\n"
+    logger.warning(f"Stream and cancellation token created for task: {task}")
 
 
-    async def event_generator(stream):
+    async def event_generator(stream, conversation):
 
         async for log_entry in stream:
-            json_response = await display_log_message(log_entry=log_entry, logs_dir=logs_dir, session_id=magentic_one.session_id, client=magentic_one.client, user_id=user_id)    
+            json_response = await display_log_message(log_entry=log_entry, logs_dir=logs_dir, session_id=magentic_one.session_id, conversation=conversation, user_id=user_id)    
             yield f"data: {json.dumps(json_response.to_json())}\n\n"
-      
-        # # DBG
-        # for log_entry in stream:
-        #     import time
-        #     time.sleep(1)
-        #     json_response = await display_log_message(log_entry=log_entry, logs_dir=logs_dir, session_id=session_id, client=None, user=user)
-        #     yield f"data: {json.dumps(json_response.to_json())}\n\n"
 
-    return StreamingResponse(event_generator(stream), media_type="text/event-stream")
+
+    return StreamingResponse(event_generator(stream, conversation), media_type="text/event-stream")
 
 @app.get("/stop")
 async def stop(session_id: str = Query(...)):
@@ -397,31 +399,44 @@ async def list_user_conversation(request_data: dict = None, user: dict = Depends
 
 @app.post("/conversations/delete")
 async def delete_conversation(session_id: str = Query(...), user_id: str = Query(...), user: dict = Depends(validate_token)):
+    logger = logging.getLogger("delete_conversation")
+    logger.setLevel(logging.INFO)
+    logger.info(f"Deleting conversation with session_id: {session_id} for user_id: {user_id}")
     try:
         # result = crud.delete_conversation(user["sub"], session_id)
         result = app.state.db.delete_user_conversation(user_id=user_id, session_id=session_id)
         if result:
+            logger.info(f"Conversation {session_id} deleted successfully.")
             return {"status": "success", "message": f"Conversation {session_id} deleted successfully."}
         else:
+            logger.warning(f"Conversation {session_id} not found.")
             return {"status": "error", "message": f"Conversation {session_id} not found."}
     except Exception as e:
-        print(f"Error deleting conversation {session_id}: {str(e)}")
+        logger.error(f"Error deleting conversation {session_id}: {str(e)}")
         return {"status": "error", "message": f"Error deleting conversation: {str(e)}"}
     
 @app.get("/health")
 async def health_check():
-    print("Health check endpoint called")
+    logger = logging.getLogger("health_check")
+    logger.setLevel(logging.INFO)
+    logger.info("Health check endpoint called")
+    # print("Health check endpoint called")
     return {"status": "healthy"}
 
 @app.post("/upload")
 async def upload_files(indexName: str = Form(...), files: List[UploadFile] = File(...)):
-    print("Received indexName:", indexName)
+    logger = logging.getLogger("upload_files")
+    logger.setLevel(logging.INFO)
+    logger.info(f"Received indexName: {indexName}")
+    # print("Received indexName:", indexName)
     for file in files:
-        print("Uploading file:", file.filename)
+        # print("Uploading file:", file.filename)
+        logger.info(f"Uploading file: {file.filename}")
     try:
         aisearch.process_upload_and_index(indexName, files)
+        logger.info(f"Files processed and indexed successfully.")
     except Exception as err:
-        print(f"Error processing upload and index: {err}")
+        logger.error(f"Error processing upload and index: {str(err)}")
         return {"status": "error", "message": str(err)}
     return {"status": "success", "filenames": [f.filename for f in files]}
 
@@ -455,12 +470,16 @@ async def create_team_api(team: dict):
 
 @app.put("/teams/{team_id}")
 async def update_team_api(team_id: str, team: dict):
+    logger = logging.getLogger("update_team_api")
+    logger.info(f"Updating team with ID: {team_id} and data: {team}")
     try:
         response = app.state.db.update_team(team_id, team)
         if "error" in response:
+            logger.error(f"Error updating team: {response['error']}")
             raise HTTPException(status_code=404, detail=response["error"])
         return response
     except Exception as e:
+        logger.error(f"Error updating team: {str(e)}")
         raise HTTPException(status_code=500, detail=f"Error updating team: {str(e)}")
 
 @app.delete("/teams/{team_id}")
@@ -476,6 +495,9 @@ async def delete_team_api(team_id: str):
 @app.on_event("startup")
 async def startup_event():
     app.state.db = CosmosDB()
+    # Configure logging with timestamp
+    logging.basicConfig(level=logging.INFO,
+                        format='%(levelname)s: %(asctime)s - %(message)s')
 
 @app.on_event("shutdown")
 async def shutdown_event():

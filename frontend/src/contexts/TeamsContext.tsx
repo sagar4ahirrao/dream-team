@@ -157,8 +157,11 @@ export const TeamsProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     setTeams((prev) =>
       prev.map((t) => {
         if (t.team_id !== team_id) return t;
+        // Generate a new input_key as random GUID
+        const newInputKey = crypto.randomUUID();
         const newAgent: Agent = {
-          input_key: String(t.agents.length + 1).padStart(4, '0'),
+          // input_key: String(t.agents.length + 1).padStart(4, '0'),
+          input_key: newInputKey,
           type: 'Custom',
           name,
           system_message: systemMessage,
