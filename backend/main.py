@@ -470,6 +470,7 @@ async def get_team_api(team_id: str):
 @app.post("/teams")
 async def create_team_api(team: dict):
     try:
+        team["agents"] = MAGENTIC_ONE_DEFAULT_AGENTS
         response = app.state.db.create_team(team)
         return response
     except Exception as e:

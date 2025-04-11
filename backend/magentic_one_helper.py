@@ -212,8 +212,8 @@ class MagenticOneHelper:
     def main(self, task):
         team = MagenticOneGroupChat(
             participants=self.agents,
-            # model_client=self.client,
-            model_client=self.client_reasoning,
+            model_client=self.client,
+            # model_client=self.client_reasoning,
             max_turns=self.max_rounds,
             max_stalls=self.max_stalls_before_replan,
             
