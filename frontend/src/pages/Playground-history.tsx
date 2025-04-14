@@ -352,7 +352,7 @@ export default function PlaygroundHistory() {
                                 <AvatarFallback>{getAvatarFallback(agent.type)}</AvatarFallback>
                               </Avatar>
                               <p className="text-sm font-semibold">{agent.name}</p>
-                              <p className="text-sm text-muted-foreground">{agent.description}</p>
+                              {/* <p className="text-sm text-muted-foreground">{agent.description}</p> */}
 
 
                             </div>
