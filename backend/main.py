@@ -68,16 +68,18 @@ MAGENTIC_ONE_DEFAULT_AGENTS = [
 # Lifespan handler for startup/shutdown events
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    # Startup code
-    # Base.metadata.create_all(bind=engine)
-    # app.state.db = CosmosDB()
+    # Startup code: initialize database and configure logging
+    # app.state.db = None
+    app.state.db = CosmosDB()
+    logging.basicConfig(level=logging.INFO,
+                        format='%(levelname)s: %(asctime)s - %(message)s')
     print("Database initialized.")
     yield
     # Shutdown code (optional)
-    # engine.dispose()
+    # Cleanup database connection
     app.state.db = None
 
-app = FastAPI()
+app = FastAPI(lifespan=lifespan)
 
 # Allow all origins
 app.add_middleware(
@@ -499,15 +501,3 @@ async def delete_team_api(team_id: str):
         return response
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Error deleting team: {str(e)}")
-
-@app.on_event("startup")
-async def startup_event():
-    app.state.db = CosmosDB()
-    # Configure logging with timestamp
-    logging.basicConfig(level=logging.INFO,
-                        format='%(levelname)s: %(asctime)s - %(message)s')
-
-@app.on_event("shutdown")
-async def shutdown_event():
-    # ...any needed cleanup...
-    pass
