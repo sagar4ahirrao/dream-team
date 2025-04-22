@@ -52,25 +52,26 @@ interface TeamsContextType {
 const TeamsContext = createContext<TeamsContextType>({} as TeamsContextType);
 
 export const getTeamLogo = (team: Team): React.ElementType => {
-  // if (team && team.logo && Object.keys(team.logo).length > 0) {
-  //   return team.logo;
-  // }
-  // console.log("getTeamLogo", team.logo);
-  switch (team.logo) {
-    case 'Map':
-      return Map;
-    case 'AudioWaveform':
-      return AudioWaveform;
-    case 'ChartNoAxesCombined':
-      return ChartNoAxesCombined;
-    case 'DollarSign':
-      return DollarSign;
-    case 'ShieldAlert':
-      return ShieldAlert;
-    case 'ShoppingBasket':
-      return ShoppingBasket;
-    default:
-      return Wrench; // Default logo
+  if (team && team.logo && Object.keys(team.logo).length > 0) {
+  	switch (team.logo) {
+	    case 'Map':
+	      return Map;
+	    case 'AudioWaveform':
+	      return AudioWaveform;
+	    case 'ChartNoAxesCombined':
+	      return ChartNoAxesCombined;
+	    case 'DollarSign':
+	      return DollarSign;
+	    case 'ShieldAlert':
+	      return ShieldAlert;
+	    case 'ShoppingBasket':
+	      return ShoppingBasket;
+	    default:
+	      return Wrench; // Default logo
+  	}
+  }
+  else{
+  	return Wrench;
   }
 }
 
