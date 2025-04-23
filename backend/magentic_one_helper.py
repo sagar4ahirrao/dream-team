@@ -216,6 +216,7 @@ class MagenticOneHelper:
             # model_client=self.client_reasoning,
             max_turns=self.max_rounds,
             max_stalls=self.max_stalls_before_replan,
+            emit_team_events=False,
             
         )
         cancellation_token = CancellationToken()

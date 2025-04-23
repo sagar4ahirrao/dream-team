@@ -4,7 +4,7 @@ from azure.identity import DefaultAzureCredential
 from typing import Optional, List, Dict
 
 from autogen_agentchat.base import TaskResult
-from autogen_agentchat.messages import MultiModalMessage, TextMessage, ToolCallExecutionEvent, ToolCallRequestEvent
+from autogen_agentchat.messages import MultiModalMessage, TextMessage, ToolCallExecutionEvent, ToolCallRequestEvent, SelectSpeakerEvent
 
 from schemas import AutoGenMessage
 import uuid
@@ -75,6 +75,10 @@ class CosmosDB:
             _response.type = _log_entry_json.type
             _response.source = _log_entry_json.source
             _response.content = _log_entry_json.content[0].arguments
+        elif isinstance(_log_entry_json, SelectSpeakerEvent):
+            _response.type = _log_entry_json.type
+            _response.source = _log_entry_json.source
+            _response.content = _log_entry_json.content[0]
         else:
             _response.type = "N/A"
             _response.source = "N/A"

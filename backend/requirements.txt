@@ -1,6 +1,6 @@
 python-dotenv==1.0.1
 azure-identity==1.19.0
-fastapi==0.115.11 
+fastapi==0.115.12 
 uvicorn==0.34.0  
 fastapi-cors==0.0.6
 python-multipart==0.0.20
@@ -9,9 +9,9 @@ jinja2==3.1.6
 openai==1.66.0
 
 # autogen packages
-autogen-agentchat==0.5.2
-autogen-ext[azure,docker]==0.5.2
-autogen-core==0.5.2
+autogen-agentchat==0.5.3
+autogen-ext[azure,docker]==0.5.3
+autogen-core==0.5.3
 openai==1.66.0
 azure-search-documents==11.6.0b10
 markitdown==0.0.2  

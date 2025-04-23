@@ -37,11 +37,11 @@ function App() {
 ReactDOM.createRoot(document.getElementById('root') as HTMLElement).render(
   <React.StrictMode>
     <UserProvider>
-      <BrowserRouter>
-        <TeamsProvider>
+      <TeamsProvider>
+        <BrowserRouter>
           <App />
-        </TeamsProvider>
-      </BrowserRouter>
+        </BrowserRouter>
+      </TeamsProvider>
     </UserProvider>
   </React.StrictMode>
 )

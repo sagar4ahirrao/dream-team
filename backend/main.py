@@ -13,7 +13,7 @@ from contextlib import asynccontextmanager
 from fastapi.responses import StreamingResponse, Response
 import json, asyncio
 from magentic_one_helper import MagenticOneHelper
-from autogen_agentchat.messages import MultiModalMessage, TextMessage, ToolCallExecutionEvent, ToolCallRequestEvent
+from autogen_agentchat.messages import MultiModalMessage, TextMessage, ToolCallExecutionEvent, ToolCallRequestEvent, SelectSpeakerEvent
 from autogen_agentchat.base import TaskResult
 from magentic_one_helper import generate_session_name
 import aisearch
@@ -217,6 +217,10 @@ async def display_log_message(log_entry, logs_dir, session_id, user_id, conversa
         _response.source = _log_entry_json.source
         _response.content = _log_entry_json.content[0].arguments # tool execution
 
+    elif isinstance(_log_entry_json, SelectSpeakerEvent):
+        _response.type = _log_entry_json.type
+        _response.source = _log_entry_json.source
+        _response.content = _log_entry_json.content[0]
     else:
         _response.type = "N/A"
         _response.source = "N/A"
