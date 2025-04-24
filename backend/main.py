@@ -205,6 +205,30 @@ async def display_log_message(log_entry, logs_dir, session_id, user_id, conversa
         _response.type = _log_entry_json.type
         _response.source = _log_entry_json.source
         _response.content = _log_entry_json.content
+        # Custom logic for Executor with base64 image
+        if _log_entry_json.source == "Executor":
+            import ast
+            import re
+            content = _log_entry_json.content
+            try:
+                if isinstance(content, str) and "'type': 'image'" in content and "'base64_data':" in content:
+                    pattern = r"\{[^{}]*'type': 'image'[^{}]*'base64_data':[^{}]*\}"
+                    match = re.search(pattern, content)
+                    if match:
+                        img_dict_str = match.group(0)
+                        img_dict = ast.literal_eval(img_dict_str)
+                        if (
+                            isinstance(img_dict, dict)
+                            and img_dict.get('type') == 'image'
+                            and img_dict.get('format') == 'png'
+                            and 'base64_data' in img_dict
+                        ):
+                            _response.content_image = f"data:image/png;base64,{img_dict['base64_data']}"
+                            # Remove the dict substring from the content
+                            cleaned_content = content.replace(img_dict_str, "").strip()
+                            _response.content = cleaned_content
+            except Exception:
+                pass
 
     elif isinstance(_log_entry_json, ToolCallExecutionEvent):
         _response.type = _log_entry_json.type
