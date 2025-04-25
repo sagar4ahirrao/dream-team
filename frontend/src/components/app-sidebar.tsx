@@ -61,22 +61,15 @@ const data = {
       title: "Documentation",
       url: "#",
       icon: BookOpen,
+      isActive: true,
       items: [
         {
           title: "Introduction",
-          url: "#",
+          url: "/documentation/introduction",
         },
         {
           title: "Get Started",
-          url: "#",
-        },
-        {
-          title: "Tutorials",
-          url: "#",
-        },
-        {
-          title: "Changelog",
-          url: "#",
+          url: "/documentation/get-started",
         },
       ],
     },
@@ -84,14 +77,11 @@ const data = {
       title: "Settings",
       url: "#",
       icon: Settings2,
+      isActive: true,
       items: [
         {
           title: "General",
-          url: "#",
-        },
-        {
-          title: "Team",
-          url: "#",
+          url: "/settings/general",
         },
       ],
     },
