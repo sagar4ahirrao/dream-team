@@ -44,7 +44,7 @@
         {
             "id": "task-2",
             "name": "Plot data",
-            "prompt": "Analyze sensor data. Plot time series for Temperature using simple mathplotlib.",
+            "prompt": "Analyze sensor data. Plot time series for Temperature using simple mathplotlib. Execute script and describe the results.",
             "created": "2025-04-24T12:04:51.887Z",
             "creator": "system"
         }
