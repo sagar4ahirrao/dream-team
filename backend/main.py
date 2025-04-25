@@ -488,6 +488,7 @@ from fastapi import HTTPException
 async def get_teams_api():
     try:
         teams = app.state.db.get_teams()
+        # teams= []
         return teams
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Error retrieving teams: {str(e)}")
@@ -534,3 +535,14 @@ async def delete_team_api(team_id: str):
         return response
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Error deleting team: {str(e)}")
+    
+
+@app.post("/inititalize-teams")
+async def initialize_teams_api():
+    try:
+        # Initialize the teams in the database
+        msg = app.state.db.initialize_teams()
+        msg = "DUMMY: Teams initialized successfully."
+        return {"status": "success", "message": msg}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error initializing teams: {str(e)}")
