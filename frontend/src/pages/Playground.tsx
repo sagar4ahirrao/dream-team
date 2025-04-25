@@ -18,7 +18,7 @@ import { ThemeProvider } from "@/components/theme-provider"
 // import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
 import { Card, CardContent, CardFooter} from "@/components/ui/card"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
-import {  ChartNoAxesCombined, DollarSign, Dot, Gamepad2, Info, Loader2, SendHorizonal, ShieldAlert, ShoppingBasket, Soup, Terminal, Volleyball, Wrench} from "lucide-react"
+import {  ChartNoAxesCombined, CloudUpload, DollarSign, Dot, Edit, Gamepad2, Info, Loader2, SendHorizonal, ShieldAlert, ShoppingBasket, Soup, Terminal, Volleyball, Wrench} from "lucide-react"
 import { Button } from "@/components/ui/button"
 
 // import remarkBreaks from 'remark-breaks'
@@ -40,6 +40,7 @@ import { Footer } from "@/components/Footer";
 // If you need teams or methods:
 import { Team, Agent, useTeamsContext } from '@/contexts/TeamsContext';
 
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog"
 
 // Define environment variables with default values
 const BASE_URL = import.meta.env.VITE_BASE_URL;
@@ -91,7 +92,7 @@ export default function App() {
   const [isTyping, setIsTyping] = useState(false);
   const { userInfo } = useUserContext();
   // const { teams } = useTeamsContext();
-  const { teams, loading } = useTeamsContext();
+  const { teams, loading, reloadTeams } = useTeamsContext();
   const [agents, setAgents] = useState<Agent[]>([]);
   const [selectedTeam, setSelectedTeam] = useState<Team | null>(null);
 
@@ -239,7 +240,64 @@ export default function App() {
     }
   }
 
-  if (loading || !selectedTeam) {
+  // Dialog state for teams initialization
+  const [showTeamsDialog, setShowTeamsDialog] = useState(false);
+
+  // Show dialog if teams is empty and not loading
+  useEffect(() => {
+    if (!loading && teams.length === 0) {
+      setShowTeamsDialog(true);
+    } else {
+      setShowTeamsDialog(false);
+    }
+  }, [loading, teams]);
+
+  // Handlers for dialog actions
+  const handleInitializeTeams = async () => {
+    try {
+      await axios.post(`${BASE_URL}/inititalize-teams`);
+      // Reload teams list
+      await reloadTeams();
+      setShowTeamsDialog(false);
+
+      // window.location.reload();
+    } catch (error) {
+      console.error('Failed to initialize teams:', error);
+    }
+  };
+
+  if (!loading && teams.length === 0) {
+    return (
+      <ThemeProvider defaultTheme="light" storageKey="vite-ui-theme">
+        <SidebarProvider defaultOpen={true}>
+          <AppSidebar onTeamSelect={handleTeamSelect} />
+          <SidebarInset>
+            <div className="flex items-center justify-center h-40">
+              <Loader2 className="h-8 w-8 animate-spin" /> Empty teams...
+              {/* Teams empty dialog */}
+              <Dialog open={showTeamsDialog}>
+                <DialogContent>
+                  <DialogHeader>
+                    <DialogTitle>
+                      <ShieldAlert className="mr-2 inline h-12 w-12 text-red-500" />
+                      Looks like you have no teams.
+                    </DialogTitle>
+                  </DialogHeader>
+                  <DialogFooter className="flex flex-row gap-2 justify-end">
+                    <Button variant="destructive" onClick={handleInitializeTeams}><CloudUpload /> Initialize</Button>
+                    <Button asChild variant="outline">
+                      <a href="/agents"><Edit />Create your own</a>
+                    </Button>
+                  </DialogFooter>
+                </DialogContent>
+              </Dialog>
+            </div>
+          </SidebarInset>
+        </SidebarProvider>
+      </ThemeProvider>
+    );
+  }
+  else if (loading || !selectedTeam) {
     return (
       <ThemeProvider defaultTheme="light" storageKey="vite-ui-theme">
         <SidebarProvider defaultOpen={true}>
@@ -253,179 +311,182 @@ export default function App() {
       </ThemeProvider>
     );
   }
+
   return (
     <ThemeProvider defaultTheme="light" storageKey="vite-ui-theme">
-    {!isAuthenticated ? (
-      <LoginCard handleLogin={handleLogin} />
-    ) : (
-    <SidebarProvider defaultOpen={true}>
-      <AppSidebar onTeamSelect={handleTeamSelect} /> {/* Remove onUserNameChange prop */}
-      <SidebarInset>
-        <header className="flex sticky top-0 bg-background h-14 shrink-0 items-center gap-2 border-b px-4 z-10 shadow">
-          <div className="flex items-center gap-2 px-4 w-full">
-            {/* <img src={banner} alt="Banner" className="h-64" /> */}
-            {/* <SidebarTrigger />   */}
-            {/* <Bot className="h-8 w-8" /> */}
-            <img src={ag  } alt="Banner" className="h-8" />
-            <Separator orientation="vertical" className="mr-2 h-4" />
-            <Breadcrumb>
-              <BreadcrumbList>
-                <BreadcrumbItem className="hidden md:block">
-                  <BreadcrumbLink href="#">
-                    AutoGen & MagenticOne demo
-                  </BreadcrumbLink>
-                </BreadcrumbItem>
-                <BreadcrumbSeparator className="hidden md:block" />
-                <BreadcrumbItem>
-                  <BreadcrumbPage>Playground</BreadcrumbPage>
-                </BreadcrumbItem>
-              </BreadcrumbList>
-            </Breadcrumb>
-            <div className="ml-auto hidden items-center gap-2 md:flex">
+      
+      {/* Main content */}
+      {!isAuthenticated ? (
+        <LoginCard handleLogin={handleLogin} />
+      ) : (
+      <SidebarProvider defaultOpen={true}>
+        <AppSidebar onTeamSelect={handleTeamSelect} /> {/* Remove onUserNameChange prop */}
+        <SidebarInset>
+          <header className="flex sticky top-0 bg-background h-14 shrink-0 items-center gap-2 border-b px-4 z-10 shadow">
+            <div className="flex items-center gap-2 px-4 w-full">
+              {/* <img src={banner} alt="Banner" className="h-64" /> */}
+              {/* <SidebarTrigger />   */}
+              {/* <Bot className="h-8 w-8" /> */}
+              <img src={ag  } alt="Banner" className="h-8" />
+              <Separator orientation="vertical" className="mr-2 h-4" />
+              <Breadcrumb>
+                <BreadcrumbList>
+                  <BreadcrumbItem className="hidden md:block">
+                    <BreadcrumbLink href="#">
+                      AutoGen & MagenticOne demo
+                    </BreadcrumbLink>
+                  </BreadcrumbItem>
+                  <BreadcrumbSeparator className="hidden md:block" />
+                  <BreadcrumbItem>
+                    <BreadcrumbPage>Playground</BreadcrumbPage>
+                  </BreadcrumbItem>
+                </BreadcrumbList>
+              </Breadcrumb>
+              <div className="ml-auto hidden items-center gap-2 md:flex">
      
-            {/* if the session end display elapsed time */}
-            <div className="flex gap-0 p-0 pt-0 justify-end">
-              {sessionTime && !isTyping ? (
-                <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                  <p className='text-sm text-muted-foreground'>Session {sessionID} completed in {sessionTime}s.</p>
-                  <Button variant="secondary" onClick={() => stopSession()}>
-                    Run new
-                  </Button>
-                </div>
-              ) : null}
-              {isTyping ? (
-                <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                  <p className='text-sm text-muted-foreground'>Running {sessionID} session...</p>
-                  <Loader2 className="lucide lucide-loader2 mr-2 h-4 animate-spin loader-green" />
-                  {/* button to stop the session */}
-                  <Button variant="destructive" onClick={() => stopSession()}>Stop</Button>
-                </div>
-              ) : <p className='text-sm text-muted-foreground loader-green'></p>}
-            </div>
+              {/* if the session end display elapsed time */}
+              <div className="flex gap-0 p-0 pt-0 justify-end">
+                {sessionTime && !isTyping ? (
+                  <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                    <p className='text-sm text-muted-foreground'>Session {sessionID} completed in {sessionTime}s.</p>
+                    <Button variant="secondary" onClick={() => stopSession()}>
+                      Run new
+                    </Button>
+                  </div>
+                ) : null}
+                {isTyping ? (
+                  <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                    <p className='text-sm text-muted-foreground'>Running {sessionID} session...</p>
+                    <Loader2 className="lucide lucide-loader2 mr-2 h-4 animate-spin loader-green" />
+                    {/* button to stop the session */}
+                    <Button variant="destructive" onClick={() => stopSession()}>Stop</Button>
+                  </div>
+                ) : <p className='text-sm text-muted-foreground loader-green'></p>}
+              </div>
         
    
-            {/* <Separator orientation="vertical" className="mr-2 h-4" /> */}
-            <ModeToggle />
-            {/* <Separator orientation="vertical" className="mr-2 h-4" /> */}
-            {/* {isAuthenticated ? (
-              <Button variant="outline" onClick={handleLogout}>
-                <LogOut />Log out
-              </Button>
-            ) : null} */}
-                
+              {/* <Separator orientation="vertical" className="mr-2 h-4" /> */}
+              <ModeToggle />
+              {/* <Separator orientation="vertical" className="mr-2 h-4" /> */}
+              {/* {isAuthenticated ? (
+                <Button variant="outline" onClick={handleLogout}>
+                  <LogOut />Log out
+                </Button>
+              ) : null} */}
+                  
+              </div>
             </div>
-          </div>
-        </header>
-        {/* Main content */}
-       
+          </header>
+          {/* Main content */}
+         
 
-        <div className="flex flex-1 flex-col gap-4 p-4 pt-0">
-          <Separator  />
-          {/* Agents setup */}
-          <AgentsSetup
-              team={selectedTeam}
-              getAvatarSrc={getAvatarSrc}
-              isCollapsed={isTyping || (sessionTime) ? true : false}
-            />
-           {/* if session is running display loader */}
-          <div className="min-h-[100vh] flex-1 rounded-xl bg-muted/50 md:min-h-min">
-            {/* Chat Interface */}
-            <Card className={`md:col-span-2 h-full flex flex-col`}>
-              <CardContent className="flex-1 h-96">
-                <Separator className='my-2 invisible'/>
-                <div className="space-y-4">
-                  {chatHistory.map((message, index) => (
-                    <div key={index} className={`flex ${message.user === 'User' ? 'justify-end' : 'justify-start'}`}>
-                      <div className={`p-2 rounded-lg shadow ${message.user === 'User' ? 'group/message relative break-words rounded-lg p-3 text-sm sm:max-w-[70%] bg-primary text-primary-foreground duration-300 animate-in fade-in-0 zoom-in-75 origin-bottom-right' : 'group/message relative break-words rounded-lg p-3 text-sm sm:max-w-[96%] bg-muted text-foreground duration-300 animate-in fade-in-0 zoom-in-75 origin-bottom-left'}`}>
-                        <div className="flex items-center space-x-2">
-                          <Avatar>
-                            <AvatarImage src={getAvatarSrc(message.user)} />
-                            <AvatarFallback>{getAvatarFallback(message.user)}</AvatarFallback>
-                            {/* <Bot className="ml-autoaspect-square h-full w-full" /> */}
-                          </Avatar>
-                          <div className="break-all max-w-[100%] message">
-                            <p className="text-sm font-semibold">{message.user}</p>
-                            <MarkdownRenderer markdownText={message.message} />
-                            {/* Display image if available */}
-                            {message.content_image && (
-                              <img src={`${message.content_image}`} alt="content" className="mt-2 max-w-[625px]" />
-                            )}
-                            {/* <MarkdownRenderer>{message.message}</MarkdownRenderer> */}
-                            <p className="text-xs text-muted-foreground">{message.time && new Date(message.time).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit',hour12: false })}</p>
+          <div className="flex flex-1 flex-col gap-4 p-4 pt-0">
+            <Separator  />
+            {/* Agents setup */}
+            <AgentsSetup
+                team={selectedTeam}
+                getAvatarSrc={getAvatarSrc}
+                isCollapsed={isTyping || (sessionTime) ? true : false}
+              />
+             {/* if session is running display loader */}
+            <div className="min-h-[100vh] flex-1 rounded-xl bg-muted/50 md:min-h-min">
+              {/* Chat Interface */}
+              <Card className={`md:col-span-2 h-full flex flex-col`}>
+                <CardContent className="flex-1 h-96">
+                  <Separator className='my-2 invisible'/>
+                  <div className="space-y-4">
+                    {chatHistory.map((message, index) => (
+                      <div key={index} className={`flex ${message.user === 'User' ? 'justify-end' : 'justify-start'}`}>
+                        <div className={`p-2 rounded-lg shadow ${message.user === 'User' ? 'group/message relative break-words rounded-lg p-3 text-sm sm:max-w-[70%] bg-primary text-primary-foreground duration-300 animate-in fade-in-0 zoom-in-75 origin-bottom-right' : 'group/message relative break-words rounded-lg p-3 text-sm sm:max-w-[96%] bg-muted text-foreground duration-300 animate-in fade-in-0 zoom-in-75 origin-bottom-left'}`}>
+                          <div className="flex items-center space-x-2">
+                            <Avatar>
+                              <AvatarImage src={getAvatarSrc(message.user)} />
+                              <AvatarFallback>{getAvatarFallback(message.user)}</AvatarFallback>
+                              {/* <Bot className="ml-autoaspect-square h-full w-full" /> */}
+                            </Avatar>
+                            <div className="break-all max-w-[100%] message">
+                              <p className="text-sm font-semibold">{message.user}</p>
+                              <MarkdownRenderer markdownText={message.message} />
+                              {/* Display image if available */}
+                              {message.content_image && (
+                                <img src={`${message.content_image}`} alt="content" className="mt-2 max-w-[625px]" />
+                              )}
+                              {/* <MarkdownRenderer>{message.message}</MarkdownRenderer> */}
+                              <p className="text-xs text-muted-foreground">{message.time && new Date(message.time).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit',hour12: false })}</p>
+                            </div>
+                          </div>
+                        </div>
+                       {/* <div className='inline'>
+                        <time className=" mt-1 block px-1 text-xs opacity-50 duration-500 animate-in fade-in-0">
+                          {message.time && new Date(message.time).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: false })}
+                        </time>
+                       </div> */}
+                      </div>
+                    ))}
+
+                    
+                    {isTyping ? (
+                      <div className="justify-left flex space-x-1">
+                        <div className="rounded-lg bg-muted p-3 shadow">
+                          <div className="flex -space-x-2.5">
+                          <Dot className='lucide lucide-dot h-5 w-5 animate-typing-dot-bounce' />
+                          <Dot className='lucide lucide-dot h-5 w-5 animate-typing-dot-bounce [animation-delay:90ms]' />
+                          <Dot className='lucide lucide-dot h-5 w-5 animate-typing-dot-bounce [animation-delay:180ms]' />
                           </div>
                         </div>
                       </div>
-                     {/* <div className='inline'>
-                      <time className=" mt-1 block px-1 text-xs opacity-50 duration-500 animate-in fade-in-0">
-                        {message.time && new Date(message.time).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: false })}
-                      </time>
-                     </div> */}
-                    </div>
-                  ))}
-
-                  
-                  {isTyping ? (
-                    <div className="justify-left flex space-x-1">
-                      <div className="rounded-lg bg-muted p-3 shadow">
-                        <div className="flex -space-x-2.5">
-                        <Dot className='lucide lucide-dot h-5 w-5 animate-typing-dot-bounce' />
-                        <Dot className='lucide lucide-dot h-5 w-5 animate-typing-dot-bounce [animation-delay:90ms]' />
-                        <Dot className='lucide lucide-dot h-5 w-5 animate-typing-dot-bounce [animation-delay:180ms]' />
-                        </div>
-                      </div>
-                    </div>
-                  ) : null}
-                </div>
-              </CardContent>
-              <CardFooter className="flex flex-col space-y-2">
-                <div className="relative w-full">
-                  <Textarea
-                    value={userMessage}
-                    onChange={(e) => setUserMessage(e.target.value)}
-                    onKeyDown={(e) => {
-                      if (e.key === 'Enter') {
-                        handleSendStreamingMessage();
-                      }
-                    }}
-                    placeholder="Type a message..."
-                    className="z-10 w-full h-36 grow resize-none rounded-xl border border-input bg-background p-3 pr-24 text-sm ring-offset-background transition-[border] placeholder:text-muted-foreground focus-visible:border-primary focus-visible:outline-none disabled:cursor-not-allowed disabled:opacity-50"
-                    disabled={isTyping}
-                  />
-                  <Button 
-                    onClick={handleSendStreamingMessage} 
-                    disabled={isTyping}
-                    className="absolute bottom-2 right-2"
-                  >
-                    <SendHorizonal />
-                  </Button>
-                </div>
-                <div className="relative w-full">
-                  <p className="text-xs text-muted-foreground">
-                    <Info className="mr-1 inline h-4 w-4" />
-                      AI-generated content may be incorrect.
-                  </p>
-                </div>
-                <div className="flex space-x-2">
-                    {selectedTeam.starting_tasks?.map(task => (
-                        <Button
-                            key={task.id} 
-                            variant="outline"
-                            className="text-sm bg-muted"
-                            onClick={() => setUserMessage(task.prompt)}
-                        >
-                            {task.name && getTaskIcon(task.name)} {task.name}
-                        </Button>
-                    ))}
-                </div>
-              </CardFooter>
-            </Card>
+                    ) : null}
+                  </div>
+                </CardContent>
+                <CardFooter className="flex flex-col space-y-2">
+                  <div className="relative w-full">
+                    <Textarea
+                      value={userMessage}
+                      onChange={(e) => setUserMessage(e.target.value)}
+                      onKeyDown={(e) => {
+                        if (e.key === 'Enter') {
+                          handleSendStreamingMessage();
+                        }
+                      }}
+                      placeholder="Type a message..."
+                      className="z-10 w-full h-36 grow resize-none rounded-xl border border-input bg-background p-3 pr-24 text-sm ring-offset-background transition-[border] placeholder:text-muted-foreground focus-visible:border-primary focus-visible:outline-none disabled:cursor-not-allowed disabled:opacity-50"
+                      disabled={isTyping}
+                    />
+                    <Button 
+                      onClick={handleSendStreamingMessage} 
+                      disabled={isTyping}
+                      className="absolute bottom-2 right-2"
+                    >
+                      <SendHorizonal />
+                    </Button>
+                  </div>
+                  <div className="relative w-full">
+                    <p className="text-xs text-muted-foreground">
+                      <Info className="mr-1 inline h-4 w-4" />
+                        AI-generated content may be incorrect.
+                    </p>
+                  </div>
+                  <div className="flex space-x-2">
+                      {selectedTeam.starting_tasks?.map(task => (
+                          <Button
+                              key={task.id} 
+                              variant="outline"
+                              className="text-sm bg-muted"
+                              onClick={() => setUserMessage(task.prompt)}
+                          >
+                              {task.name && getTaskIcon(task.name)} {task.name}
+                          </Button>
+                      ))}
+                  </div>
+                </CardFooter>
+              </Card>
+            </div>
           </div>
-        </div>
-        {/* Footer */}
-        <Footer />
-      </SidebarInset>
-    </SidebarProvider>
-    )}
+          {/* Footer */}
+          <Footer />
+        </SidebarInset>
+      </SidebarProvider>
+      )}
     </ThemeProvider>
   )
 }

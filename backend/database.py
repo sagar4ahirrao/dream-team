@@ -262,6 +262,20 @@ class CosmosDB:
         response = container.delete_item(item=existing_team["id"], partition_key=existing_team["id"])
         return response
 
+    def initialize_teams(self):
+        teams_folder = os.path.join(os.path.dirname(__file__), "./data/teams-definitions")
+        json_files = glob.glob(os.path.join(teams_folder, "*.json"))
+        json_files.sort()
+        print(f"Found {len(json_files)} JSON files in {teams_folder}.")
+        created_items = 0
+        for file_path in json_files:
+            with open(file_path, "r") as f:
+                team = json.load(f)
+            response = self.create_team(team)
+            print(f"Created team from {os.path.basename(file_path)}")
+            created_items += 1
+        print(f"Created {created_items}/{len(json_files)} items in the database.")
+        return f"Successfully created {created_items} teams."
 if __name__ == "__main__":
     db = CosmosDB()
     teams_folder = os.path.join(os.path.dirname(__file__), "./data/teams-definitions")
