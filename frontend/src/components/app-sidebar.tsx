@@ -65,11 +65,11 @@ const data = {
       items: [
         {
           title: "Introduction",
-          url: "/documentation/introduction",
+          url: "/introduction",
         },
         {
           title: "Get Started",
-          url: "/documentation/get-started",
+          url: "/get-started",
         },
       ],
     },
@@ -81,7 +81,7 @@ const data = {
       items: [
         {
           title: "General",
-          url: "/settings/general",
+          url: "/general",
         },
       ],
     },

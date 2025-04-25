@@ -33,9 +33,9 @@ function App() {
       <Route path="/" element={<Playground />} />
       <Route path="/agents" element={<Agents />} />
       <Route path="/playground-history" element={<PlaygroundHistory />} />
-      <Route path="/documentation/introduction" element={<Introduction />} />
-      <Route path="/documentation/get-started" element={<GetStarted />} />
-      <Route path="/settings/general" element={<GeneralSettings />} />
+      <Route path="/introduction" element={<Introduction />} />
+      <Route path="/get-started" element={<GetStarted />} />
+      <Route path="/general" element={<GeneralSettings />} />
     </Routes>
   );
 }
