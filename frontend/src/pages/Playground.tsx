@@ -18,7 +18,7 @@ import { ThemeProvider } from "@/components/theme-provider"
 // import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
 import { Card, CardContent, CardFooter} from "@/components/ui/card"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
-import {  ChartNoAxesCombined, DollarSign, Dot, Gamepad2, Loader2, SendHorizonal, ShieldAlert, ShoppingBasket, Soup, Terminal, Volleyball, Wrench} from "lucide-react"
+import {  ChartNoAxesCombined, DollarSign, Dot, Gamepad2, Info, Loader2, SendHorizonal, ShieldAlert, ShoppingBasket, Soup, Terminal, Volleyball, Wrench} from "lucide-react"
 import { Button } from "@/components/ui/button"
 
 // import remarkBreaks from 'remark-breaks'
@@ -137,43 +137,6 @@ export default function App() {
     }
   };
   
-
-
-  // const handleSendMessage = async () => {
-  //   if (userMessage.trim()) {
-  //     // const newMessage = { user: 'User', message: userMessage };
-  //     const newMessage: ChatMessage = {
-  //       user: 'User',
-  //       message: userMessage,
-  //       time: new Date().toISOString(),
-  //       // content: response.data.content,
-  //       source: 'User',
-  //     };
-  //     setChatHistory((prev) => [...prev, newMessage]);
-  
-  //     try {
-        
-  //       const response = await axios.post('http://localhost:8000/chat', { content: userMessage, agents: JSON.stringify(agents)});
-  //       console.log('Response:', response.data);
-  //       const aiMessage: ChatMessage = {
-  //         user: response.data.source,
-  //         message: response.data.content,
-  //         time: response.data.time,
-  //         // content: response.data.content,
-  //         source: response.data.source,
-  //         stop_reason: response.data.stop_reason,
-  //         models_usage: response.data.models_usage,
-  //         content_image: response.data.content_image,
-  //       };
-  //       console.log('New message:', aiMessage);
-  //       // const aiMessage = { user: 'MagenticOneOrchestrator', message: String(newMessage.content).replace(/\n$/, '') };
-  //       setChatHistory((prev) => [...prev, aiMessage]);
-  //     } catch (error) {
-  //       console.error('Chat error:', error);
-  //     }
-  //     setUserMessage('');
-  //   }
-  // };
 
   const handleSendStreamingMessage = async () => {
     if (!userMessage.trim()) return;
@@ -414,7 +377,7 @@ export default function App() {
                   ) : null}
                 </div>
               </CardContent>
-                           <CardFooter className="flex flex-col space-y-2">
+              <CardFooter className="flex flex-col space-y-2">
                 <div className="relative w-full">
                   <Textarea
                     value={userMessage}
@@ -436,7 +399,13 @@ export default function App() {
                     <SendHorizonal />
                   </Button>
                 </div>
-                                <div className="flex space-x-2">
+                <div className="relative w-full">
+                  <p className="text-xs text-muted-foreground">
+                    <Info className="mr-1 inline h-4 w-4" />
+                      AI-generated content may be incorrect.
+                  </p>
+                </div>
+                <div className="flex space-x-2">
                     {selectedTeam.starting_tasks?.map(task => (
                         <Button
                             key={task.id} 

@@ -177,6 +177,7 @@ output STATIC_SITE_ENDPOINT string = frontend.outputs.staticSiteEndpoint
 output COSMOS_DB_URI string = backend.outputs.cosmosdb_uri
 output COSMOS_DB_DATABASE string = backend.outputs.cosmosdb_database
 output CONTAINER_NAME string = backend.outputs.container_name
+output CONTAINER_TEAMS_NAME string = backend.outputs.container_teams_name
 output AZURE_SEARCH_SERVICE_ENDPOINT string = backend.outputs.ai_search_endpoint
 output AZURE_RESOURCE_GROUP string = rg.name
 

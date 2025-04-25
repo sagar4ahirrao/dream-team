@@ -26,6 +26,7 @@ load_dotenv()
 
 from magentic_one_custom_agent import MagenticOneCustomAgent
 from magentic_one_custom_rag_agent import MagenticOneRAGAgent
+from magentic_one_custom_mcp_agent import MagenticOneCustomMCPAgent
 
 azure_credential = DefaultAzureCredential()
 token_provider = get_bearer_token_provider(
@@ -191,6 +192,16 @@ class MagenticOneHelper:
 
                 agent_list.append(custom_agent)
                 print(f'{agent["name"]} (custom) added!')
+            
+            elif (agent["type"] == "CustomMCP"):
+                custom_agent = await MagenticOneCustomMCPAgent.create(
+                    agent["name"], 
+                    client, 
+                    agent["system_message"], 
+                    agent["description"])
+                agent_list.append(custom_agent)
+                print(f'{agent["name"]} (custom MCP) added!')
+
             
             # This is custom agent - RAG agent - you need to specify index_name and Azure Cognitive Search service endpoint and admin key in .env file
             elif (agent["type"] == "RAG"):

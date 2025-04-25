@@ -4,6 +4,9 @@ import { BrowserRouter, Routes, Route } from 'react-router-dom'
 import Playground from './pages/Playground'
 import Agents from './pages/Agents'
 import PlaygroundHistory from './pages/Playground-history'
+import Introduction from './pages/Introduction'
+import GetStarted from './pages/GetStarted'
+import GeneralSettings from './pages/GeneralSettings'
 import './index.css'
 import { UserProvider, UserContext, getUserInfo } from './contexts/UserContext'
 import { TeamsProvider } from './contexts/TeamsContext'
@@ -30,6 +33,9 @@ function App() {
       <Route path="/" element={<Playground />} />
       <Route path="/agents" element={<Agents />} />
       <Route path="/playground-history" element={<PlaygroundHistory />} />
+      <Route path="/introduction" element={<Introduction />} />
+      <Route path="/get-started" element={<GetStarted />} />
+      <Route path="/general" element={<GeneralSettings />} />
     </Routes>
   );
 }

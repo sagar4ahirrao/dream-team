@@ -128,6 +128,23 @@ resource cosmosDbContainer 'Microsoft.DocumentDB/databaseAccounts/sqlDatabases/c
   }
 }
 
+resource cosmosDbContainerTeams 'Microsoft.DocumentDB/databaseAccounts/sqlDatabases/containers@2021-04-15' = {
+  name: 'agent_teams'
+  parent: cosmosDBDatabase
+  properties: {
+    resource: {
+      id: 'agent_teams'
+      partitionKey: {
+        paths: [
+          '/team_id'
+        ]
+        kind: 'Hash'
+      }
+      // Optionally add indexing policy, uniqueKeyPolicy, etc.
+    }
+  }
+}
+
 // Create Storage Account with private endpoint in the default subnet
 resource storageAcct 'Microsoft.Storage/storageAccounts@2021-09-01' = {
   name: storageName
@@ -388,6 +405,10 @@ resource app 'Microsoft.App/containerApps@2023-05-02-preview' = {
               value: 'ag_demo'
             }
             {
+              name: 'CONTAINER_TEAMS_NAME'
+              value: 'agent_teams'
+            }
+            {
               name: 'AZURE_SEARCH_SERVICE_ENDPOINT'
               value: 'https://${aiSearch.name}.search.windows.net'
             }
@@ -609,6 +630,7 @@ output pool_endpoint string = dynamicsession.properties.poolManagementEndpoint
 output cosmosdb_uri string = cosmosDb.properties.documentEndpoint
 output cosmosdb_database string = 'ag_demo'
 output container_name string = 'ag_demo'
+output container_teams_name string = 'agent_teams'
 output cosmosDbId string = cosmosDb.id
 output storageAccountId string = storageAcct.id
 output storageAccountEndpoint string = storageAcct.properties.primaryEndpoints.blob
