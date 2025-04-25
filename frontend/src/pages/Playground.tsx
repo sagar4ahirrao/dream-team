@@ -273,7 +273,7 @@ export default function App() {
           <AppSidebar onTeamSelect={handleTeamSelect} />
           <SidebarInset>
             <div className="flex items-center justify-center h-40">
-              <Loader2 className="h-8 w-8 animate-spin" /> AAALoading teams...
+              <Loader2 className="h-8 w-8 animate-spin" /> Empty teams...
               {/* Teams empty dialog */}
               <Dialog open={showTeamsDialog}>
                 <DialogContent>
