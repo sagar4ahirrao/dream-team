@@ -34,7 +34,6 @@ const ACTIVATION_CODE = import.meta.env.VITE_ACTIVATON_CODE || "0000";
 import { Footer } from '@/components/Footer'
 
 import { Agent, Team, useTeamsContext } from '@/contexts/TeamsContext';
-import { AlarmClock } from 'lucide-react'
 import { Card, CardHeader,CardContent, CardFooter} from "@/components/ui/card"
 
 export default function Introduction() {
