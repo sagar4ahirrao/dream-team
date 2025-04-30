@@ -41,15 +41,16 @@ export interface Team {
 interface TeamsContextType {
   teams: Team[];
   loading: boolean;
-  addAgent: (team_id: string, name: string, description: string, systemMessage: string) => void;
+  addAgent: (team_id: string, name: string, description: string, systemMessage: string, icon: string) => void;
   addRAGAgent: (
     team_id: string,
     name: string,
     description: string,
     indexName: string,
-    files?: FileList | null
+    files?: FileList | null,
+    icon?: string // <-- add icon param (optional for backward compatibility)
   ) => Promise<void>;
-  editAgent: (team_id: string, inputKey: string, name: string, description: string, systemMessage: string) => void;
+  editAgent: (team_id: string, inputKey: string, name: string, description: string, systemMessage: string, icon: string) => void;
   removeAgent: (team_id: string, inputKey: string) => void;
   reloadTeams: () => Promise<void>;
   saveTeam: (team: Team) => Promise<void>; // <-- new function
@@ -165,20 +166,19 @@ export const TeamsProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     }
   };
 
-  const addAgent = (team_id: string, name: string, description: string, systemMessage: string) => {
+  const addAgent = (team_id: string, name: string, description: string, systemMessage: string, icon: string) => {
     setTeams((prev) =>
       prev.map((t) => {
         if (t.team_id !== team_id) return t;
         // Generate a new input_key as random GUID
         const newInputKey = crypto.randomUUID();
         const newAgent: Agent = {
-          // input_key: String(t.agents.length + 1).padStart(4, '0'),
           input_key: newInputKey,
           type: 'Custom',
           name,
           system_message: systemMessage,
           description,
-          icon: '🤖',
+          icon,
           index_name: '',
         };
         return { ...t, agents: [...t.agents, newAgent] };
@@ -186,13 +186,13 @@ export const TeamsProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     );
   };
 
-  const editAgent = (team_id: string, inputKey: string, name: string, description: string, systemMessage: string) => {
+  const editAgent = (team_id: string, inputKey: string, name: string, description: string, systemMessage: string, icon: string) => {
     setTeams((prev) =>
       prev.map((t) => {
         if (t.team_id !== team_id) return t;
         const updatedAgents = t.agents.map((agent) =>
           agent.input_key === inputKey
-            ? { ...agent, name, description, system_message: systemMessage }
+            ? { ...agent, name, description, system_message: systemMessage, icon }
             : agent
         );
         return { ...t, agents: updatedAgents };
@@ -205,15 +205,14 @@ export const TeamsProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     name: string,
     description: string,
     indexName: string,
-    files?: FileList | null
+    files?: FileList | null,
+    icon: string = "🤖"
   ): Promise<void> => {
-
     const team = teams.find((team) => team.team_id === team_id);
     if (!team) {
       console.error(`Team with ID ${team_id} not found.`);
       return;
     }
-
     if (files && files.length > 0) {
       const temporaryRandomName = Math.random().toString(36).substring(2, 15);
       const newAgent = {
@@ -222,8 +221,8 @@ export const TeamsProvider: React.FC<{ children: React.ReactNode }> = ({ childre
         name: "Processing & Uploading...",
         system_message: "",
         description,
-        icon: "⌛",
-        index_name: "tmp"
+        icon: icon || "⌛",
+        index_name: indexName
       };
       setTeams((prevTeams) =>
         prevTeams.map((team) =>
@@ -259,13 +258,14 @@ export const TeamsProvider: React.FC<{ children: React.ReactNode }> = ({ childre
         );
       }
     }
+    // Add the actual RAG agent
     const newAgent = {
       input_key: (team.agents.length + 1).toString().padStart(4, '0'),
       type: "RAG",
       name,
       system_message: "",
       description,
-      icon: "🤖",
+      icon: icon || "🤖",
       index_name: indexName
     };
     setTeams((prevTeams) =>

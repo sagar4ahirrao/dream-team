@@ -12,7 +12,7 @@
             "name": "Coder",
             "system_message": "",
             "description": "",
-            "icon": "👨‍💻"
+            "icon": "Terminal"
         },
         {
             "input_key": "36b4084fx-20002",
@@ -20,7 +20,7 @@
             "name": "Executor",
             "system_message": "",
             "description": "",
-            "icon": "💻",
+            "icon": "MonitorCog",
             "index_name": ""
         },
         {
@@ -29,7 +29,7 @@
             "name": "DataConnector",
             "system_message": "You are helpful Data provider. Your task is to porivde data in form of CSV format.",
             "description": "This agent is serving data. Use where there is need to fetch data for analysis.",
-            "icon": "🤖",
+            "icon": "DatabaseZap",
             "index_name": ""
         }
     ],
@@ -53,11 +53,5 @@
             "creator": "system",
             "logo": "AudioWaveform"
         }
-    ],
-    "_rid": "yJpNAMxuyT9WAAAAAAAAAA==",
-    "_self": "dbs/yJpNAA==/colls/yJpNAMxuyT8=/docs/yJpNAMxuyT9WAAAAAAAAAA==/",
-    "_etag": "\"23003359-0000-0c00-0000-6812089d0000\"",
-    "_attachments": "attachments/",
-    "protected": false,
-    "_ts": 1746012317
+    ]
 }

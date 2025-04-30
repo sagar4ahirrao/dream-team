@@ -1,13 +1,37 @@
 import React, { useState } from 'react';
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
 import { Separator } from '@/components/ui/separator';
 import { Trash, Plus, Edit, Download, Save, Loader2, Lock, Map, AudioWaveform, ChartNoAxesCombined, DollarSign, ShieldAlert, ShoppingBasket, Wrench, Soup, Volleyball, Gamepad2, Terminal } from 'lucide-react';
+import { MonitorCog, Globe, File, BookMarked, Bot, Search, DatabaseZap } from 'lucide-react';
 import { Dialog, DialogTrigger, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogClose, DialogFooter } from '@/components/ui/dialog';
 import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { useTeamsContext, Agent, Team } from '@/contexts/TeamsContext';
+
+// Icon options for selection (updated)
+const iconOptions = [
+  { value: 'Soup', label: 'Soup', icon: Soup },
+  { value: 'Volleyball', label: 'Football', icon: Volleyball },
+  { value: 'ChartNoAxesCombined', label: 'Market assessment', icon: ChartNoAxesCombined },
+  { value: 'Wrench', label: 'Predictive Maintenance', icon: Wrench },
+  { value: 'ShieldAlert', label: 'Safety', icon: ShieldAlert },
+  { value: 'DollarSign', label: 'Loan Upsell', icon: DollarSign },
+  { value: 'ShoppingBasket', label: 'Retail', icon: ShoppingBasket },
+  { value: 'Gamepad2', label: 'Gaming', icon: Gamepad2 },
+  { value: 'Terminal', label: 'Generate script', icon: Terminal },
+  { value: 'AudioWaveform', label: 'Audio', icon: AudioWaveform },
+  { value: 'Map', label: 'Map', icon: Map },
+  { value: 'MonitorCog', label: 'Monitor', icon: MonitorCog },
+  { value: 'Globe', label: 'Web', icon: Globe },
+  { value: 'File', label: 'File', icon: File },
+  { value: 'BookMarked', label: 'Bookmark', icon: BookMarked },
+  { value: 'Bot', label: 'Bot', icon: Bot },
+  { value: 'Search', label: 'Search', icon: Search },
+  { value: 'ChartNoAxesCombined', label: 'ChartNoAxesCombined', icon: ChartNoAxesCombined },
+  { value: 'DatabaseZap', label: 'DatabaseZap', icon: DatabaseZap },
+];
 
 interface AgentsSetupProps {
   team: Team;
@@ -16,7 +40,7 @@ interface AgentsSetupProps {
   showDetails: boolean;
 }
 
-export function AgentsSetup({ team, getAvatarSrc, isCollapsed, showDetails }: AgentsSetupProps) {
+export function AgentsSetup({ team, isCollapsed, showDetails }: AgentsSetupProps) {
   const { addAgent, removeAgent, addRAGAgent, editAgent, saveTeam } = useTeamsContext();
   const [editingAgent, setEditingAgent] = useState<Agent | null>(null);
   const [hasTeamChanged, setHasTeamChanged] = useState<boolean>(false);
@@ -29,6 +53,8 @@ export function AgentsSetup({ team, getAvatarSrc, isCollapsed, showDetails }: Ag
   const [newTaskName, setNewTaskName] = useState('');
   const [newTaskPrompt, setNewTaskPrompt] = useState('');
   const [newTaskLogo, setNewTaskLogo] = useState('');
+  const [newAgentIcon, setNewAgentIcon] = useState<string>(iconOptions[0]?.value || '');
+  const [newRAGAgentIcon, setNewRAGAgentIcon] = useState<string>(iconOptions[0]?.value || '');
 
   // Handler to open dialog for editing a task
   const handleEditTask = (idx: number) => {
@@ -80,22 +106,6 @@ export function AgentsSetup({ team, getAvatarSrc, isCollapsed, showDetails }: Ag
     setNewTaskLogo('');
   };
 
-  // Icon options for selection (updated)
-  const iconOptions = [
-    { value: 'Soup', label: 'Soup', icon: Soup },
-    { value: 'Volleyball', label: 'Football', icon: Volleyball },
-    { value: 'ChartNoAxesCombined', label: 'Market assessment', icon: ChartNoAxesCombined },
-    { value: 'Wrench', label: 'Predictive Maintenance', icon: Wrench },
-    { value: 'ShieldAlert', label: 'Safety', icon: ShieldAlert },
-    { value: 'DollarSign', label: 'Loan Upsell', icon: DollarSign },
-    { value: 'ShoppingBasket', label: 'Retail', icon: ShoppingBasket },
-    { value: 'Gamepad2', label: 'Gaming', icon: Gamepad2 },
-    { value: 'Terminal', label: 'Generate script', icon: Terminal },
-    { value: 'AudioWaveform', label: 'Audio', icon: AudioWaveform },
-    { value: 'Map', label: 'Map', icon: Map },
-    
-  ];
-
   return (
     <div className="space-y-4">
       <div className="grid auto-rows-min gap-4 md:grid-cols-2 text-sm items-center">
@@ -120,8 +130,12 @@ export function AgentsSetup({ team, getAvatarSrc, isCollapsed, showDetails }: Ag
           <div key={agent.input_key} className={`rounded-xl bg-muted/50 shadow ${isCollapsed ? 'p-0 duration-300 animate-in fade-in-0 zoom-in-75 origin-bottom-right' : 'p-4'}`}>
             <div className="flex items-center space-x-2">
               <Avatar>
-                <AvatarImage src={getAvatarSrc(agent.name)} />
-                <AvatarFallback>{agent.icon}</AvatarFallback>
+                {/* <AvatarImage src={getAvatarSrc(agent.name)} /> */}
+                <AvatarFallback>
+                  {iconOptions.find(opt => opt.value === agent.icon)
+                        ? React.createElement(iconOptions.find(opt => opt.value === agent.icon)!.icon, { className: 'h-5 w-5' })
+                        : null}
+                </AvatarFallback>
               </Avatar>
               <div>
                 <p className="text-sm font-semibold">{agent.name}</p>
@@ -183,6 +197,22 @@ export function AgentsSetup({ team, getAvatarSrc, isCollapsed, showDetails }: Ag
                       placeholder='In the system message use as last sentence: Reply "TERMINATE" in the end when everything is done.'
                     />
                   </div>
+                  <div className="grid grid-cols-4 items-center gap-4">
+                    <Label className="text-right">Icon</Label>
+                    <div className="col-span-3 flex flex-wrap gap-2 mt-1">
+                      {iconOptions.map(opt => (
+                        <Button
+                          key={opt.value}
+                          type="button"
+                          variant={newAgentIcon === opt.value ? 'default' : 'outline'}
+                          size="icon"
+                          onClick={() => setNewAgentIcon(opt.value)}
+                        >
+                          {React.createElement(opt.icon, { className: 'h-5 w-5' })}
+                        </Button>
+                      ))}
+                    </div>
+                  </div>
                 </div>
                 <DialogFooter className="sm:justify-start">
                   <DialogClose asChild>
@@ -192,8 +222,9 @@ export function AgentsSetup({ team, getAvatarSrc, isCollapsed, showDetails }: Ag
                         const name = (document.getElementById('name') as HTMLInputElement).value;
                         const description = (document.getElementById('description') as HTMLTextAreaElement).value;
                         const systemMessage = (document.getElementById('system_message') as HTMLTextAreaElement).value;
-                        addAgent(team.team_id, name, description, systemMessage);
+                        addAgent(team.team_id, name, description, systemMessage, newAgentIcon);
                         setHasTeamChanged(true);
+                        setNewAgentIcon(iconOptions[0]?.value || '');
                       }}
                       variant="default"
                     >
@@ -252,6 +283,22 @@ export function AgentsSetup({ team, getAvatarSrc, isCollapsed, showDetails }: Ag
                       className="col-span-3"
                     />
                   </div>
+                  <div className="grid grid-cols-4 items-center gap-4">
+                    <Label className="text-right">Icon</Label>
+                    <div className="col-span-3 flex flex-wrap gap-2 mt-1">
+                      {iconOptions.map(opt => (
+                        <Button
+                          key={opt.value}
+                          type="button"
+                          variant={newRAGAgentIcon === opt.value ? 'default' : 'outline'}
+                          size="icon"
+                          onClick={() => setNewRAGAgentIcon(opt.value)}
+                        >
+                          {React.createElement(opt.icon, { className: 'h-5 w-5' })}
+                        </Button>
+                      ))}
+                    </div>
+                  </div>
                 </div>
                 <DialogFooter className="sm:justify-start">
                   <DialogClose asChild>
@@ -262,8 +309,9 @@ export function AgentsSetup({ team, getAvatarSrc, isCollapsed, showDetails }: Ag
                         const description = (document.getElementById('description') as HTMLTextAreaElement).value;
                         const indexName = (document.getElementById('index_name') as HTMLInputElement).value;
                         const files = (document.getElementById('file_upload') as HTMLInputElement).files;
-                        addRAGAgent(team.team_id, name, description, indexName, files);
+                        addRAGAgent(team.team_id, name, description, indexName, files, newRAGAgentIcon);
                         setHasTeamChanged(true);
+                        setNewRAGAgentIcon(iconOptions[0]?.value || '');
                       }}
                       variant="default"
                     >
@@ -456,7 +504,23 @@ export function AgentsSetup({ team, getAvatarSrc, isCollapsed, showDetails }: Ag
                         rows={10}
                     />
                 </div>
-            </div>
+                <div className="grid grid-cols-[150px_1fr] items-center gap-4">
+                  <Label className="text-right">Icon</Label>
+                  <div className="flex flex-wrap gap-2 mt-1">
+                    {iconOptions.map(opt => (
+                      <Button
+                        key={opt.value}
+                        type="button"
+                        variant={editingAgent.icon === opt.value ? 'default' : 'outline'}
+                        size="icon"
+                        onClick={() => setEditingAgent({ ...editingAgent, icon: opt.value })}
+                      >
+                        {React.createElement(opt.icon, { className: 'h-5 w-5' })}
+                      </Button>
+                    ))}
+                  </div>
+                </div>
+              </div>
             <DialogFooter className="sm:justify-start">
               <DialogClose asChild>
                 <Button
@@ -465,7 +529,7 @@ export function AgentsSetup({ team, getAvatarSrc, isCollapsed, showDetails }: Ag
                     const name = (document.getElementById('edit_name') as HTMLInputElement).value;
                     const description = (document.getElementById('edit_description') as HTMLTextAreaElement).value;
                     const systemMessage = (document.getElementById('edit_system_message') as HTMLTextAreaElement).value;
-                    editAgent(team.team_id, editingAgent.input_key, name, description, systemMessage);
+                    editAgent(team.team_id, editingAgent.input_key, name, description, systemMessage, editingAgent.icon);
                     setEditingAgent(null);
                     setHasTeamChanged(true);
                   }}

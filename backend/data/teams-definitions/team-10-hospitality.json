@@ -13,7 +13,7 @@
             "name": "Coder",
             "system_message": "",
             "description": "",
-            "icon": "👨‍💻",
+            "icon": "Terminal",
             "index_name": ""
         },
         {
@@ -22,7 +22,8 @@
             "name": "Executor",
             "system_message": "",
             "description": "Execute code from Coder Agent",
-            "icon": "💻"
+            "icon": "MonitorCog",
+            "index_name": ""
         },
         {
             "input_key": "cba96ae2-0004",
@@ -30,7 +31,7 @@
             "name": "WebSurfer",
             "system_message": "",
             "description": "Get OTA prices from the web",
-            "icon": "🏄‍♂️"
+            "icon": "Globe"
         },
         {
             "input_key": "625fb48c-719b-4318-af31-e6df756ed7ef",
@@ -38,7 +39,7 @@
             "name": "HotelSmartConcierge",
             "system_message": "You are Hotel-Smart-Concierge. For every guest question: 1) call Coder Agent to join Inventory with request; 2) call Web-Surfer to fetch OTA price if not supplied; 3) call Price-Advisor to compute direct price & perks; 4) if guest accepts, write personalized email",
             "description": "AssistantAgent\tMain conversational brain; decides when to call tools and other agents.",
-            "icon": "🤖",
+            "icon": "Bot",
             "index_name": ""
         },
         {
@@ -47,7 +48,7 @@
             "name": "PriceAdvisor",
             "system_message": "Given: dates, room type, OTA price, current availability, base rate. Rules: • Target gross margin ≥ 25 %. • Example how to reason: If Available < 10 % set rate = max(OTA-5 %, base+30). Else rate = base + 10. Suggest one upsell (late checkout, breakfast) worth 5–8 % of total",
             "description": "Calculates best direct rate and upsell bundle.",
-            "icon": "🤖",
+            "icon": "ChartNoAxesCombined",
             "index_name": ""
         },
         {
@@ -56,7 +57,7 @@
             "name": "DataConnector",
             "system_message": "You are helpful Data provider. Your task is to porivde data in form of CSV format.",
             "description": "This agent is serving data. Use where there is need to fetch data for analysis.",
-            "icon": "🤖",
+            "icon": "DatabaseZap",
             "index_name": ""
         }
     ],
@@ -71,10 +72,5 @@
             "created": "2025-04-24T12:04:51.887Z",
             "creator": "system"
         }
-    ],
-    "_rid": "yJpNAMxuyT9YAAAAAAAAAA==",
-    "_self": "dbs/yJpNAA==/colls/yJpNAMxuyT8=/docs/yJpNAMxuyT9YAAAAAAAAAA==/",
-    "_etag": "\"23007a59-0000-0c00-0000-681208a50000\"",
-    "_attachments": "attachments/",
-    "_ts": 1746012325
+    ]
 }

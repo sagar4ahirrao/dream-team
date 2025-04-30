@@ -17,8 +17,8 @@ import {
 import { ThemeProvider } from "@/components/theme-provider"
 // import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
 import { Card, CardContent, CardFooter} from "@/components/ui/card"
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
-import {  ChartNoAxesCombined, CloudUpload, DollarSign, Dot, Edit, Gamepad2, Info, Loader2, SendHorizonal, ShieldAlert, ShoppingBasket, Soup, Terminal, Volleyball, Wrench, AudioWaveform, Map } from "lucide-react"
+import { Avatar, AvatarFallback } from "@/components/ui/avatar"
+import {  ChartNoAxesCombined, CloudUpload, DollarSign, Dot, Edit, Gamepad2, Info, Loader2, SendHorizonal, ShieldAlert, ShoppingBasket, Soup, Terminal, Volleyball, Wrench, AudioWaveform, Map, MonitorCog, Globe, BookMarked, Bot, Search, DatabaseZap, User,  Target, File } from "lucide-react"
 import { Button } from "@/components/ui/button"
 
 // import remarkBreaks from 'remark-breaks'
@@ -41,6 +41,7 @@ import { Footer } from "@/components/Footer";
 import { Team, Agent, useTeamsContext } from '@/contexts/TeamsContext';
 
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog"
+import React from 'react';
 
 // Define environment variables with default values
 const BASE_URL = import.meta.env.VITE_BASE_URL;
@@ -77,6 +78,22 @@ export default function App() {
     source: 'MagenticOneOrchestrator',
     session_id: 'dummy-generated-session-id',
   };
+  // const debugMessages: ChatMessage[] = [
+  //   {
+  //     user: 'TaskResult',
+  //     message: "My team is ready to assist you. Please type your task below to start.",
+  //     time: new Date().toISOString(),    
+  //     source: 'MagenticOneOrchestrator',
+  //     session_id: 'dummy-generated-session-id',
+  //   },
+  //   {
+  //     user: 'User',
+  //     message: "Hello! How can I assist you today?",       
+  //     time: new Date().toISOString(),
+  //     source: 'Coder',
+  //     session_id: 'dummy-generated-session-id',
+  //   },
+  // ]
 
   const [chatHistory, setChatHistory] = useState<ChatMessage[]>([wellcomeMessage]);
   // const [chatHistory, setChatHistory] = useState<ChatMessage[]>(debugMessages);
@@ -228,6 +245,17 @@ export default function App() {
     { value: 'Terminal', label: 'Generate script', icon: Terminal },
     { value: 'AudioWaveform', label: 'Audio', icon: AudioWaveform },
     { value: 'Map', label: 'Map', icon: Map },
+    { value: 'MonitorCog', label: 'Monitor', icon: MonitorCog },
+    { value: 'Globe', label: 'Web', icon: Globe },
+    { value: 'File', label: 'File', icon: File },
+    { value: 'BookMarked', label: 'Bookmark', icon: BookMarked },
+    { value: 'Bot', label: 'Bot', icon: Bot },
+    { value: 'Search', label: 'Search', icon: Search },
+    { value: 'ChartNoAxesCombined', label: 'ChartNoAxesCombined', icon: ChartNoAxesCombined },
+    { value: 'DatabaseZap', label: 'DatabaseZap', icon: DatabaseZap },
+    { value: 'MagenticOneOrchestrator', label: 'MagenticOneOrchestrator', icon: Bot },
+    { value: 'User', label: 'User', icon: User },
+    { value: 'TaskResult', label: 'TaskResult', icon: Target },
   ];
 
   // Helper to get icon component by logo string
@@ -236,8 +264,7 @@ export default function App() {
     const found = iconOptions.find(opt => opt.value === logo);
     if (found) {
       const Icon = found.icon;
-      return <Icon className="inline mr-1 h-4 w-4 align-text-bottom" />;
-    }
+      return <Icon className="inline mr-1 h-4 w-4 align-text-bottom" />;}
     return null;
   };
 
@@ -265,6 +292,25 @@ export default function App() {
     } catch (error) {
       console.error('Failed to initialize teams:', error);
     }
+  };
+
+  // Function to get Agent by name from selectedTeam
+  const getAgentByName = (name: string): Agent | undefined => {
+    if (!selectedTeam) return undefined;
+    // add special case for MagenticOneOrchestrator
+    if (name === 'MagenticOneOrchestrator') {
+      return { input_key: "", type: "",name: "MagenticOneOrchestrator",system_message: "",description: "",icon: "MagenticOneOrchestrator",index_name: ""}
+    }
+    // add special case for User
+    if (name=== 'User') {
+      return {input_key: "",type: "",name: "User",system_message: "",description: "",icon: "User", index_name: ""}
+    } 
+    // add special case for TaskResult
+    if (name=== 'TaskResult') {
+      return {input_key: "",type: "",name: "TaskResult",system_message: "",description: "",icon: "TaskResult",index_name: ""}
+    }
+    // Check if selectedTeam is defined and has agents
+    return selectedTeam.agents.find(agent => agent.name === name);
   };
 
   if (!loading && teams.length === 0) {
@@ -402,8 +448,20 @@ export default function App() {
                         <div className={`p-2 rounded-lg shadow ${message.user === 'User' ? 'group/message relative break-words rounded-lg p-3 text-sm sm:max-w-[70%] bg-primary text-primary-foreground duration-300 animate-in fade-in-0 zoom-in-75 origin-bottom-right' : 'group/message relative break-words rounded-lg p-3 text-sm sm:max-w-[96%] bg-muted text-foreground duration-300 animate-in fade-in-0 zoom-in-75 origin-bottom-left'}`}>
                           <div className="flex items-center space-x-2">
                             <Avatar>
-                              <AvatarImage src={getAvatarSrc(message.user)} />
-                              <AvatarFallback>{getAvatarFallback(message.user)}</AvatarFallback>
+                              <AvatarFallback>
+                                {(() => {
+                                  const agent = getAgentByName(message.user);
+                                  if (agent && agent.icon) {
+                                    const iconOpt = iconOptions.find(opt => opt.value === agent.icon);
+                                    // Only render if iconOpt.icon is a Lucide icon (function, not native File constructor)
+                                    if (iconOpt) {
+                                      return React.createElement(iconOpt.icon, { className: 'h-5 w-5' });
+                                    }
+                                  }
+                                  return getAvatarFallback(message.user);
+                                })()}
+                              </AvatarFallback>
+
                               {/* <Bot className="ml-autoaspect-square h-full w-full" /> */}
                             </Avatar>
                             <div className="break-all max-w-[100%] message">

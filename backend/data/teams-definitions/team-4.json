@@ -13,7 +13,7 @@
             "name": "Coder",
             "system_message": "",
             "description": "",
-            "icon": "👨‍💻",
+            "icon": "Terminal",
             "index_name": ""
         },
         {
@@ -22,7 +22,7 @@
             "name": "Executor",
             "system_message": "",
             "description": "",
-            "icon": "💻",
+            "icon": "MonitorCog",
             "index_name": ""
         },
         {
@@ -31,7 +31,7 @@
             "name": "FileSurfer",
             "system_message": "",
             "description": "",
-            "icon": "📂",
+            "icon": "File",
             "index_name": ""
         },
         {
@@ -40,7 +40,7 @@
             "name": "WebSurfer",
             "system_message": "",
             "description": "",
-            "icon": "🏄‍♂️",
+            "icon": "Globe",
             "index_name": ""
         },
         {
@@ -49,7 +49,7 @@
             "name": "OilGasKnowledge",
             "system_message": "",
             "description": "An agent that has access to a knowledge base of International Energy Agency (IEA) Analysis and forecast to 2030 and can handle RAG tasks, call this agent if you are getting questions on your knowledge base.",
-            "icon": "📖",
+            "icon": "Search",
             "index_name": "ag-demo-market"
         }
     ],

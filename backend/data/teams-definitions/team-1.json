@@ -13,7 +13,7 @@
             "name": "Coder",
             "system_message": "",
             "description": "",
-            "icon": "👨‍💻",
+            "icon": "Terminal",
             "index_name": ""
         },
         {
@@ -22,7 +22,7 @@
             "name": "Executor",
             "system_message": "",
             "description": "",
-            "icon": "💻",
+            "icon": "MonitorCog",
             "index_name": ""
         },
         {
@@ -31,7 +31,7 @@
             "name": "FileSurfer",
             "system_message": "",
             "description": "",
-            "icon": "📂",
+            "icon": "File",
             "index_name": ""
         },
         {
@@ -40,7 +40,7 @@
             "name": "WebSurfer",
             "system_message": "",
             "description": "",
-            "icon": "🏄‍♂️",
+            "icon": "Globe",
             "index_name": ""
         }
     ],
@@ -72,10 +72,5 @@
             "creator": "system",
             "logo": "Terminal"
         }
-    ],
-    "_rid": "yJpNAMxuyT9OAAAAAAAAAA==",
-    "_self": "dbs/yJpNAA==/colls/yJpNAMxuyT8=/docs/yJpNAMxuyT9OAAAAAAAAAA==/",
-    "_etag": "\"23003283-0000-0c00-0000-68120e890000\"",
-    "_attachments": "attachments/",
-    "_ts": 1746013833
+    ]
 }
