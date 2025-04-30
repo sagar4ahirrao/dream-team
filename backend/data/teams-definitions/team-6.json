@@ -2,8 +2,10 @@
     "id": "6",
     "team_id": "team-6",
     "name": "Retail - Inventory optimization",
-    "logo": "ShoppingBasket",
-    "plan": "Inventory analysis.",
+    "status": "visible",
+    "protected": true,
+    "created": "2025-01-01T00:00:00.000Z",
+    "created_by": "Admin",
     "agents": [
         {
             "input_key": "60001",
@@ -70,13 +72,16 @@
         }
     ],
     "description": "Team focused on Retail tasks. Namely Inventory optimization scenario by analyzing inventory data for our customer base, focusing on identifying customers with frequent stockouts, recurring overstock situations, and rapid declines in sales.",
+    "logo": "ShoppingBasket",
+    "plan": "Inventory analysis.",
     "starting_tasks": [
         {
             "id": "task-8",
             "name": "Retail",
             "prompt": "Analyze the real‑time inventory and sales data for the cinema concessions at Well‑in‑Mall Cinema (Location: Cinema A1). Your task is to identify products that are nearing or falling below their reorder points. Cross‑reference these findings with the recommended restocking strategies outlined in the Microsoft Dynamics 365 Retail Inventory & Supply Chain Optimization Best Practices Guide 2024 (see link above). Additionally, use real‑time supply chain news—retrieved via our web surfer agent—to adjust for any external factors affecting lead times. Based on your analysis, produce a detailed restocking alert report that includes: \n\n - A prioritized list of items needing replenishment. \n\n - Recommended order quantities based on recent sales trends and forecasted demand. \n\n - Actionable recommendations to optimize the supply chain and reduce stockouts..",
             "created": "2025-04-07T12:04:51.887Z",
-            "creator": "system"
+            "creator": "system",
+            "logo": "ShoppingBasket"
         }
     ]
 }

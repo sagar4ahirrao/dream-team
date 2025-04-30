@@ -2,6 +2,10 @@
     "id": "cba96ae2-f28b-4c0e-92f3-d8069430caf2",
     "team_id": "cba96ae2-f28b-4c0e-92f3-d8069430caf2",
     "name": "Hospitality",
+    "status": "visible",
+    "protected": false,
+    "created": "2025-01-01T00:00:00.000Z",
+    "created_by": "Admin",
     "agents": [
         {
             "input_key": "cba96ae2-0001",
@@ -67,5 +71,10 @@
             "created": "2025-04-24T12:04:51.887Z",
             "creator": "system"
         }
-    ]
+    ],
+    "_rid": "yJpNAMxuyT9YAAAAAAAAAA==",
+    "_self": "dbs/yJpNAA==/colls/yJpNAMxuyT8=/docs/yJpNAMxuyT9YAAAAAAAAAA==/",
+    "_etag": "\"23007a59-0000-0c00-0000-681208a50000\"",
+    "_attachments": "attachments/",
+    "_ts": 1746012325
 }

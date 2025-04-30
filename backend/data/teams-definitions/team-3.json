@@ -2,8 +2,10 @@
     "id": "3",
     "team_id": "team-3",
     "name": "Oil & Gas - Safety Compliance",
-    "logo": "ShieldAlert",
-    "plan": "Team analyzing Safety & Incident Reporting",
+    "status": "visible",
+    "protected": true,
+    "created": "2025-01-01T00:00:00.000Z",
+    "created_by": "Admin",
     "agents": [
         {
             "input_key": "30001",
@@ -52,13 +54,16 @@
         }
     ],
     "description": "Team focused on Safety & Incident Reporting tasks. Besides default agents includes RAG agent for BSEE Incident Reporting & HSE Compliance Guidelines 2024 and Compliance Sentinel agent, the watchdog for our incident reporting system at Well Site and Trend Analyzer agent, responsible for scrutinizing historical incident data to identify recurring patterns and underlying causes",
+    "logo": "ShieldAlert",
+    "plan": "Team analyzing Safety & Incident Reporting",
     "starting_tasks": [
         {
             "id": "task-6",
             "name": "Safety",
             "prompt": "Analyze the internal incident reports for the upstream oil and gas facility (Asset: Well Site A-17) to detect compliance gaps. Using real‑time incident data (including near misses, safety violations, and environmental events) along with historical incident outcomes, correlate these findings with the updated BSEE Incident Reporting & HSE Compliance Guidelines 2024. Identify missing data fields or delayed reporting that do not meet the new regulatory requirements and generate a prioritized set of corrective recommendations to enhance incident reporting and overall safety compliance. Your output should include detailed observations on which aspects of the incident logs (e.g., incomplete descriptions, inconsistent outcome classifications) need improvement.​",
             "created": "2025-04-07T12:04:51.887Z",
-            "creator": "system"
+            "creator": "system",
+            "logo": "ShieldAlert"
         }
     ]
 }
