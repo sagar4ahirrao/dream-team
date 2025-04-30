@@ -2,8 +2,10 @@
     "id": "1",
     "team_id": "team-1",
     "name": "MagenticOneTeam",
-    "logo": "AudioWaveform",
-    "plan": "Original MagenticOne Team",
+    "status": "visible",
+    "protected": true,
+    "created": "2025-01-01T00:00:00.000Z",
+    "created_by": "Admin",
     "agents": [
         {
             "input_key": "0001",
@@ -43,27 +45,37 @@
         }
     ],
     "description": "Original MagenticOne Team. Includes Coder, Executor, FileSurfer and WebSurfer.",
+    "logo": "AudioWaveform",
+    "plan": "Original MagenticOne Team",
     "starting_tasks": [
         {
             "id": "task-1",
             "name": "Find restaurant",
             "prompt": "Find me a French restaurant in Dubai with 2 Michelin stars?",
             "created": "2025-04-07T12:04:51.887Z",
-            "creator": "system"
+            "creator": "system",
+            "logo": "Soup"
         },
         {
             "id": "task-2",
             "name": "Check football game",
             "prompt": "When and where is the next game of Arsenal, print a link for purchase",
             "created": "2025-04-07T12:04:51.887Z",
-            "creator": "system"
+            "creator": "system",
+            "logo": "Volleyball"
         },
         {
             "id": "task-3",
             "name": "Generate script",
             "prompt": "Generate a python script and execute Fibonacci series below 1000",
             "created": "2025-04-07T12:04:51.887Z",
-            "creator": "system"
+            "creator": "system",
+            "logo": "Terminal"
         }
-    ]
+    ],
+    "_rid": "yJpNAMxuyT9OAAAAAAAAAA==",
+    "_self": "dbs/yJpNAA==/colls/yJpNAMxuyT8=/docs/yJpNAMxuyT9OAAAAAAAAAA==/",
+    "_etag": "\"23003283-0000-0c00-0000-68120e890000\"",
+    "_attachments": "attachments/",
+    "_ts": 1746013833
 }

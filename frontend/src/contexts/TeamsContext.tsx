@@ -2,6 +2,7 @@ import { AudioWaveform, ChartNoAxesCombined, DollarSign, Map, ShieldAlert, Shopp
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import axios from 'axios';
 
+
 export interface Agent {
   input_key: string;
   type: string;
@@ -18,6 +19,7 @@ export interface TeamTask {
   prompt: string;
   created: Date;
   creator: string;
+  logo?: string; // Optional logo attribute
 }
 
 export interface Team {
@@ -30,6 +32,10 @@ export interface Team {
   icon?: string;
   plan: string;
   starting_tasks: TeamTask[];
+  status?: string; // Optional status of the team
+  protected?: boolean; // Optional flag for protection
+  created?: Date; // Optional creation date
+  created_by?: string; // Optional creator identifier
 }
 
 interface TeamsContextType {
@@ -112,13 +118,18 @@ export const TeamsProvider: React.FC<{ children: React.ReactNode }> = ({ childre
               prompt: task.prompt,
               created: new Date(task.created),
               creator: task.creator,
+              logo: task.logo,
             }))
           : [],
+        status: team.status,
+        protected: typeof team.protected === 'string' ? team.protected === 'true' : !!team.protected,
+        created: team.created ? new Date(team.created) : undefined,
+        created_by: team.created_by,
       }));
       setTeams(initializedTeams);
-      console.log("Fetched teams:", initializedTeams);
+      // console.log("Fetched teams:", initializedTeams);
+      // console.log("Writing teams to sessionStorage:", initializedTeams);
       // Write teams to sessionStorage.
-      console.log("Writing teams to sessionStorage:", initializedTeams);
       sessionStorage.setItem('teams', JSON.stringify(initializedTeams));
     } catch (error) {
       console.error("Error fetching teams:", error);

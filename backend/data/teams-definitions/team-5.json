@@ -2,8 +2,10 @@
     "id": "5",
     "team_id": "team-5",
     "name": "FSI - Banking Loan Upsell",
-    "logo": "DollarSign",
-    "plan": "Loan upsell scenario by analyzing financial transaction ",
+    "status": "visible",
+    "protected": true,
+    "created": "2025-01-01T00:00:00.000Z",
+    "created_by": "Admin",
     "agents": [
         {
             "input_key": "50001",
@@ -70,13 +72,16 @@
         }
     ],
     "description": "Team focused on Financial Services Industry tasks. Namely Loan upsell scenario by analyzing financial transaction data for our customer base, focusing on identifying customers with frequent overdrafts, recurring cash flow gaps, and rapid declines in account balances.",
+    "logo": "DollarSign",
+    "plan": "Loan upsell scenario by analyzing financial transaction ",
     "starting_tasks": [
         {
             "id": "task-7",
             "name": "Loan Upsell",
             "prompt": "Analyze the financial transaction data for our customer base, focusing on identifying customers with frequent overdrafts, recurring cash flow gaps, and rapid declines in account balances. Use this analysis, combined with customer profile details (such as account balance, current loan amount, and credit score), and cross‑reference these findings with the risk thresholds from the Experian Credit Risk Scorecard PDF. Your task is to dynamically generate personalized upsell recommendations for each customer. The recommendations should include suggestions such as higher credit lines or tailored personal loans, with actionable insights based on each customer’s behavior.",
             "created": "2025-04-07T12:04:51.887Z",
-            "creator": "system"
+            "creator": "system",
+            "logo": "DollarSign"
         }
     ]
 }

@@ -18,7 +18,7 @@ import { ThemeProvider } from "@/components/theme-provider"
 // import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
 import { Card, CardContent, CardFooter} from "@/components/ui/card"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
-import {  ChartNoAxesCombined, CloudUpload, DollarSign, Dot, Edit, Gamepad2, Info, Loader2, SendHorizonal, ShieldAlert, ShoppingBasket, Soup, Terminal, Volleyball, Wrench} from "lucide-react"
+import {  ChartNoAxesCombined, CloudUpload, DollarSign, Dot, Edit, Gamepad2, Info, Loader2, SendHorizonal, ShieldAlert, ShoppingBasket, Soup, Terminal, Volleyball, Wrench, AudioWaveform, Map } from "lucide-react"
 import { Button } from "@/components/ui/button"
 
 // import remarkBreaks from 'remark-breaks'
@@ -215,30 +215,31 @@ export default function App() {
   //   setIsAuthenticated(false)
   // }
 
-  const getTaskIcon = (task_name: string) => {
-    switch (task_name) {
-      case 'Find restaurant':
-        return <Soup />;
-      case 'Check football game':
-        return <Volleyball />;
-      case 'Market assessment':
-        return <ChartNoAxesCombined />;
-      case 'Predictive Maintenance':
-        return <Wrench />;
-      case 'Safety':
-        return <ShieldAlert />;
-      case 'Loan Upsell':
-        return <DollarSign />;
-      case 'Retail':
-        return <ShoppingBasket />;
-      case 'Gaming':
-        return <Gamepad2 />;
-      case 'Generate script':
-        return <Terminal />;
-      default:
-        return null;
+  // Icon options for selection (updated)
+  const iconOptions = [
+    { value: 'Soup', label: 'Soup', icon: Soup },
+    { value: 'Volleyball', label: 'Football', icon: Volleyball },
+    { value: 'ChartNoAxesCombined', label: 'Market assessment', icon: ChartNoAxesCombined },
+    { value: 'Wrench', label: 'Predictive Maintenance', icon: Wrench },
+    { value: 'ShieldAlert', label: 'Safety', icon: ShieldAlert },
+    { value: 'DollarSign', label: 'Loan Upsell', icon: DollarSign },
+    { value: 'ShoppingBasket', label: 'Retail', icon: ShoppingBasket },
+    { value: 'Gamepad2', label: 'Gaming', icon: Gamepad2 },
+    { value: 'Terminal', label: 'Generate script', icon: Terminal },
+    { value: 'AudioWaveform', label: 'Audio', icon: AudioWaveform },
+    { value: 'Map', label: 'Map', icon: Map },
+  ];
+
+  // Helper to get icon component by logo string
+  const getTaskLogoIcon = (logo: string | undefined) => {
+    if (!logo) return null;
+    const found = iconOptions.find(opt => opt.value === logo);
+    if (found) {
+      const Icon = found.icon;
+      return <Icon className="inline mr-1 h-4 w-4 align-text-bottom" />;
     }
-  }
+    return null;
+  };
 
   // Dialog state for teams initialization
   const [showTeamsDialog, setShowTeamsDialog] = useState(false);
@@ -387,6 +388,7 @@ export default function App() {
                 team={selectedTeam}
                 getAvatarSrc={getAvatarSrc}
                 isCollapsed={isTyping || (sessionTime) ? true : false}
+                showDetails={false}
               />
              {/* if session is running display loader */}
             <div className="min-h-[100vh] flex-1 rounded-xl bg-muted/50 md:min-h-min">
@@ -474,7 +476,7 @@ export default function App() {
                               className="text-sm bg-muted"
                               onClick={() => setUserMessage(task.prompt)}
                           >
-                              {task.name && getTaskIcon(task.name)} {task.name}
+                              {getTaskLogoIcon(task.logo)} {task.name}
                           </Button>
                       ))}
                   </div>

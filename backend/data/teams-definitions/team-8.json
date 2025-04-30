@@ -2,6 +2,10 @@
     "id": "8",
     "team_id": "team-8",
     "name": "Public Services - Claims Management",
+    "status": "visible",
+    "protected": false,
+    "created": "2025-01-01T00:00:00.000Z",
+    "created_by": "Admin",
     "agents": [
         {
             "input_key": "80002",
@@ -60,5 +64,10 @@
             "created": "2025-04-07T12:04:51.887Z",
             "creator": "system"
         }
-    ]
+    ],
+    "_rid": "yJpNAMxuyT9VAAAAAAAAAA==",
+    "_self": "dbs/yJpNAA==/colls/yJpNAMxuyT8=/docs/yJpNAMxuyT9VAAAAAAAAAA==/",
+    "_etag": "\"23000859-0000-0c00-0000-681208940000\"",
+    "_attachments": "attachments/",
+    "_ts": 1746012308
 }

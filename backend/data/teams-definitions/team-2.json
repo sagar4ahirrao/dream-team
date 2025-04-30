@@ -2,8 +2,10 @@
     "id": "2",
     "team_id": "team-2",
     "name": "Oil & Gas - Predictive Maintenance",
-    "logo": "Wrench",
-    "plan": "Team focused on Predictive Maintenance tasks",
+    "status": "visible",
+    "protected": true,
+    "created": "2025-01-01T00:00:00.000Z",
+    "created_by": "Admin",
     "agents": [
         {
             "input_key": "20001",
@@ -43,13 +45,16 @@
         }
     ],
     "description": "Team focused on Predictive Maintenance tasks. Besides default agents includes RAG agent for Emerson Predictive Maintenance Guide and Sentinel Sentinel agent specialized in monitoring sensor streams and detecting trends or anomalies for particular device.",
+    "logo": "Wrench",
+    "plan": "Team focused on Predictive Maintenance tasks",
     "starting_tasks": [
         {
             "id": "task-5",
             "name": "Predictive Maintenance",
             "prompt": "Analyze the sensor data and historical maintenance logs for the high‑pressure gas compressor (EquipmentID: COMP-001). Using real‑time measurements of temperature, vibration, and pressure, along with the asset’s running hours, detect any early signs of mechanical degradation. After this, correlate these findings with the vendor’s guidelines (downloaded from Emerson’s Predictive Maintenance Guide for Gas Compressors) and the maintenance history. In particular, determine if rising vibration amplitudes, combined with temperature excursions and delayed calibrations, suggest that the compressor is trending toward failure. Based on this analysis, generate a detailed maintenance alert (text only, formatted as Markdown) including a prioritized repair schedule and recommended corrective actions to mitigate downtime.",
             "created": "2025-04-07T12:04:51.887Z",
-            "creator": "system"
+            "creator": "system",
+            "logo": "Wrench"
         }
     ]
 }
