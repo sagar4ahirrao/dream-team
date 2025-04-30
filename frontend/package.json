@@ -48,7 +48,7 @@
   "devDependencies": {
     "@azure/static-web-apps-cli": "^2.0.4",
     "@eslint/js": "^9.17.0",
-    "@types/node": "^22.15.2",
+    "@types/node": "^22.15.3",
     "@types/react": "^18.3.20",
     "@types/react-dom": "^18.3.6",
     "@types/react-syntax-highlighter": "^15.5.13",

@@ -16,7 +16,7 @@ import {
   SidebarProvider,
 } from "@/components/ui/sidebar"
 import { ThemeProvider } from "@/components/theme-provider"
-import {  RefreshCcw, Plus ,Loader2 } from "lucide-react"
+import {  RefreshCcw, Plus ,Loader2, Lock } from "lucide-react"
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger, DialogClose } from "@/components/ui/dialog"
 import { AudioWaveform, ChartNoAxesCombined, DollarSign, Map, ShieldAlert, ShoppingBasket, Wrench } from 'lucide-react';
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
@@ -311,7 +311,7 @@ export default function Agents() {
                 </Button>
               </CardContent>
               <CardFooter className="flex space-x-2">
-         
+                
               </CardFooter>
             </Card>
           </div> 
@@ -327,6 +327,8 @@ export default function Agents() {
                           {React.createElement(getTeamLogo(team))}
                           <Separator orientation="vertical" className="mr-2 h-4 invisible" />
                           {team.name}
+                          <Separator orientation="vertical" className="mr-2 h-4 invisible" />
+                          {team.protected && <Lock className="inline h-4 w-4 text-muted-foreground" />}
                       </div>
                   </CardTitle>
                   <Separator />
@@ -340,6 +342,7 @@ export default function Agents() {
                   team={team}
                   getAvatarSrc={getAvatarSrc}
                   isCollapsed={false}
+                  showDetails={true}
                   />
                 </CardContent>
                 <CardFooter className="flex space-x-2">
