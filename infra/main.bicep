@@ -29,7 +29,17 @@ param location string
 
 param srcExists bool
 @secure()
-param srcDefinition object
+param srcDefinition object = {
+  repositoryUrl: 'https://example.com/repo.git'
+  branch: 'main'
+  frontendArtifactLocation: 'dist'
+  settings: [
+    {
+      name: 'setting1'
+      value: 'value1'
+    }
+  ]
+}
 
 @description('Id of the user or app to assign application roles')
 param principalId string
