@@ -259,7 +259,7 @@ class CosmosDB:
         existing_team = self.get_team(team_id)
         if not existing_team:
             return {"error": "Team not found"}
-        response = container.delete_item(item=existing_team["id"], partition_key=existing_team["id"])
+        response = container.delete_item(item=existing_team["id"], partition_key=existing_team["team_id"])
         return response
 
     def initialize_teams(self):
