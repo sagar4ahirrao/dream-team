@@ -97,10 +97,11 @@ class MagenticOneHelper:
             self.session_id = generate_session_name()
         else:
             self.session_id = session_id
-
+        # print(f"Session MODEL gpt-4.1-2025-04-14")
+        print(f"Session MODEL o4-mini-2025-04-16")
         self.client = AzureOpenAIChatCompletionClient(
-            model="gpt-4o-2024-11-20",
-            azure_deployment="gpt-4o",
+            model="gpt-4.1-2025-04-14",
+            azure_deployment="gpt-4.1",
             api_version="2025-03-01-preview",
             azure_endpoint=os.getenv("AZURE_OPENAI_ENDPOINT"),
             azure_ad_token_provider=token_provider,
@@ -113,8 +114,8 @@ class MagenticOneHelper:
         )
 
         self.client_reasoning = AzureOpenAIChatCompletionClient(
-            model="o3-mini",
-            azure_deployment="o3-mini",
+            model="o4-mini-2025-04-16",
+            azure_deployment="o4-mini",
             api_version="2025-03-01-preview",
             azure_endpoint=os.getenv("AZURE_OPENAI_ENDPOINT"),
             azure_ad_token_provider=token_provider,
@@ -122,7 +123,7 @@ class MagenticOneHelper:
                 "vision": True,
                 "function_calling": True,
                 "json_output": True,
-                "family": "o3"
+                "family": "o4"
             }
         )
 
@@ -170,7 +171,7 @@ class MagenticOneHelper:
 
             # This is default MagenticOne agent - WebSurfer
             elif (agent["type"] == "MagenticOne" and agent["name"] == "WebSurfer"):
-                web_surfer = MultimodalWebSurfer("WebSurfer", model_client=client, start_page="https://azure.microsoft.com/en-us/blog/?sort-by=newest-oldest&category=ai-machine-learning&content-type=announcements&date=any&s=")
+                web_surfer = MultimodalWebSurfer("WebSurfer", model_client=client)
                 agent_list.append(web_surfer)
                 print("WebSurfer added!")
             
