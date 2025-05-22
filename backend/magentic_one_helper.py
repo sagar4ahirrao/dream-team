@@ -61,7 +61,7 @@ def generate_session_name():
     return f"{adjective}-{noun}-{number}"
 
 class MagenticOneHelper:
-    def __init__(self, logs_dir: str = None, save_screenshots: bool = False, run_locally: bool = False) -> None:
+    def __init__(self, logs_dir: str = None, save_screenshots: bool = False, run_locally: bool = False, user_id: str = None) -> None:
         """
         A helper class to interact with the MagenticOne system.
         Initialize MagenticOne instance.
@@ -69,12 +69,15 @@ class MagenticOneHelper:
         Args:
             logs_dir: Directory to store logs and downloads
             save_screenshots: Whether to save screenshots of web pages
+            user_id: The user ID associated with this helper instance
         """
         self.logs_dir = logs_dir or os.getcwd()
         self.runtime: Optional[SingleThreadedAgentRuntime] = None
         # self.log_handler: Optional[LogHandler] = None
         self.save_screenshots = save_screenshots
         self.run_locally = run_locally
+
+        self.user_id = user_id
 
         self.max_rounds = 50
         self.max_time = 25 * 60
@@ -198,8 +201,10 @@ class MagenticOneHelper:
                 custom_agent = await MagenticOneCustomMCPAgent.create(
                     agent["name"], 
                     client, 
-                    agent["system_message"], 
-                    agent["description"])
+                    agent["system_message"] + "\n\n in case of email use this address as TO: " + self.user_id, 
+                    agent["description"],
+                    self.user_id
+                )
                 agent_list.append(custom_agent)
                 print(f'{agent["name"]} (custom MCP) added!')
 

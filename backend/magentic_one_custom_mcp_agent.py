@@ -20,6 +20,7 @@ class MagenticOneCustomMCPAgent(AssistantAgent):
         system_message: str,
         description: str,
         adapter,  # adapter is now provided by the async factory method
+        user_id: str = None
     ):
         super().__init__(
             name,
@@ -28,6 +29,7 @@ class MagenticOneCustomMCPAgent(AssistantAgent):
             system_message=system_message,
             tools=adapter
         )
+        self.user_id = user_id
     
     @classmethod
     async def create(
@@ -36,6 +38,7 @@ class MagenticOneCustomMCPAgent(AssistantAgent):
         model_client: ChatCompletionClient,
         system_message: str,
         description: str,
+        user_id: str = None
     ):
         server_params = StdioServerParams(
             command="python",
@@ -45,8 +48,10 @@ class MagenticOneCustomMCPAgent(AssistantAgent):
         adapter_addition = await StdioMcpToolAdapter.from_server_params(server_params, "add")
         adapter_multiplication = await StdioMcpToolAdapter.from_server_params(server_params, "multiply")
         adapter_data_provider = await SseMcpToolAdapter.from_server_params(server_params, "data_provider")
+        adapter_mailer = await SseMcpToolAdapter.from_server_params(server_params, "mailer")
         return cls(name, 
                    model_client, 
                    system_message, 
                    description, 
-                   [adapter_addition, adapter_multiplication, adapter_data_provider])
+                   [adapter_addition, adapter_multiplication, adapter_data_provider, adapter_mailer],
+                   user_id=user_id)

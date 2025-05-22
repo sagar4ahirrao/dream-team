@@ -14,7 +14,7 @@ interface UserContextType {
 
 const defaultUserInfo: UserInfo = {
   name: "Jon Doe",
-  email: "johne@microsoft.com",
+  email: "mimarusa@microsoft.com",
   avatar: h1,
 };
 
