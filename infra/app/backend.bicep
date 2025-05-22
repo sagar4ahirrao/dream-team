@@ -41,6 +41,9 @@ param vnetId string
 @description('Name of the Azure Communication Service')
 param communicationServiceName string
 
+@description('Name of the Azure Communication Service Email')
+param communicationServiceEmailName string
+
 var appSettingsArray = filter(array(appDefinition.settings), i => i.name != '')
 var secrets = map(filter(appSettingsArray, i => i.?secret != null), i => {
   name: i.name
@@ -431,6 +434,22 @@ resource app 'Microsoft.App/containerApps@2023-05-02-preview' = {
               name: 'UAMI_RESOURCE_ID'
               value: identity.id
             }
+            {
+              name: 'AZURE_COMMUNICATION_EMAIL_ENDPOINT'
+              value: 'https://${communicationService.properties.hostName}'
+            }
+            {
+              name: 'AZURE_COMMUNICATION_EMAIL_SENDER'
+              value: 'DoNotReply@${communicationServiceEmailDomain.properties.fromSenderDomain}'
+            }
+            {
+              name: 'AZURE_COMMUNICATION_EMAIL_RECIPIENT_DEFAULT'
+              value: 'michal.marusan@microsoft.com'
+            }
+            {
+              name: 'AZURE_COMMUNICATION_EMAIL_SUBJECT_DEFAULT'
+              value: 'Message from AI Agent'
+            }
           ],
           env,
           map(secrets, secret => {
@@ -563,7 +582,7 @@ resource dynamicsession 'Microsoft.App/sessionPools@2024-02-02-preview' = {
 }
 
 // Azure Communication Service resource
-resource communicationService 'Microsoft.Communication/CommunicationServices@2023-04-01-preview' = {
+resource communicationService 'Microsoft.Communication/CommunicationServices@2023-04-01' = {
   name: communicationServiceName
   location: 'global'
   identity: {
@@ -573,6 +592,32 @@ resource communicationService 'Microsoft.Communication/CommunicationServices@202
     dataLocation: 'united states'
   }
 }
+resource communicationServiceEmail 'Microsoft.Communication/emailServices@2023-04-01' = {
+  location: 'global'
+  name: communicationServiceEmailName 
+  properties: {
+    dataLocation: 'united states'
+  }
+}
+
+resource communicationServiceEmailDomain 'Microsoft.Communication/emailServices/domains@2023-04-01' = {
+  parent: communicationServiceEmail
+  location: 'global'
+  name: 'AzureManagedDomain'
+  properties: {
+    domainManagement: 'AzureManaged'
+    userEngagementTracking: 'Disabled'
+  }
+}
+
+resource userCommunicationServiceAssignment 'Microsoft.Authorization/roleAssignments@2022-04-01' = {
+  name: guid(communicationService.id, userPrincipalId, 'Communication and Email Service Owner')
+  scope: communicationService
+  properties: {
+    principalId: userPrincipalId
+    roleDefinitionId: subscriptionResourceId('Microsoft.Authorization/roleDefinitions', '09976791-48a7-449e-bb21-39d1a415f350')
+  }
+} 
 
 
 resource userSessionPoolRoleAssignment 'Microsoft.Authorization/roleAssignments@2022-04-01' = {
@@ -680,3 +725,5 @@ output communicationServicePrimaryConnectionString string = communicationService
 #disable-next-line outputs-should-not-contain-secrets
 output communicationServicePrimaryKey string = communicationService.listKeys().primaryConnectionString
 output communicationServiceNameOut string = communicationServiceName
+output communicationServiceEmailNameOut string = communicationServiceEmailName
+output communicationServiceEmailDomainOut string = communicationServiceEmailDomain.properties.fromSenderDomain
