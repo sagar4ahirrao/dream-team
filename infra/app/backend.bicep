@@ -38,6 +38,9 @@ param defaultSubnetId string
 @description('The ID of the target virtual network for private DNS association')
 param vnetId string
 
+@description('Name of the Azure Communication Service')
+param communicationServiceName string
+
 var appSettingsArray = filter(array(appDefinition.settings), i => i.name != '')
 var secrets = map(filter(appSettingsArray, i => i.?secret != null), i => {
   name: i.name
@@ -559,6 +562,19 @@ resource dynamicsession 'Microsoft.App/sessionPools@2024-02-02-preview' = {
   }
 }
 
+// Azure Communication Service resource
+resource communicationService 'Microsoft.Communication/CommunicationServices@2023-04-01-preview' = {
+  name: communicationServiceName
+  location: 'global'
+  identity: {
+    type: 'SystemAssigned'
+  }
+  properties: {
+    dataLocation: 'united states'
+  }
+}
+
+
 resource userSessionPoolRoleAssignment 'Microsoft.Authorization/roleAssignments@2022-04-01' = {
   name: guid(dynamicsession.id, userPrincipalId, 'Azure Container Apps Session Executor')
   scope: dynamicsession
@@ -657,3 +673,10 @@ output userAssignedIdentityId string = identity.id
 output opemaiEmbeddingModel string = openaideploymentembedding.name
 output opemaiEmbeddingModelId string = openaideploymentembedding.id
 output ai_search_endpoint string = 'https://${aiSearch.name}.search.windows.net'
+// Azure Communication Service outputs
+output communicationServiceEndpoint string = 'https://${communicationService.properties.hostName}'
+#disable-next-line outputs-should-not-contain-secrets
+output communicationServicePrimaryConnectionString string = communicationService.listKeys().primaryConnectionString
+#disable-next-line outputs-should-not-contain-secrets
+output communicationServicePrimaryKey string = communicationService.listKeys().primaryConnectionString
+output communicationServiceNameOut string = communicationServiceName
