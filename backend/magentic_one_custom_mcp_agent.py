@@ -84,11 +84,12 @@ class MagenticOneCustomMCPAgent(AssistantAgent):
 
         # Get the addition tool from the server asynchronously
         adapter_data_provider = await SseMcpToolAdapter.from_server_params(server_params, "data_provider")
+        adapter_data_list_tables = await SseMcpToolAdapter.from_server_params(server_params, "list_tables")
         adapter_mailer = await SseMcpToolAdapter.from_server_params(server_params, "mailer")
 
         return cls(name, 
                    model_client, 
                    system_message, 
                    description, 
-                   [adapter_data_provider, adapter_mailer],
+                   [adapter_data_provider, adapter_data_list_tables, adapter_mailer],
                    user_id=user_id)
