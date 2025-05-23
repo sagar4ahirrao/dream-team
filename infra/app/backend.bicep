@@ -581,17 +581,6 @@ resource dynamicsession 'Microsoft.App/sessionPools@2024-02-02-preview' = {
   }
 }
 
-// Azure Communication Service resource
-resource communicationService 'Microsoft.Communication/CommunicationServices@2023-04-01' = {
-  name: communicationServiceName
-  location: 'global'
-  identity: {
-    type: 'SystemAssigned'
-  }
-  properties: {
-    dataLocation: 'united states'
-  }
-}
 resource communicationServiceEmail 'Microsoft.Communication/emailServices@2023-04-01' = {
   location: 'global'
   name: communicationServiceEmailName 
@@ -599,7 +588,6 @@ resource communicationServiceEmail 'Microsoft.Communication/emailServices@2023-0
     dataLocation: 'united states'
   }
 }
-
 resource communicationServiceEmailDomain 'Microsoft.Communication/emailServices/domains@2023-04-01' = {
   parent: communicationServiceEmail
   location: 'global'
@@ -609,6 +597,23 @@ resource communicationServiceEmailDomain 'Microsoft.Communication/emailServices/
     userEngagementTracking: 'Disabled'
   }
 }
+
+// Azure Communication Service resource
+resource communicationService 'Microsoft.Communication/CommunicationServices@2023-04-01' = {
+  name: communicationServiceName
+  location: 'global'
+  identity: {
+    type: 'SystemAssigned'
+  }
+  properties: {
+    dataLocation: 'united states'
+    linkedDomains: [
+      communicationServiceEmailDomain.id
+      // '/subscriptions/x${}/domains/AzureManagedDomain'
+    ]
+  }
+}
+
 
 resource userCommunicationServiceAssignment 'Microsoft.Authorization/roleAssignments@2022-04-01' = {
   name: guid(communicationService.id, userPrincipalId, 'Communication and Email Service Owner')
