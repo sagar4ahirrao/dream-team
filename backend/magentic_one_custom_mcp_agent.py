@@ -40,9 +40,16 @@ class MagenticOneCustomMCPAgent(AssistantAgent):
         description: str,
         user_id: str = None
     ):
+        import os
         server_params = StdioServerParams(
             command="python",
             args=["mcp_math_server.py"],
+            env={
+                "AZURE_COMMUNICATION_EMAIL_ENDPOINT": os.getenv("AZURE_COMMUNICATION_EMAIL_ENDPOINT"),
+                "AZURE_COMMUNICATION_EMAIL_SENDER": os.getenv("AZURE_COMMUNICATION_EMAIL_SENDER"),
+                "AZURE_COMMUNICATION_EMAIL_RECIPIENT_DEFAULT": os.getenv("AZURE_COMMUNICATION_EMAIL_RECIPIENT_DEFAULT"),
+                "AZURE_COMMUNICATION_EMAIL_SUBJECT_DEFAULT": os.getenv("AZURE_COMMUNICATION_EMAIL_SUBJECT_DEFAULT"),
+            },
         )
         # Get the addition tool from the server asynchronously
         adapter_addition = await StdioMcpToolAdapter.from_server_params(server_params, "add")

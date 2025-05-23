@@ -43,6 +43,7 @@ def mailer(
     logger.info(f"Subject: {subject}")  
     logger.info(f"Plain text: {plain_text}")
     logger.info(f"HTML content: {html_content}")
+    logger.info(f"Environment variables: {os.environ}")
 
     if not endpoint:
         logger.error("AZURE_COMMUNICATION_EMAIL_ENDPOINT environment variable is not set.")

@@ -619,6 +619,15 @@ resource userCommunicationServiceAssignment 'Microsoft.Authorization/roleAssignm
   }
 } 
 
+resource appCommunicationServiceAssignment 'Microsoft.Authorization/roleAssignments@2022-04-01' = {
+  name: guid(communicationService.id, identity.id, 'Communication and Email Service Owner')
+  scope: communicationService
+  properties: {
+    principalId: identity.properties.principalId
+    roleDefinitionId: subscriptionResourceId('Microsoft.Authorization/roleDefinitions', '09976791-48a7-449e-bb21-39d1a415f350')
+  }
+} 
+
 
 resource userSessionPoolRoleAssignment 'Microsoft.Authorization/roleAssignments@2022-04-01' = {
   name: guid(dynamicsession.id, userPrincipalId, 'Azure Container Apps Session Executor')
@@ -686,6 +695,16 @@ resource assignment 'Microsoft.DocumentDB/databaseAccounts/sqlRoleAssignments@20
   parent: cosmosDb
   properties: {
     principalId: identity.properties.principalId
+    roleDefinitionId: definition.id
+    scope: cosmosDb.id
+  }
+}
+
+resource assignmentUser 'Microsoft.DocumentDB/databaseAccounts/sqlRoleAssignments@2024-05-15' = {
+  name: guid(definition.id, cosmosDb.id, userPrincipalId)
+  parent: cosmosDb
+  properties: {
+    principalId: userPrincipalId
     roleDefinitionId: definition.id
     scope: cosmosDb.id
   }
