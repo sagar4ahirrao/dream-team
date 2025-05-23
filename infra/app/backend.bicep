@@ -44,6 +44,9 @@ param communicationServiceName string
 @description('Name of the Azure Communication Service Email')
 param communicationServiceEmailName string
 
+@description('Authentication key for the MCP server')
+param mcpKey string
+
 var appSettingsArray = filter(array(appDefinition.settings), i => i.name != '')
 var secrets = map(filter(appSettingsArray, i => i.?secret != null), i => {
   name: i.name
@@ -342,6 +345,83 @@ resource searchZoneGroup 'Microsoft.Network/privateEndpoints/privateDnsZoneGroup
   ]
 }
 
+
+// New container app: mcpserver
+resource mcpserver 'Microsoft.App/containerApps@2023-05-02-preview' = {
+  name: 'mcpserver'
+  location: location
+  tags: union(tags, {'azd-service-name': 'mcpserver'})
+  dependsOn: [ acrPullRole ]
+  identity: {
+    type: 'UserAssigned'
+    userAssignedIdentities: { '${identity.id}': {} }
+  }
+  properties: {
+    managedEnvironmentId: containerAppsEnvironment.id
+    configuration: {
+      ingress: {
+        external: true
+        targetPort: 3100
+        transport: 'auto'
+      }
+      registries: [
+        {
+          server: '${containerRegistryName}.azurecr.io'
+          identity: identity.id
+        }
+      ]
+      // No additional secrets for now
+    }
+    template: {
+      containers: [
+        {
+          image: fetchLatestImage.outputs.?containers[?0].?image ?? 'mcr.microsoft.com/azuredocs/containerapps-helloworld:latest'
+          name: 'main'
+          env: [
+            {
+              name: 'UAMI_RESOURCE_ID'
+              value: identity.id
+            }
+            {
+              name: 'AZURE_COMMUNICATION_EMAIL_ENDPOINT'
+              value: 'https://${communicationService.properties.hostName}'
+            }
+            {
+              name: 'AZURE_COMMUNICATION_EMAIL_SENDER'
+              value: 'DoNotReply@${communicationServiceEmailDomain.properties.fromSenderDomain}'
+            }
+            {
+              name: 'AZURE_COMMUNICATION_EMAIL_RECIPIENT_DEFAULT'
+              value: 'michal.marusan@microsoft.com'
+            }
+            {
+              name: 'AZURE_COMMUNICATION_EMAIL_SUBJECT_DEFAULT'
+              value: 'Message from AI Agent'
+            }
+            {
+              name: 'MCP_SERVER_API_KEY'
+              value: mcpKey
+            }
+            {
+              name: 'AZURE_CLIENT_ID'
+              value: identity.properties.clientId
+            }
+          ]
+          resources: {
+            cpu: json('2.0')
+            memory: '4.0Gi'
+          }
+        }
+      ]
+      scale: {
+        minReplicas: 1
+        maxReplicas: 10
+      }
+    }
+  }
+}
+
+
 resource app 'Microsoft.App/containerApps@2023-05-02-preview' = {
   name: name
   location: location
@@ -449,6 +529,14 @@ resource app 'Microsoft.App/containerApps@2023-05-02-preview' = {
             {
               name: 'AZURE_COMMUNICATION_EMAIL_SUBJECT_DEFAULT'
               value: 'Message from AI Agent'
+            }
+            {
+              name: 'MCP_SERVER_URI'
+              value: 'https://${mcpserver.properties.configuration.ingress.fqdn}'
+            }
+            {
+              name: 'MCP_SERVER_API_KEY'
+              value: mcpKey
             }
           ],
           env,
@@ -751,3 +839,6 @@ output communicationServicePrimaryKey string = communicationService.listKeys().p
 output communicationServiceNameOut string = communicationServiceName
 output communicationServiceEmailNameOut string = communicationServiceEmailName
 output communicationServiceEmailDomainOut string = communicationServiceEmailDomain.properties.fromSenderDomain
+
+// Output the FQDN of the new mcpserver container app
+output mcpserver_fqdn string = 'https://${mcpserver.properties.configuration.ingress.fqdn}'
