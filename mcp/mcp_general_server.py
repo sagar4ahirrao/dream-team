@@ -1,21 +1,4 @@
-@mcp.tool()
-def show_tables() -> list:
-    """
-    Searches for all CSV files in the ./data folder and returns a list of table names (without .csv extension).
-    Returns:
-        list: List of table names found in the ./data directory.
-    """
-    logger = logging.getLogger("show_tables")
-    table_names = []
-    for root, _, files in os.walk("./data"):
-        for file in files:
-            if file.lower().endswith(".csv"):
-                table_name = file[:-4]  # Remove .csv extension
-                table_names.append(table_name)
-                logger.info(f"Found table: {table_name}")
-    if not table_names:
-        logger.warning("No CSV tables found in './data' directory.")
-    return table_names
+
 from typing import Any
 import httpx
 from mcp.server.fastmcp import FastMCP
@@ -156,6 +139,25 @@ def find_file(filename: str) -> str:
         "path": None,
         "filename": filename
     })
+
+@mcp.tool()
+def show_tables() -> list:
+    """
+    Searches for all CSV files in the ./data folder and returns a list of table names (without .csv extension).
+    Returns:
+        list: List of table names found in the ./data directory.
+    """
+    logger = logging.getLogger("show_tables")
+    table_names = []
+    for root, _, files in os.walk("./data"):
+        for file in files:
+            if file.lower().endswith(".csv"):
+                table_name = file[:-4]  # Remove .csv extension
+                table_names.append(table_name)
+                logger.info(f"Found table: {table_name}")
+    if not table_names:
+        logger.warning("No CSV tables found in './data' directory.")
+    return table_names
 
 if __name__ == "__main__":
     # Initialize and run the server
