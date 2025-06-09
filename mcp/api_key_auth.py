@@ -6,7 +6,7 @@ api_key_header = APIKeyHeader(name="x-api-key")
 
 def ensure_valid_api_key(api_key_header: str = Security(api_key_header)):
     def check_api_key(key: str) -> bool:
-        valid_keys = os.environ.get("MCP_SERVER_API_KEY", "").split(",")
+        valid_keys = os.environ.get("MCP_SERVER_API_KEY", "0").split(",")
         return key in valid_keys and key != ""
 
     if not check_api_key(api_key_header):

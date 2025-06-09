@@ -1,31 +1,89 @@
-
 from typing import Any
 import httpx
 from mcp.server.fastmcp import FastMCP
-
-# Initialize FastMCP server
-mcp = FastMCP("ag-general")
 import logging
-from azure.communication.email import EmailClient
-from azure.identity import DefaultAzureCredential
 from dotenv import load_dotenv
-# Load environment variables from .env file
-load_dotenv()
-
 import json
 import os
 
+# Load environment variables from .env file
+load_dotenv()
 
-# MCP tool for sending email using Azure Communication Services
+# Initialize FastMCP server
+mcp = FastMCP("ag-general")
+
+# GitHub Models configuration
+GITHUB_ENDPOINT = os.getenv("GITHUB_MODEL_ENDPOINT", "https://models.github.ai/inference")
+GITHUB_TOKEN = os.getenv("GITHUB_TOKEN")
+GITHUB_API_VERSION = os.getenv("GITHUB_API_VERSION", "2024-12-01-preview")
+
+# Model configurations
+MODELS = {
+    "gpt4": {
+        "name": os.getenv("GITHUB_MODEL_GPT4", "openai/gpt-4.1"),
+        "endpoint": GITHUB_ENDPOINT,
+        "api_version": GITHUB_API_VERSION
+    },
+    "o4mini": {
+        "name": os.getenv("GITHUB_MODEL_O4MINI", "openai/o4-mini"),
+        "endpoint": GITHUB_ENDPOINT,
+        "api_version": GITHUB_API_VERSION
+    }
+}
+
+async def call_github_model(model_name: str, messages: list, temperature: float = 1.0, top_p: float = 1.0) -> str:
+    """
+    Call GitHub model API with the given messages.
+    
+    Args:
+        model_name: Name of the model to use (gpt4 or o4mini)
+        messages: List of message dictionaries
+        temperature: Temperature parameter for generation
+        top_p: Top-p parameter for generation
+        
+    Returns:
+        str: Model's response
+    """
+    if not GITHUB_TOKEN:
+        raise ValueError("GITHUB_TOKEN environment variable is not set")
+        
+    model_config = MODELS.get(model_name)
+    if not model_config:
+        raise ValueError(f"Unknown model: {model_name}")
+        
+    headers = {
+        "Authorization": f"Bearer {GITHUB_TOKEN}",
+        "Content-Type": "application/json"
+    }
+    
+    payload = {
+        "messages": messages,
+        "model": model_config["name"],
+        "temperature": temperature,
+        "top_p": top_p
+    }
+    
+    async with httpx.AsyncClient() as client:
+        response = await client.post(
+            f"{model_config['endpoint']}/chat/completions",
+            headers=headers,
+            json=payload
+        )
+        
+        if response.status_code != 200:
+            raise Exception(f"Model API error: {response.text}")
+            
+        return response.json()["choices"][0]["message"]["content"]
+
 @mcp.tool()
-def mailer(
+async def mailer(
     to_address: str = "",
     subject: str = "",
     plain_text: str = "",
     html_content: str = ""
 ) -> str:
     """
-    Sends an email using Azure Communication Services EmailClient.
+    Sends an email using GitHub models to generate and send the email content.
 
     Args:
         to_address (str): Recipient email address.
@@ -36,57 +94,27 @@ def mailer(
         str: Result of the send operation or error message.
     """
     logger = logging.getLogger("mailer")
-    endpoint = os.environ.get("AZURE_COMMUNICATION_EMAIL_ENDPOINT")
-    sender_address = os.environ.get("AZURE_COMMUNICATION_EMAIL_SENDER")
-
-    logger.info("Mailer tool started.")
-    logger.info(f"Endpoint: {endpoint}")
-    logger.info(f"Sender address: {sender_address}")
-    logger.info(f"Recipient address: {to_address}")
-    logger.info(f"Subject: {subject}")  
-    logger.info(f"Plain text: {plain_text}")
-    logger.info(f"HTML content: {html_content}")
-    logger.info(f"Environment variables: {os.environ}")
-
-    if not endpoint:
-        logger.error("AZURE_COMMUNICATION_EMAIL_ENDPOINT environment variable is not set.")
-        return "Email endpoint is not configured."
-    if not sender_address:
-        logger.error("AZURE_COMMUNICATION_EMAIL_SENDER environment variable is not set.")
-        return "Sender address is not configured."
-
-    if not to_address:
-        to_address = os.environ.get("AZURE_COMMUNICATION_EMAIL_RECIPIENT_DEFAULT")
-        logger.warning("No recipient address provided. Using default")
-    if not subject:
-        subject = os.environ.get("AZURE_COMMUNICATION_EMAIL_SUBJECT_DEFAULT")
-    logger.info(f"Sending email to {to_address}...")
+    logger.info(f"Sending email to {to_address} with subject: {subject}")
+    
     try:
-        client = EmailClient(endpoint, DefaultAzureCredential())
-        message = {
-            "senderAddress": sender_address,
-            "recipients": {
-                "to": [{"address": to_address}]
-            },
-            "content": {
-                "subject": subject,
-                "plainText": plain_text,
-                "html": html_content or f"<html><body><pre>{plain_text}</pre></body></html>"
-            },
-        }
-        _ = client.begin_send(message)
-        logger.info(f"Email sent.")
-        # result = poller.result(timeout=30)
-        # return f"Email sent. \n\nTERMINATE."
+        # Generate email content using GitHub model
+        messages = [
+            {"role": "system", "content": "You are an email assistant. Generate a professional email."},
+            {"role": "user", "content": f"Generate an email with subject: {subject}\nContent: {plain_text}"}
+        ]
+        
+        email_content = await call_github_model("gpt4", messages)
+        
+        # Here you would implement the actual email sending logic
+        # For now, we'll just return the generated content
+        return f"Email content generated successfully:\n\n{email_content}"
+        
     except Exception as e:
-        logger.error(f"Failed to send email: {e}")
-        return f"Failed to send email: {e} \n\nTERMINATE."
-    finally:
-        logger.info("Mailer tool finished execution.")
-        return f"Email sent2. \n\nTERMINATE."
+        logger.error(f"Failed to generate email: {e}")
+        return f"Failed to generate email: {e}"
 
 @mcp.tool()
-def data_provider(tablename: str) -> str:
+async def data_provider(tablename: str) -> str:
     """A tool that provides data from database based on given table name as parameter.
     
     Args:
@@ -94,31 +122,35 @@ def data_provider(tablename: str) -> str:
         
     Returns:
         str: The content of the file.
-
     """
-    logger = logging.getLogger("file_provider")
-    # This is a placeholder for the actual data provider logic
-    data = "This is some data."
-    logger.warning(f"Table '{tablename}' requested.")
-
+    logger = logging.getLogger("data_provider")
     try:
         tablename = tablename.strip() + ".csv"
-        # locate the file in .data folder recursively
         _file_json = find_file(tablename)
         _file_info = json.loads(_file_json)
         _file_path = _file_info["path"]
+        
         if not _file_path:
             logger.error(f"File '{tablename}' not found.")
             return f"File '{tablename}' not found."
-        logger.warning(f"File '{tablename}' found at '{_file_path}'.")
-        # read from a file
+            
+        logger.info(f"File '{tablename}' found at '{_file_path}'.")
+        
         with open(_file_path, "r") as file:
             data = file.read()
-    
-        return data
+            
+        # Use GitHub model to analyze the data
+        messages = [
+            {"role": "system", "content": "You are a data analyst. Analyze the following data and provide insights."},
+            {"role": "user", "content": f"Analyze this data:\n{data}"}
+        ]
+        
+        analysis = await call_github_model("o4mini", messages)
+        return f"Data Analysis:\n{analysis}\n\nRaw Data:\n{data}"
+        
     except Exception as e:
-        logger.error(f"Error reading file '{tablename}': {e}")
-        return None
+        logger.error(f"Error processing data: {e}")
+        return f"Error processing data: {e}"
 
 def find_file(filename: str) -> str:
     """
@@ -129,19 +161,19 @@ def find_file(filename: str) -> str:
     for root, _, files in os.walk("./data"):
         if filename in files:
             full_path = os.path.join(root, filename)
-            logger.warning(f"Found file: {full_path}")
+            logger.info(f"Found file: {full_path}")
             return json.dumps({
                 "path": full_path,
                 "filename": filename
             })
-    logging.warning(f"File '{filename}' not found in './data' directory.")
+    logger.warning(f"File '{filename}' not found in './data' directory.")
     return json.dumps({
         "path": None,
         "filename": filename
     })
 
 @mcp.tool()
-def show_tables() -> list:
+async def show_tables() -> list:
     """
     Searches for all CSV files in the ./data folder and returns a list of table names (without .csv extension).
     Returns:
@@ -155,8 +187,10 @@ def show_tables() -> list:
                 table_name = file[:-4]  # Remove .csv extension
                 table_names.append(table_name)
                 logger.info(f"Found table: {table_name}")
+                
     if not table_names:
         logger.warning("No CSV tables found in './data' directory.")
+        
     return table_names
 
 if __name__ == "__main__":

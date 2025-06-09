@@ -11,16 +11,14 @@ from autogen_ext.agents.file_surfer import FileSurfer
 from autogen_ext.agents.magentic_one import MagenticOneCoderAgent
 from autogen_ext.agents.web_surfer import MultimodalWebSurfer
 from autogen_ext.code_executors.local import LocalCommandLineCodeExecutor
-from autogen_ext.code_executors.azure import ACADynamicSessionsCodeExecutor
 from autogen_ext.code_executors.docker import DockerCommandLineCodeExecutor
-from autogen_ext.models.openai import AzureOpenAIChatCompletionClient
+from autogen_ext.models.azure import AzureAIChatCompletionClient
 from autogen_core import AgentId, AgentProxy, DefaultTopicId
 from autogen_core import SingleThreadedAgentRuntime
 from autogen_core import CancellationToken
-from azure.identity import DefaultAzureCredential, get_bearer_token_provider
 import tempfile
+from azure.core.credentials import AzureKeyCredential
 
-from autogen_ext.models.openai import AzureOpenAIChatCompletionClient
 from dotenv import load_dotenv
 load_dotenv()
 
@@ -28,10 +26,12 @@ from magentic_one_custom_agent import MagenticOneCustomAgent
 from magentic_one_custom_rag_agent import MagenticOneRAGAgent
 from magentic_one_custom_mcp_agent import MagenticOneCustomMCPAgent
 
-azure_credential = DefaultAzureCredential()
-token_provider = get_bearer_token_provider(
-    azure_credential, "https://cognitiveservices.azure.com/.default"
-)
+# GitHub Models Configuration
+GITHUB_TOKEN = os.getenv("GITHUB_TOKEN")
+GITHUB_MODEL_ENDPOINT = os.getenv("GITHUB_MODEL_ENDPOINT", "https://models.inference.ai.azure.com")
+GITHUB_MODEL_GPT4 = os.getenv("GITHUB_MODEL_GPT4", "openai/gpt-4.1")
+GITHUB_MODEL_O4MINI = os.getenv("GITHUB_MODEL_O4MINI", "openai/o4-mini")
+GITHUB_API_VERSION = os.getenv("GITHUB_API_VERSION", "2024-12-01-preview")
 
 def generate_session_name():
     '''Generate a unique session name based on random sci-fi words, e.g. quantum-cyborg-1234'''
@@ -100,36 +100,35 @@ class MagenticOneHelper:
             self.session_id = generate_session_name()
         else:
             self.session_id = session_id
-        # print(f"Session MODEL gpt-4.1-2025-04-14")
-        print(f"Session MODEL o4-mini-2025-04-16")
-        self.client = AzureOpenAIChatCompletionClient(
-            model="gpt-4.1-2025-04-14",
-            azure_deployment="gpt-4.1",
-            api_version="2025-03-01-preview",
-            azure_endpoint=os.getenv("AZURE_OPENAI_ENDPOINT"),
-            azure_ad_token_provider=token_provider,
+            
+        print(f"Session MODEL {GITHUB_MODEL_GPT4}")
+        
+        # Initialize the client with GitHub token
+        self.client = AzureAIChatCompletionClient(
+            model=GITHUB_MODEL_GPT4,
+            endpoint=GITHUB_MODEL_ENDPOINT,
+            credential=AzureKeyCredential(GITHUB_TOKEN),
             model_info={
                 "vision": True,
                 "function_calling": True,
                 "json_output": True,
-                "family": "gpt-4o"
+                "family": "gpt-4",
+                "structured_output": True
             }
         )
 
-        self.client_reasoning = AzureOpenAIChatCompletionClient(
-            model="o4-mini-2025-04-16",
-            azure_deployment="o4-mini",
-            api_version="2025-03-01-preview",
-            azure_endpoint=os.getenv("AZURE_OPENAI_ENDPOINT"),
-            azure_ad_token_provider=token_provider,
+        self.client_reasoning = AzureAIChatCompletionClient(
+            model=GITHUB_MODEL_O4MINI,
+            endpoint=GITHUB_MODEL_ENDPOINT,
+            credential=AzureKeyCredential(GITHUB_TOKEN),
             model_info={
                 "vision": True,
                 "function_calling": True,
                 "json_output": True,
-                "family": "o4"
+                "family": "o4",
+                "structured_output": True
             }
         )
-
 
         # Set up agents
         self.agents = await self.setup_agents(agents, self.client, self.logs_dir) 
@@ -147,28 +146,10 @@ class MagenticOneHelper:
 
             # This is default MagenticOne agent - Executor
             elif (agent["type"] == "MagenticOne" and agent["name"] == "Executor"):
-                # handle local = local docker execution
-                if self.run_locally:
-                    #docker
-                    code_executor = DockerCommandLineCodeExecutor(work_dir=logs_dir)
-                    await code_executor.start()
-                    executor = CodeExecutorAgent("Executor", code_executor=code_executor)
-                
-                # or remote = Azure ACA Dynamic Sessions execution
-                else:
-                    pool_endpoint = os.getenv("POOL_MANAGEMENT_ENDPOINT")
-                    assert pool_endpoint, "POOL_MANAGEMENT_ENDPOINT environment variable is not set"
-                    with tempfile.TemporaryDirectory() as temp_dir:# Define the correct path to the data folder for file access
-                        code_executor=ACADynamicSessionsCodeExecutor(
-                            pool_management_endpoint=pool_endpoint,
-                            credential=azure_credential,
-                            work_dir=temp_dir
-                        )
-                        print(code_executor._session_id)
-                        #code_executor.upload_files(os.path.join(os.getcwd(), "data"))
-                        print("Files uploaded!")
-                        executor = CodeExecutorAgent("Executor",code_executor=code_executor )
-                
+                # Use LocalCommandLineCodeExecutor instead of ACADynamicSessionsCodeExecutor
+                code_executor = LocalCommandLineCodeExecutor(work_dir=logs_dir)
+                await code_executor.start()
+                executor = CodeExecutorAgent("Executor", code_executor=code_executor)
                 agent_list.append(executor)
                 print("Executor added!")
 
