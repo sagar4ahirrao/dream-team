@@ -1,7 +1,6 @@
 # File: main.py
 from fastapi import FastAPI, Depends, UploadFile, HTTPException, Query, File, Form
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.security import OAuth2AuthorizationCodeBearer
 from azure.identity import DefaultAzureCredential, get_bearer_token_provider
 from azure.storage.blob import BlobServiceClient
 from azure.core.credentials import AzureKeyCredential
@@ -97,23 +96,6 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
-
-
-# Azure AD Authentication (Mocked for example)
-oauth2_scheme = OAuth2AuthorizationCodeBearer(
-    authorizationUrl="https://login.microsoftonline.com/common/oauth2/v2.0/authorize",
-    tokenUrl="https://login.microsoftonline.com/common/oauth2/v2.0/token"
-)
-
-async def validate_tokenx(token: str = Depends(oauth2_scheme)):
-    # In production, implement proper token validation
-    print("Token:", token)
-    return {"sub": "user123", "name": "Test User"}  # Mocked user data
-
-async def validate_token(token: str = None):
-    # In production, implement proper token validation
-    print("Token:", token)
-    return {"sub": "user123", "name": "Test User"}  # Mocked user data
 
 from openai import AsyncAzureOpenAI
 
@@ -282,14 +264,13 @@ blob_service_client = BlobServiceClient.from_connection_string(
 # Chat Endpoint
 @app.post("/chat")
 async def chat_endpoint(
-    message: schemas.ChatMessageCreate,
-    user: dict = Depends(validate_token)
+    message: schemas.ChatMessageCreate
 ):
     # ...existing code...
     mock_response = "This is a mock AI response (Markdown formatted)."
     # Log the user message.
     crud.save_message(
-        user_id=user["sub"],
+        user_id=message.user_id,
         session_id="session_direct",  # or generate a session id if needed
         message={"content": message.content, "role": "user"}
     )
@@ -304,7 +285,7 @@ async def chat_endpoint(
         "content_image": None,
     }
     crud.save_message(
-        user_id=user["sub"],
+        user_id=message.user_id,
         session_id="session_direct",
         message=response
     )
@@ -315,14 +296,13 @@ async def chat_endpoint(
 # Chat Endpoint
 @app.post("/start", response_model=schemas.ChatMessageResponse)
 async def chat_endpoint(
-    message: schemas.ChatMessageCreate,
-    user: dict = Depends(validate_token)
+    message: schemas.ChatMessageCreate
 ):
     logger = logging.getLogger("chat_endpoint")
     logger.setLevel(logging.INFO)
     logger.info(f"Starting agent session with message: {message.content}")
-    # print("User:", user["sub"])
-    _user_id=message.user_id if message.user_id else user["sub"]
+    # print("User:", message.user_id)
+    _user_id=message.user_id if message.user_id else message.user_id
     # print("Provided user_id:", message.user_id)
     logger.info(f"User ID: {_user_id}")
     _agents = json.loads(message.agents) if message.agents else MAGENTIC_ONE_DEFAULT_AGENTS
@@ -354,9 +334,7 @@ async def chat_endpoint(
 @app.get("/chat-stream")
 async def chat_stream(
     session_id: str = Query(...),
-    user_id: str = Query(...),
-    # db: Session = Depends(get_db),
-    user: dict = Depends(validate_token)
+    user_id: str = Query(...)
 ):
     
    
@@ -417,9 +395,8 @@ async def stop(session_id: str = Query(...)):
 # New endpoint to retrieve all conversations with pagination.
 @app.post("/conversations")
 async def list_all_conversations(
-    request_data: dict,
-    user: dict = Depends(validate_token)
-    ):
+    request_data: dict
+):
     try:
         user_id = request_data.get("user_id")
         page = request_data.get("page", 1)
@@ -436,14 +413,14 @@ async def list_all_conversations(
 
 # New endpoint to retrieve conversations for the authenticated user.
 @app.post("/conversations/user")
-async def list_user_conversation(request_data: dict = None, user: dict = Depends(validate_token)):
+async def list_user_conversation(request_data: dict = None):
     session_id = request_data.get("session_id") if request_data else None
     user_id = request_data.get("user_id") if request_data else None
     conversations = app.state.db.fetch_user_conversation(user_id, session_id=session_id)
     return conversations
 
 @app.post("/conversations/delete")
-async def delete_conversation(session_id: str = Query(...), user_id: str = Query(...), user: dict = Depends(validate_token)):
+async def delete_conversation(session_id: str = Query(...), user_id: str = Query(...)):
     logger = logging.getLogger("delete_conversation")
     logger.setLevel(logging.INFO)
     logger.info(f"Deleting conversation with session_id: {session_id} for user_id: {user_id}")
