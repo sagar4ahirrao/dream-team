@@ -4,6 +4,8 @@ from autogen_core.models import (
     ChatCompletionClient,
 )
 from autogen_ext.tools.mcp import SseMcpToolAdapter, StdioServerParams, StdioMcpToolAdapter, SseServerParams
+from dotenv import load_dotenv
+load_dotenv()
 
 # TODO add checks to ususer inputs to make sure it is a valid definition of custom agent
 class MagenticOneCustomMCPAgent(AssistantAgent):

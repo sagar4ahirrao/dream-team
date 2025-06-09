@@ -11,7 +11,6 @@
             "name": "Coder",
             "system_message": "",
             "description": "",
-            "icon": "👨‍💻",
             "index_name": ""
         },
         {
@@ -20,7 +19,6 @@
             "name": "Executor",
             "system_message": "",
             "description": "",
-            "icon": "💻",
             "index_name": ""
         },
         {
@@ -29,7 +27,6 @@
             "name": "FileSurfer",
             "system_message": "",
             "description": "",
-            "icon": "📂",
             "index_name": ""
         },
         {
@@ -38,7 +35,6 @@
             "name": "WebSurfer",
             "system_message": "",
             "description": "",
-            "icon": "🏄‍♂️",
             "index_name": ""
         }
     ],

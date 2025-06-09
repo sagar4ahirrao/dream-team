@@ -4,6 +4,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.security import OAuth2AuthorizationCodeBearer
 from azure.identity import DefaultAzureCredential, get_bearer_token_provider
 from azure.storage.blob import BlobServiceClient
+from azure.core.credentials import AzureKeyCredential
 # from sqlalchemy.orm import Session
 import schemas, crud
 from database import CosmosDB
@@ -29,6 +30,13 @@ print("Starting the server...")
 #print(f'COSMOS_DB_URI:{os.getenv("COSMOS_DB_URI")}')
 #print(f'AZURE_SEARCH_SERVICE_ENDPOINT:{os.getenv("AZURE_SEARCH_SERVICE_ENDPOINT")}')
 
+# GitHub Models Configuration
+GITHUB_TOKEN = os.getenv("GITHUB_TOKEN")
+GITHUB_MODEL_ENDPOINT = os.getenv("GITHUB_MODEL_ENDPOINT", "https://models.inference.ai.azure.com")
+GITHUB_MODEL_GPT4 = os.getenv("GITHUB_MODEL_GPT4", "openai/gpt-4.1")
+GITHUB_MODEL_O4MINI = os.getenv("GITHUB_MODEL_O4MINI", "openai/o4-mini")
+GITHUB_API_VERSION = os.getenv("GITHUB_API_VERSION", "2024-12-01-preview")
+
 session_data = {}
 MAGENTIC_ONE_DEFAULT_AGENTS = [
             {
@@ -37,7 +45,7 @@ MAGENTIC_ONE_DEFAULT_AGENTS = [
             "name":"Coder",
             "system_message":"",
             "description":"",
-            "icon":"👨‍💻"
+            # "icon":"👨‍💻"
             },
             {
             "input_key":"0002",
@@ -45,7 +53,7 @@ MAGENTIC_ONE_DEFAULT_AGENTS = [
             "name":"Executor",
             "system_message":"",
             "description":"",
-            "icon":"💻"
+            # "icon":"💻"
             },
             {
             "input_key":"0003",
@@ -53,7 +61,7 @@ MAGENTIC_ONE_DEFAULT_AGENTS = [
             "name":"FileSurfer",
             "system_message":"",
             "description":"",
-            "icon":"📂"
+            # "icon":"📂"
             },
             {
             "input_key":"0004",
@@ -61,7 +69,7 @@ MAGENTIC_ONE_DEFAULT_AGENTS = [
             "name":"WebSurfer",
             "system_message":"",
             "description":"",
-            "icon":"🏄‍♂️"
+            # "icon":"🏄‍♂️"
             },
             ]
 
@@ -109,18 +117,13 @@ async def validate_token(token: str = None):
 
 from openai import AsyncAzureOpenAI
 
-# Azure OpenAI Client
+# GitHub Models Client
 async def get_openai_client():
-    azure_credential = DefaultAzureCredential()
-    token_provider = get_bearer_token_provider(
-        azure_credential, "https://cognitiveservices.azure.com/.default"
-    )
-    
+    credential = AzureKeyCredential(GITHUB_TOKEN)
     return AsyncAzureOpenAI(
-        api_version="2024-12-01-preview",
-        # azure_endpoint=os.getenv("AZURE_OPENAI_ENDPOINT"),
-        # azure_endpoint="https://aoai-eastus-mma-cdn.openai.azure.com/",
-        azure_ad_token_provider=token_provider
+        api_version=GITHUB_API_VERSION,
+        azure_endpoint=GITHUB_MODEL_ENDPOINT,
+        api_key=GITHUB_TOKEN
     )
 
 

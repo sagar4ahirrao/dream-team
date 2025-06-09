@@ -93,9 +93,23 @@ jobs:
       #     containerAppName: ${{ env.SVC_NAME }}
       #     containerAppEnvironment: ${{ env.CONTAINER_APP_ENV }}
       #     imageToDeploy: ${{ env.ACR_SERVER }}/${{ env.SVC_NAME }}:${{ env.VERSION }}
-      #     # environmentVariables: [${{ secrets.AZURE_WEBAPP_PUBLISH_PROFILE }}]
       #     environmentVariables: |
-      #       "AZURE_OPENAI_SERVICE_NAME=${{ env.AZURE_OPENAI_SERVICE_NAME }}" "AZURE_OPENAI_ENDPOINT=${{ env.AZURE_OPENAI_ENDPOINT }}" "AZURE_OPENAI_API_KEY=secretref:aoai-key" "AZURE_OPENAI_MODEL_NAME=${{ env.AZURE_OPENAI_MODEL_NAME }}" "AZURE_OPENAI_API_VERSION=${{ env.AZURE_OPENAI_API_VERSION }}" "AZURE_OPENAI_EMBEDDING_ENDPOINT=${{ env.AZURE_OPENAI_EMBEDDING_ENDPOINT }}" "AZURE_OPENAI_EMBEDDING_MODEL_NAME=${{ env.AZURE_OPENAI_EMBEDDING_MODEL_NAME }}" "AZURE_SEARCH_ENDPOINT=${{ env.AZURE_SEARCH_ENDPOINT }}" "AZURE_SEARCH_KEY=secretref:search-key" "AZURE_SEARCH_INDEX=${{ env.AZURE_SEARCH_INDEX }}" "AZURE_SEARCH_API_VERSION=${{ env.AZURE_SEARCH_API_VERSION }}" "AZURE_FORMREC_SERVICE=${{ env.AZURE_FORMREC_SERVICE }}" "FORM_RECOGNIZER_ENDPOINT=${{ env.FORM_RECOGNIZER_ENDPOINT }}"  "DOCINT_API_VERSION=${{ env.DOCINT_API_VERSION }}" "NUM_TOKENS=${{ env.NUM_TOKENS }}" "MIN_CHUNK_SIZE=${{ env.MIN_CHUNK_SIZE }}" "TOKEN_OVERLAP=${{ env.TOKEN_OVERLAP }}" "AZURE_CLIENT_ID=${{ env.AZURE_CLIENT_ID }}"
+      #       "GITHUB_TOKEN=secretref:github-token" 
+      #       "GITHUB_MODEL_ENDPOINT=https://models.github.ai/inference"
+      #       "GITHUB_MODEL_GPT4=openai/gpt-4.1"
+      #       "GITHUB_MODEL_O4MINI=openai/o4-mini"
+      #       "GITHUB_API_VERSION=2024-12-01-preview"
+      #       "AZURE_SEARCH_ENDPOINT=${{ env.AZURE_SEARCH_ENDPOINT }}"
+      #       "AZURE_SEARCH_KEY=secretref:search-key"
+      #       "AZURE_SEARCH_INDEX=${{ env.AZURE_SEARCH_INDEX }}"
+      #       "AZURE_SEARCH_API_VERSION=${{ env.AZURE_SEARCH_API_VERSION }}"
+      #       "AZURE_FORMREC_SERVICE=${{ env.AZURE_FORMREC_SERVICE }}"
+      #       "FORM_RECOGNIZER_ENDPOINT=${{ env.FORM_RECOGNIZER_ENDPOINT }}"
+      #       "DOCINT_API_VERSION=${{ env.DOCINT_API_VERSION }}"
+      #       "NUM_TOKENS=${{ env.NUM_TOKENS }}"
+      #       "MIN_CHUNK_SIZE=${{ env.MIN_CHUNK_SIZE }}"
+      #       "TOKEN_OVERLAP=${{ env.TOKEN_OVERLAP }}"
+      #       "AZURE_CLIENT_ID=${{ env.AZURE_CLIENT_ID }}"
       
       - name: Deploy to Azure Container App
         run: |

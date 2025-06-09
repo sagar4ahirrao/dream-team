@@ -19,8 +19,9 @@ class CosmosDB:
         # Get Cosmos DB account details
         COSMOS_DB_URI = os.getenv("COSMOS_DB_URI", "https://YOURDB.documents.azure.com:443/")
         COSMOS_DB_DATABASE = os.getenv("COSMOS_DB_DATABASE", "ag_demo")
-        credential = DefaultAzureCredential()
-        self.client = CosmosClient(COSMOS_DB_URI, credential=credential)
+        COSMOS_DB_KEY=os.getenv("COSMOS_DB_KEY","1234") 
+        # credential = DefaultAzureCredential()
+        self.client = CosmosClient(COSMOS_DB_URI, COSMOS_DB_KEY)
         self.database = self.client.create_database_if_not_exists(id=COSMOS_DB_DATABASE)
         self.containers = {}
         # Pre-initialize default containers

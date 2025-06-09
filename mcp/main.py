@@ -13,7 +13,7 @@ from dotenv import load_dotenv
 # Load environment variables from .env file
 load_dotenv(override=True)
 
-app = FastAPI(docs_url=None, redoc_url=None, dependencies=[Depends(ensure_valid_api_key)])
+app = FastAPI(dependencies=[Depends(ensure_valid_api_key)])
 # app = FastAPI(docs_url=None, redoc_url=None)
 
 sse = SseServerTransport("/messages/")
